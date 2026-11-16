@@ -40,6 +40,22 @@ test('index page has search box, tag filter and a question link', () => {
   assert.ok(!html.includes('&amp;quot;'));
 });
 
+test('index rows carry their id and the page offers a practiced filter + year', () => {
+  const html = renderIndex(view);
+  assert.ok(html.includes('data-id="42"'));
+  assert.ok(html.includes('data-prac="done"'));
+  assert.ok(html.includes('class="year">'));
+});
+
+test('detail page includes the practice panel and loads the client script', () => {
+  const html = renderDetail(sampleQuestion(false), view);
+  assert.ok(html.includes('class="practice"'));
+  assert.ok(html.includes('my-answer'));
+  assert.ok(html.includes('標記為練過'));
+  assert.ok(html.includes('../assets/app.js'));
+  assert.ok(html.includes('年提問'));
+});
+
 test('detail page marks the accepted answer and links to the SO original', () => {
   const html = renderDetail(sampleQuestion(false), view);
   assert.ok(html.includes('採納'));

@@ -61,6 +61,11 @@ function renderIndex(data) {
     <p class="tagline">${escapeHtml(data.siteTagline)}</p>
     <input id="search" class="search" type="search" placeholder="搜尋題目或標籤…" autocomplete="off" aria-label="搜尋">
     <div id="tags" class="tag-filter">${tagList(data.topTags, { link: true })}</div>
+    <div id="prac" class="prac-filter" hidden>
+      <button type="button" class="prac-btn on" data-prac="all">全部</button>
+      <button type="button" class="prac-btn" data-prac="todo">未練</button>
+      <button type="button" class="prac-btn" data-prac="done">練過 <span id="done-count">0</span></button>
+    </div>
     <p class="count"><span id="shown">${data.questions.length}</span> / ${data.questions.length} 題 · 依票數排序</p>
   </div>
 </header>`;
@@ -69,7 +74,7 @@ function renderIndex(data) {
     const snippet = truncate(toText(q.bodyHtml), 180);
     const tagsAttr = q.tags.join(' ').toLowerCase();
     const searchAttr = `${titleText(q)} ${tagsAttr}`.toLowerCase();
-    return `<article class="q" data-tags="${escapeHtml(tagsAttr)}" data-search="${escapeHtml(searchAttr)}">
+    return `<article class="q" data-id="${q.id}" data-tags="${escapeHtml(tagsAttr)}" data-search="${escapeHtml(searchAttr)}">
     <div class="q-score">${scoreBadge(q.score)}</div>
     <div class="q-main">
       <h2 class="q-title"><a href="q/${q.id}.html">${titleHtml(q)}</a></h2>
@@ -137,12 +142,25 @@ function renderDetail(q, data) {
       <a class="a-src" href="${escapeHtml(q.link)}" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
     <div class="prose">${sanitizeBody(q.bodyHtml)}</div>
   </article>
+  <section class="practice" data-id="${q.id}" hidden>
+    <div class="practice-head">
+      <h2>我的練習</h2>
+      <button type="button" class="mark-btn">標記為練過</button>
+    </div>
+    <p class="practice-hint">先自己寫寫看怎麼答，再往下對照重點答案。只存在你這台瀏覽器。</p>
+    <textarea class="my-answer" placeholder="在這裡寫你的答案…"></textarea>
+    <div class="practice-actions">
+      <button type="button" class="save-btn">存起來</button>
+      <span class="save-state" aria-live="polite"></span>
+    </div>
+  </section>
   <section class="answers">
     <h2>重點答案</h2>
 ${answers}
   </section>
 </main>
-${siteFooter()}`;
+${siteFooter()}
+<script src="../assets/app.js"></script>`;
 
   return layout({
     title: `${titleText(q)} · ${data.siteTitle}`,
