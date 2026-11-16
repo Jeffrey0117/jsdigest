@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How does JavaScript .prototype work? · jsdigest</title>
+<meta name="description" content="I&#39;m not that into dynamic programming languages but I&#39;ve written my fair share of JavaScript code. I never really got my head around this prototype-based progr…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How does JavaScript .prototype work?</h1>
+    <div class="q-meta big"><span class="score hot" title="2185 votes">2.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/58961/john-leidegren" rel="noopener">John Leidegren</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">dynamic-languages</span><span class="tag">prototype-oriented</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/572897/how-does-javascript-prototype-work" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm not that into dynamic programming languages but I've written my fair share of JavaScript code. I never really got my head around this prototype-based programming, does any one know how this works?</p>
+<pre><code>var obj = new Object();
+obj.prototype.test = function() { alert('Hello?'); };
+var obj2 = new obj();
+obj2.test();
+</code></pre>
+<p>I remember a lot discussion I had with people a while back (I'm not exactly sure what I'm doing) but as I understand it, there's no concept of a class. It's just an object, and instances of those objects are clones of the original, right?</p>
+<p>But what is the exact purpose of this &quot;.prototype&quot; property in JavaScript? How does it relate to instantiating objects?</p>
+<h3>Update: correct way</h3>
+<pre><code>var obj = new Object(); // not a functional object
+obj.prototype.test = function() { alert('Hello?'); }; // this is wrong!
+
+function MyObject() {} // a first class functional object
+MyObject.prototype.test = function() { alert('OK'); } // OK
+</code></pre>
+<p>Also these <a href="http://ejohn.org/apps/learn/#64" rel="noreferrer">slides</a> really helped a lot.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1066 votes">1.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/48015/christoph" rel="noopener">Christoph</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/572996" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Every JavaScript object <a href="https://www.ecma-international.org/ecma-262/10.0/index.html#sec-ordinary-object-internal-methods-and-internal-slots" rel="nofollow noreferrer">has an internal &quot;slot&quot;</a>(i.e. hidden property) called <code>[[Prototype]]</code>(square brackets are deliberate) whose value is either <code>null</code> or an <code>object</code>. The value is colloquially known as &quot;the prototype of that object.&quot;</p>
+<p>These prototypes connect objects into <em>prototype chains</em> for looking up properties. When you try to access a property from an object by either <code>obj.propName</code> or <code>obj['propName']</code>, and the object does not <em>own</em>(<code>obj.hasOwnProperty('propName')</code>) the property, the runtime will try to find the property from the prototype chain of that object by recursively referencing the <code>[[Prototype]]</code> slots until a <code>null</code> is reached.</p>
+<p>An object's <code>[[Prototype]]</code> is initially set during object creation, and modern JavaScript allows read and write access to the <code>[[Prototype]]</code> in the following ways:</p>
+<ol>
+<li>The <code>new Ctor()</code> syntax, which sets <code>[[Prototype]]</code> to <code>Func.prototype</code> for the newly created object.</li>
+<li>The <code>extends</code> keyword, which configures the prototype chain for the class syntax.</li>
+<li><code>Object.create</code>, which will set the supplied argument as the <code>[[Prototype]]</code> of the resulting object.</li>
+<li><code>Object.getPrototypeOf</code> and <code>Object.setPrototypeOf</code> (get/set the <code>[[Prototype]]</code> <em>after</em> object creation)</li>
+<li>The standardized accessor property named <code>__proto__</code>. (but it has <a href="https://stackoverflow.com/a/35458348/38522">unusual behaviours</a> when an object has a prototype of <code>null</code>.)</li>
+</ol>
+<p>Note that the <code>.prototype</code> is a genuine property, not an internal slot. Therefore, <strong>all classes, and all functions that can be used with the <code>new</code> operator, have a property named <code>.prototype</code> in addition to their own <code>[[Prototype]]</code> internal slot.</strong> This dual use of the word &quot;prototype&quot; is the source of endless confusion amongst newcomers to the language.</p>
+<p>Before JavaScript introduced the class syntax, people used the syntax <code>new Ctor()</code> to simulate classical inheritance by prototypical inheritance:</p>
+<ul>
+<li>Shared members, e.g. methods, were added to the constructor's <code>.prototype</code> property.</li>
+<li>Instance fields, however, were added to the object itself during construction.</li>
+</ul>
+<p>For example, here's one way:</p>
+<pre class="lang-js prettyprint-override"><code>function Child() {}
+function Parent() {}
+Parent.prototype.inheritedMethod = function () { return 'this is inherited' }
+
+function inherit(child, parent) {
+  child.prototype = Object.create(parent.prototype)
+  child.prototype.constructor = child
+  return child;
+}
+
+Child = inherit(Child, Parent)
+const o = new Child
+console.log(o.inheritedMethod()) // 'this is inherited'
+</code></pre>
+<p>...and here's another way:</p>
+<pre class="lang-js prettyprint-override"><code>function Child() {}
+function Parent() {}
+Parent.prototype.inheritedMethod = function () { return 'this is inherited' }
+
+function inherit(child, parent) {
+    function tmp() {}
+    tmp.prototype = parent.prototype
+    const proto = new tmp()
+    proto.constructor = child
+    child.prototype = proto
+    return child
+}
+
+Child = inherit(Child, Parent)
+const o = new Child
+console.log(o.inheritedMethod()) // 'this is inherited'
+</code></pre>
+<p>But if you're careful, you might have found that <code>Parent</code>'s instance fields are not considered in these two cases. Fortunately, in ES2015 these details are hidden and we can just write a one-liner version thanks to the <code>extends</code> syntax:</p>
+<pre class="lang-js prettyprint-override"><code>class Parent { inheritedMethod() { return 'this is inherited' } }
+class Child extends Parent {}
+
+const o = new Child
+console.log(o.inheritedMethod()) // 'this is inherited'
+</code></pre>
+<p>...the resulting object's <code>[[Prototype]]</code> will be set to an instance of <code>Parent</code>, whose <code>[[Prototype]]</code>, in turn, is <code>Parent.prototype</code>.</p>
+<p>Finally, if you create a new object via <code>Object.create(foo)</code>, the resulting object's <code>[[Prototype]]</code> will be set to <code>foo</code>.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1833 votes">1.8k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/445543/stivlo" rel="noopener">stivlo</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4778408" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>In a language implementing classical inheritance like Java, C# or C++ you start by creating a class--a blueprint for your objects--and then you can create new objects from that class or you can extend the class, defining a new class that augments the original class.</p>
+
+<p>In JavaScript you first create an object (there is no concept of class), then you can augment your own object or create new objects from it. It's not difficult, but a little foreign and hard to metabolize for somebody used to the classical way.</p>
+
+<p>Example:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>//Define a functional object to hold persons in JavaScript
+var Person = function(name) {
+  this.name = name;
+};
+
+//Add dynamically to the already defined object a new getter
+Person.prototype.getName = function() {
+  return this.name;
+};
+
+//Create a new object of type Person
+var john = new Person("John");
+
+//Try the getter
+alert(john.getName());
+
+//If now I modify person, also John gets the updates
+Person.prototype.sayMyName = function() {
+  alert('Hello, my name is ' + this.getName());
+};
+
+//Call the new method on john
+john.sayMyName();</code></pre>
+</div>
+</div>
+</p>
+
+<p>Until now I've been extending the base object, now I create another object and then inheriting from Person.</p>
+
+<pre><code>//Create a new object of type Customer by defining its constructor. It's not 
+//related to Person for now.
+var Customer = function(name) {
+    this.name = name;
+};
+
+//Now I link the objects and to do so, we link the prototype of Customer to 
+//a new instance of Person. The prototype is the base that will be used to 
+//construct all new instances and also, will modify dynamically all already 
+//constructed objects because in JavaScript objects retain a pointer to the 
+//prototype
+Customer.prototype = new Person();     
+
+//Now I can call the methods of Person on the Customer, let's try, first 
+//I need to create a Customer.
+var myCustomer = new Customer('Dream Inc.');
+myCustomer.sayMyName();
+
+//If I add new methods to Person, they will be added to Customer, but if I
+//add new methods to Customer they won't be added to Person. Example:
+Customer.prototype.setAmountDue = function(amountDue) {
+    this.amountDue = amountDue;
+};
+Customer.prototype.getAmountDue = function() {
+    return this.amountDue;
+};
+
+//Let's try:       
+myCustomer.setAmountDue(2000);
+alert(myCustomer.getAmountDue());
+</code></pre>
+
+<p><div class="snippet" data-lang="js" data-hide="true">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var Person = function (name) {
+    this.name = name;
+};
+Person.prototype.getName = function () {
+    return this.name;
+};
+var john = new Person("John");
+alert(john.getName());
+Person.prototype.sayMyName = function () {
+    alert('Hello, my name is ' + this.getName());
+};
+john.sayMyName();
+var Customer = function (name) {
+    this.name = name;
+};
+Customer.prototype = new Person();
+
+var myCustomer = new Customer('Dream Inc.');
+myCustomer.sayMyName();
+Customer.prototype.setAmountDue = function (amountDue) {
+    this.amountDue = amountDue;
+};
+Customer.prototype.getAmountDue = function () {
+    return this.amountDue;
+};
+myCustomer.setAmountDue(2000);
+alert(myCustomer.getAmountDue());</code></pre>
+</div>
+</div>
+</p>
+
+<p>While as said I can't call setAmountDue(), getAmountDue() on a Person.</p>
+
+<pre><code>//The following statement generates an error.
+john.setAmountDue(1000);
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="197 votes">197</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2877719/mehran-hatami" rel="noopener">Mehran Hatami</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/21763808" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>This is a very simple prototype based object model that would be considered as a sample during the explanation, with no comment yet:</p>
+
+<pre><code>function Person(name){
+    this.name = name;
+}
+Person.prototype.getName = function(){
+    console.log(this.name);
+}
+var person = new Person("George");
+</code></pre>
+
+<hr>
+
+<p>There are some crucial points that we have to consider before going through the prototype concept.</p>
+
+<h1>1- How JavaScript functions actually work:</h1>
+
+<p>To take the first step we have to figure out, how JavaScript functions actually work , as a class like function using <strong><code>this</code></strong> keyword in it or just as a regular function with its arguments, what it does and what it returns.</p>
+
+<p>Let's say we want to create a <code>Person</code> object model. but in this step I'm gonna be trying to <strong>do the same exact thing without using <code>prototype</code> and <code>new</code> keyword</strong>.</p>
+
+<p>So in this step <strong><code>functions</code></strong>, <strong><code>objects</code></strong> and <strong><code>this</code></strong> keyword, are all we have.</p>
+
+<p>The first question would be <strong>how <code>this</code> keyword could be useful without using <code>new</code> keyword</strong>.</p>
+
+<p>So to answer that let's say we have an empty object, and two functions like:</p>
+
+<pre><code>var person = {};
+function Person(name){  this.name = name;  }
+
+function getName(){
+    console.log(this.name);
+}
+</code></pre>
+
+<p>and now <strong>without using <code>new</code> keyword</strong> how we could use these functions. So JavaScript has 3 different ways to do that:</p>
+
+<h2>a. first way is just to call the function as a regular function:</h2>
+
+<pre><code>Person("George");
+getName();//would print the "George" in the console
+</code></pre>
+
+<p>in this case, this would be the current context object, which is usually is the global  <code>window</code> object in the browser or <code>GLOBAL</code> in <code>Node.js</code>. It means we would have, window.name in browser or GLOBAL.name in Node.js, with "George" as its value.</p>
+
+<h2>b. We can <strong>attach</strong> them to an object, as its properties</h2>
+
+<p>-<strong>The easiest way</strong> to do this is modifying the empty <code>person</code> object, like:</p>
+
+<pre><code>person.Person = Person;
+person.getName = getName;
+</code></pre>
+
+<p>this way we can call them like:</p>
+
+<pre><code>person.Person("George");
+person.getName();// --&gt;"George"
+</code></pre>
+
+<p>and now the <code>person</code> object is like:</p>
+
+<pre><code>Object {Person: function, getName: function, name: "George"}
+</code></pre>
+
+<hr>
+
+<p>-<strong>The other way to attach a property</strong> to an object is using the <code>prototype</code> of that object that can be find in any JavaScript object with the name of <code>__proto__</code>, and I have tried to explain it a bit on the summary part. So we could get the similar result by doing:</p>
+
+<pre><code>person.__proto__.Person = Person;
+person.__proto__.getName = getName;
+</code></pre>
+
+<p><strong>But</strong> this way what we actually are doing is modifying the <code>Object.prototype</code>, because whenever we create a JavaScript object using literals (<code>{ ... }</code>), it gets created based on <code>Object.prototype</code>, which means it gets attached to the newly created object as an attribute named <strong><code>__proto__</code></strong> , so if we change it, as we have done on our previous code snippet, all the JavaScript objects would get changed, not a good practice. So what could be the better practice now:</p>
+
+<pre><code>person.__proto__ = {
+    Person: Person,
+    getName: getName
+};
+</code></pre>
+
+<p>and now other objects are in peace, but it still doesn't seem to be a good practice. So we have still one more solutions, but to use this solution we should get back to that line of code where <code>person</code> object got created (<code>var person = {};</code>) then change it like:</p>
+
+<pre><code>var propertiesObject = {
+    Person: Person,
+    getName: getName
+};
+var person = Object.create(propertiesObject);
+</code></pre>
+
+<p>what it does is creating a new JavaScript <code>Object</code> and attach the <code>propertiesObject</code> to the <code>__proto__</code> attribute. So to make sure you can do:</p>
+
+<pre><code>console.log(person.__proto__===propertiesObject); //true
+</code></pre>
+
+<p>But the tricky point here is you have access to all the properties defined in <code>__proto__</code> on the first level of the <code>person</code> object(read the summary part for more detail).</p>
+
+<hr>
+
+<p>as you see using any of these two way <code>this</code> would exactly point to the <code>person</code> object.</p>
+
+<h2>c. JavaScript has another way to provide the function with <code>this</code>, which is using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/call" rel="noreferrer">call</a> or <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply" rel="noreferrer">apply</a> to invoke the function.</h2>
+
+<blockquote>
+  <p>The apply() method calls a function with a given this value and
+  arguments provided as an array (or an array-like object).</p>
+</blockquote>
+
+<p>and</p>
+
+<blockquote>
+  <p>The call() method calls a function with a given this value and
+  arguments provided individually.</p>
+</blockquote>
+
+<p>this way which is my favorite, we can easily call our functions like:</p>
+
+<pre><code>Person.call(person, "George");
+</code></pre>
+
+<p>or</p>
+
+<pre><code>//apply is more useful when params count is not fixed
+Person.apply(person, ["George"]);
+
+getName.call(person);   
+getName.apply(person);
+</code></pre>
+
+<p>these 3 methods are the important initial steps to figure out the .prototype functionality.</p>
+
+<hr>
+
+<h1>2- How does the <code>new</code> keyword work?</h1>
+
+<p>this is the second step to understand the <code>.prototype</code> functionality.this is what I use to simulate the process:</p>
+
+<pre><code>function Person(name){  this.name = name;  }
+my_person_prototype = { getName: function(){ console.log(this.name); } };
+</code></pre>
+
+<p>in this part I'm gonna be trying to take all the steps which JavaScript takes, without using the <code>new</code> keyword and <code>prototype</code>, when you use <code>new</code> keyword. so when we do <code>new Person("George")</code>, <code>Person</code> function serves as a constructor, These are what JavaScript does, one by one:</p>
+
+<h2>a. first of all it makes an empty object, basically an empty hash like:</h2>
+
+<pre><code>var newObject = {};
+</code></pre>
+
+<h2>b. the next step that JavaScript takes is to <strong>attach</strong> the all prototype objects to the newly created object</h2>
+
+<p>we have <code>my_person_prototype</code> here similar to the prototype object.</p>
+
+<pre><code>for(var key in my_person_prototype){
+    newObject[key] = my_person_prototype[key];
+}
+</code></pre>
+
+<p>It is not the way that JavaScript actually attaches the properties that are defined in the prototype. The actual way is related to the prototype chain concept.</p>
+
+<hr>
+
+<h2>a. &amp; b. Instead of these two steps you can have the exact same result by doing:</h2>
+
+<pre><code>var newObject = Object.create(my_person_prototype);
+//here you can check out the __proto__ attribute
+console.log(newObject.__proto__ === my_person_prototype); //true
+//and also check if you have access to your desired properties
+console.log(typeof newObject.getName);//"function"
+</code></pre>
+
+<p>now we can call the <code>getName</code> function in our <code>my_person_prototype</code>:</p>
+
+<pre><code>newObject.getName();
+</code></pre>
+
+<h2>c. then it gives that object to the constructor,</h2>
+
+<p>we can do this with our sample like:</p>
+
+<pre><code>Person.call(newObject, "George");
+</code></pre>
+
+<p>or</p>
+
+<pre><code>Person.apply(newObject, ["George"]);
+</code></pre>
+
+<p>then the constructor can do whatever it wants, because <strong>this</strong> inside of that constructor is the object that was just created.</p>
+
+<p>now the end result before simulating the other steps:
+    Object {name: "George"}</p>
+
+<hr>
+
+<h2>Summary:</h2>
+
+<p>Basically, when you use the <strong>new</strong> keyword on a function, you are calling on that and that function serves as a constructor, so when you say:</p>
+
+<pre><code>new FunctionName()
+</code></pre>
+
+<p>JavaScript internally makes an object, an empty hash and then it gives that object to the constructor, then the constructor can do whatever it wants, because <strong>this</strong> inside of that constructor is the object that was just created and then it gives you that object of course if you haven't used the return statement in your function or if you've put a <code>return undefined;</code> at the end of your function body.</p>
+
+<p>So when JavaScript goes to look up a property on an object, the first thing it does, is it looks it up on that object. And then there is a secret property <strong><code>[[prototype]]</code></strong> which we usually have it like <strong><code>__proto__</code></strong> and that property is what JavaScript looks at next. And when it looks through the <strong><code>__proto__</code></strong>, as far as it is again another JavaScript object, it has its own <strong><code>__proto__</code></strong> attribute, it goes up and up until it gets to the point where the next <strong><code>__proto__</code></strong> is null. The point is the only object in JavaScript that its <strong><code>__proto__</code></strong> attribute is null is <code>Object.prototype</code> object:</p>
+
+<pre><code>console.log(Object.prototype.__proto__===null);//true
+</code></pre>
+
+<p>and that's how inheritance works in JavaScript.</p>
+
+<p><img src="https://i.sstatic.net/JnpBV.png" alt="The prototype chain"></p>
+
+<p>In other words, when you have a prototype property on a function and you call a new on that, after JavaScript finishes looking at that newly created object for properties, it will go look at the function's <code>.prototype</code> and also it is possible that this object has its own internal prototype. and so on.</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I modify the URL without reloading the page? · jsdigest</title>
+<meta name="description" content="Is there a way I can modify the URL of the current page without reloading the page? I would like to access the portion before the # hash if possible. I only ne…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I modify the URL without reloading the page?</h1>
+    <div class="q-meta big"><span class="score hot" title="3085 votes">3.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/41021/robin-rodricks" rel="noopener">Robin Rodricks</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">html</span><span class="tag">url</span><span class="tag">url-rewriting</span><span class="tag">friendly-url</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/824349/how-do-i-modify-the-url-without-reloading-the-page" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Is there a way I can modify the URL of the current page without reloading the page?</p>
+<p>I would like to access the portion <strong>before</strong> the # hash if possible.</p>
+<p>I only need to change the portion <strong>after</strong> the domain, so it's not like I'm violating cross-domain policies.</p>
+<pre><code> window.location.href = &quot;www.mysite.com/page2.php&quot;;  // this reloads
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2465 votes">2.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/160173/david-murdoch" rel="noopener">David Murdoch</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3354511" rel="noopener">原文 ↗</a></div><div class="prose"><p>This can now be done in Chrome, Safari, Firefox 4+, and Internet Explorer 10pp4+!</p>
+<p>See this question's answer for more information:
+<em><a href="https://stackoverflow.com/questions/3338642/updating-address-bar-with-new-url-without-hash-or-reloading-the-page">Updating address bar with new URL without hash or reloading the page</a></em></p>
+<p>Example:</p>
+<pre><code> function processAjaxData(response, urlPath){
+     document.getElementById(&quot;content&quot;).innerHTML = response.html;
+     document.title = response.pageTitle;
+     window.history.pushState({&quot;html&quot;:response.html,&quot;pageTitle&quot;:response.pageTitle},&quot;&quot;, urlPath);
+ }
+</code></pre>
+<p>You can then use <code>window.onpopstate</code> or <code>window.addEventListener</code> to detect the back/forward button navigation:</p>
+<pre><code>window.addEventListener(&quot;popstate&quot;, (e) =&gt; {
+    if(e.state){
+        document.getElementById(&quot;content&quot;).innerHTML = e.state.html;
+        document.title = e.state.pageTitle;
+    }
+});
+</code></pre>
+<hr />
+<p>For a more in-depth look at manipulating browser history, see <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history" rel="noreferrer">this MDN article</a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="865 votes">865</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/241518/vivart" rel="noopener">Vivart</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3503206" rel="noopener">原文 ↗</a></div><div class="prose"><p>HTML5 introduced the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History/pushState" rel="noreferrer"><code>history.pushState()</code></a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState" rel="noreferrer"><code>history.replaceState()</code></a> methods, which allow you to add and modify history entries, respectively.</p>
+<pre><code>window.history.pushState('page2', 'Title', '/page2.php');
+</code></pre>
+<p>Read more about this from <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API/Working_with_the_History_API" rel="noreferrer">here</a></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="230 votes">230</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/961333/george-filippakos" rel="noopener">George Filippakos</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/13451971" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can also use HTML5 <strong>replaceState</strong> if you want to change the url but don't want to add the entry to the browser history:</p>
+
+<pre><code>if (window.history.replaceState) {
+   //prevents browser from storing history with each change:
+   window.history.replaceState(statedata, title, url);
+}
+</code></pre>
+
+<p>This would 'break' the back button functionality. This may be required in some instances such as an image gallery (where you want the back button to return back to the gallery index page instead of moving back through each and every image you viewed) whilst giving each image its own unique url.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

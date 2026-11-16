@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I know which radio button is selected via jQuery? · jsdigest</title>
+<meta name="description" content="I have two radio buttons and want to post the value of the selected one. How can I get the value with jQuery? I can get all of them like this: $(&quot;form :radio&quot;)…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I know which radio button is selected via jQuery?</h1>
+    <div class="q-meta big"><span class="score hot" title="3080 votes">3.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1782/juan" rel="noopener">juan</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">html</span><span class="tag">jquery-selectors</span><span class="tag">radio-button</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/596351/how-can-i-know-which-radio-button-is-selected-via-jquery" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have two radio buttons and want to post the value of the selected one.
+How can I get the value with jQuery?</p>
+
+<p>I can get all of them like this:</p>
+
+<pre><code>$("form :radio")
+</code></pre>
+
+<p>How do I know which one is selected?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4304 votes">4.3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/56018/peter-j" rel="noopener">Peter J</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/596369" rel="noopener">原文 ↗</a></div><div class="prose"><p>To get the value of the <strong>selected</strong> <code>radioName</code> item of a form with id <code>myForm</code>:</p>
+<pre><code>$('input[name=radioName]:checked', '#myForm').val()
+</code></pre>
+<p>Here's an example:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>$('#myForm input').on('change', function() {
+  alert($('input[name=radioName]:checked', '#myForm').val());
+});</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;form id="myForm"&gt;
+  &lt;fieldset&gt;
+    &lt;legend&gt;Choose radioName&lt;/legend&gt;
+    &lt;label&gt;&lt;input type="radio" name="radioName" value="1" /&gt; 1&lt;/label&gt; &lt;br /&gt;
+    &lt;label&gt;&lt;input type="radio" name="radioName" value="2" /&gt; 2&lt;/label&gt; &lt;br /&gt;
+    &lt;label&gt;&lt;input type="radio" name="radioName" value="3" /&gt; 3&lt;/label&gt; &lt;br /&gt;
+  &lt;/fieldset&gt;
+&lt;/form&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="467 votes">467</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/245030/joberror" rel="noopener">Joberror</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2017454" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use this..  </p>
+
+<pre><code>$("#myform input[type='radio']:checked").val();
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="349 votes">349</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/560114/matt-browne" rel="noopener">Matt Browne</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4948884" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you already have a reference to a radio button group, for example:</p>
+
+<pre><code>var myRadio = $("input[name=myRadio]");
+</code></pre>
+
+<p>Use the <code>filter()</code> function, not <code>find()</code>. (<code>find()</code> is for locating child/descendant elements, whereas <code>filter()</code> searches top-level elements in your selection.)</p>
+
+<pre><code>var checkedValue = myRadio.filter(":checked").val();
+</code></pre>
+
+<hr>
+
+<p><em>Notes:</em> This answer was originally correcting another answer that recommended using <code>find()</code>, which seems to have since been changed. <code>find()</code> could still be useful for the situation where you already had a reference to a container element, but not to the radio buttons, e.g.:</p>
+
+<pre><code>var form = $("#mainForm");
+...
+var checkedValue = form.find("input[name=myRadio]:checked").val();
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

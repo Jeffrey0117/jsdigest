@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>var functionName = function() {} vs function functionName() {} · jsdigest</title>
+<meta name="description" content="I&#39;ve recently started maintaining someone else&#39;s JavaScript code. I&#39;m fixing bugs, adding features and also trying to tidy up the code and make it more consist…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>var functionName = function() {} vs function functionName() {}</h1>
+    <div class="q-meta big"><span class="score hot" title="7669 votes">7.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/31569/richard-garside" rel="noopener">Richard Garside</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">function</span><span class="tag">methods</span><span class="tag">syntax</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/336859/var-functionname-function-vs-function-functionname" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I've recently started maintaining someone else's JavaScript code. I'm fixing bugs, adding features and also trying to tidy up the code and make it more consistent.</p>
+<p>The previous developer used two ways of declaring functions and I can't work out if there is a reason behind it or not.</p>
+<p>The two ways are:</p>
+<pre><code>var functionOne = function() {
+    // Some code
+};
+</code></pre>
+<p>And,</p>
+<pre><code>function functionTwo() {
+    // Some code
+}
+</code></pre>
+<p>What are the reasons for using these two different methods and what are the pros and cons of each? Is there anything that can be done with one method that can't be done with the other?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5623 votes">5.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/24181/greg" rel="noopener">Greg</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/336868" rel="noopener">原文 ↗</a></div><div class="prose"><p>The difference is that <code>functionOne</code> is a <strong>function expression</strong> and so only defined when that line is reached, whereas <code>functionTwo</code> is a <strong>function declaration</strong> and is defined as soon as its surrounding function or script is executed (due to <a href="http://adripofjavascript.com/blog/drips/variable-and-function-hoisting.html" rel="noreferrer">hoisting</a>).</p>
+<p>For example, a function expression:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// TypeError: functionOne is not a function
+functionOne();
+
+var functionOne = function() {
+  console.log("Hello!");
+};</code></pre>
+</div>
+</div>
+</p>
+<p>And, a function declaration:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// Outputs: "Hello!"
+functionTwo();
+
+function functionTwo() {
+  console.log("Hello!");
+}</code></pre>
+</div>
+</div>
+</p>
+<p>Historically, function declarations defined within blocks were handled inconsistently between browsers. <a href="https://udn.realityripple.com/docs/Glossary/strict_mode" rel="noreferrer">Strict mode</a> (introduced in ES5) resolved this by scoping function declarations to their enclosing block.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>'use strict';    
+{ // note this block!
+  function functionThree() {
+    console.log("Hello!");
+  }
+}
+functionThree(); // ReferenceError</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="2104 votes">2.1k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/26394/eugene-lazutkin" rel="noopener">Eugene Lazutkin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/338053" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>First I want to correct Greg: <code>function abc(){}</code> is scoped too &mdash; the name <code>abc</code> is defined in the scope where this definition is encountered. Example:</p>
+
+<pre><code>function xyz(){
+  function abc(){};
+  // abc is defined here...
+}
+// ...but not here
+</code></pre>
+
+<p>Secondly, it is possible to combine both styles:</p>
+
+<pre><code>var xyz = function abc(){};
+</code></pre>
+
+<p><code>xyz</code> is going to be defined as usual, <code>abc</code> is undefined in all browsers but Internet&nbsp;Explorer &mdash; do not rely on it being defined. But it will be defined inside its body:</p>
+
+<pre><code>var xyz = function abc(){
+  // xyz is visible here
+  // abc is visible here
+}
+// xyz is visible here
+// abc is undefined here
+</code></pre>
+
+<p>If you want to alias functions on all browsers, use this kind of declaration:</p>
+
+<pre><code>function abc(){};
+var xyz = abc;
+</code></pre>
+
+<p>In this case, both <code>xyz</code> and <code>abc</code> are aliases of the same object:</p>
+
+<pre><code>console.log(xyz === abc); // prints "true"
+</code></pre>
+
+<p>One compelling reason to use the combined style is the "name" attribute of function objects (<strong>not supported by Internet&nbsp;Explorer</strong>). Basically when you define a function like</p>
+
+<pre><code>function abc(){};
+console.log(abc.name); // prints "abc"
+</code></pre>
+
+<p>its name is automatically assigned. But when you define it like</p>
+
+<pre><code>var abc = function(){};
+console.log(abc.name); // prints ""
+</code></pre>
+
+<p>its name is empty &mdash; we created an anonymous function and assigned it to some variable.</p>
+
+<p>Another good reason to use the combined style is to use a short internal name to refer to itself, while providing a long non-conflicting name for external users:</p>
+
+<pre><code>// Assume really.long.external.scoped is {}
+really.long.external.scoped.name = function shortcut(n){
+  // Let it call itself recursively:
+  shortcut(n - 1);
+  // ...
+  // Let it pass itself as a callback:
+  someFunction(shortcut);
+  // ...
+}
+</code></pre>
+
+<p>In the example above we can do the same with an external name, but it'll be too unwieldy (and slower).</p>
+
+<p><em>(Another way to refer to itself is to use <code>arguments.callee</code>, which is still relatively long, and not supported in the strict mode.)</em></p>
+
+<p>Deep down, JavaScript treats both statements differently. This is a function declaration:</p>
+
+<pre><code>function abc(){}
+</code></pre>
+
+<p><code>abc</code> here is defined everywhere in the current scope:</p>
+
+<pre><code>// We can call it here
+abc(); // Works
+
+// Yet, it is defined down there.
+function abc(){}
+
+// We can call it again
+abc(); // Works
+</code></pre>
+
+<p>Also, it hoisted through a <code>return</code> statement:</p>
+
+<pre><code>// We can call it here
+abc(); // Works
+return;
+function abc(){}
+</code></pre>
+
+<p>This is a function expression:</p>
+
+<pre><code>var xyz = function(){};
+</code></pre>
+
+<p><code>xyz</code> here is defined from the point of assignment:</p>
+
+<pre><code>// We can't call it here
+xyz(); // UNDEFINED!!!
+
+// Now it is defined
+xyz = function(){}
+
+// We can call it here
+xyz(); // works
+</code></pre>
+
+<p>Function declaration vs. function expression is the real reason why there is a difference demonstrated by Greg.</p>
+
+<p>Fun fact:</p>
+
+<pre><code>var xyz = function abc(){};
+console.log(xyz.name); // Prints "abc"
+</code></pre>
+
+<p>Personally, I prefer the "function expression" declaration because this way I can control the visibility. When I define the function like</p>
+
+<pre><code>var abc = function(){};
+</code></pre>
+
+<p>I know that I defined the function locally. When I define the function like</p>
+
+<pre><code>abc = function(){};
+</code></pre>
+
+<p>I know that I defined it globally providing that I didn't define <code>abc</code> anywhere in the chain of scopes. This style of definition is resilient even when used inside <code>eval()</code>. While the definition</p>
+
+<pre><code>function abc(){};
+</code></pre>
+
+<p>depends on the context and may leave you guessing where it is actually defined, especially in the case of <code>eval()</code> &mdash; the answer is: It depends on the browser.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="745 votes">745</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/157247/t-j-crowder" rel="noopener">T.J. Crowder</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/22173438" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Here's the rundown on the standard forms that create functions: <em>(Originally written for another question, but adapted after being moved into the canonical question.)</em></p>
+
+<p>Terms:</p>
+
+<ul>
+<li><strong>ES5</strong>: <a href="http://ecma-international.org/ecma-262/5.1/" rel="noreferrer">ECMAScript 5th edition</a>, 2009</li>
+<li><strong>ES2015</strong>: <a href="http://www.ecma-international.org/ecma-262/6.0/index.html" rel="noreferrer">ECMAScript 2015</a> (also known as "ES6")</li>
+</ul>
+
+<p>The quick list:</p>
+
+<ul>
+<li><p>Function Declaration</p></li>
+<li><p>"Anonymous" <code>function</code> Expression <em>(which despite the term, sometimes create functions with names)</em></p></li>
+<li><p>Named <code>function</code> Expression</p></li>
+<li><p>Accessor Function Initializer (ES5+)</p></li>
+<li><p>Arrow Function Expression (ES2015+) <em>(which, like anonymous function expressions, don't involve an explicit name, and yet can create functions with names)</em></p></li>
+<li><p>Method Declaration in Object Initializer (ES2015+)</p></li>
+<li><p>Constructor and Method Declarations in <code>class</code> (ES2015+)</p></li>
+</ul>
+
+<h3>Function Declaration</h3>
+
+<p>The first form is a <em>function declaration</em>, which looks like this:</p>
+
+<pre><code>function x() {
+    console.log('x');
+}
+</code></pre>
+
+<p>A function declaration is a <em>declaration</em>; it's not a statement or expression. As such, you don't follow it with a <code>;</code> (although doing so is harmless).</p>
+
+<p>A function declaration is processed when execution enters the context in which it appears, <strong>before</strong> any step-by-step code is executed. The function it creates is given a proper name (<code>x</code> in the example above), and that name is put in the scope in which the declaration appears.</p>
+
+<p>Because it's processed before any step-by-step code in the same context, you can do things like this:</p>
+
+<pre><code>x(); // Works even though it's above the declaration
+function x() {
+    console.log('x');
+}
+</code></pre>
+
+<p>Until ES2015, the spec didn't cover what a JavaScript engine should do if you put a function declaration inside a control structure like <code>try</code>, <code>if</code>, <code>switch</code>, <code>while</code>, etc., like this:</p>
+
+<pre><code>if (someCondition) {
+    function foo() {    // &lt;===== HERE THERE
+    }                   // &lt;===== BE DRAGONS
+}
+</code></pre>
+
+<p>And since they're processed <em>before</em> step-by-step code is run, it's tricky to know what to do when they're in a control structure.</p>
+
+<p>Although doing this wasn't <em>specified</em> until ES2015, it was an <em>allowable extension</em> to support function declarations in blocks. Unfortunately (and inevitably), different engines did different things.</p>
+
+<p>As of ES2015, the specification says what to do. In fact, it gives three separate things to do:</p>
+
+<ol>
+<li>If in loose mode <em>not</em> on a web browser, the JavaScript engine is supposed to do one thing</li>
+<li>If in loose mode on a web browser, the JavaScript engine is supposed to do something else</li>
+<li>If in <em>strict</em> mode (browser or not), the JavaScript engine is supposed to do yet another thing</li>
+</ol>
+
+<p>The rules for the loose modes are tricky, but in <em>strict</em> mode, function declarations in blocks are easy: They're local to the block (they have <em>block scope</em>, which is also new in ES2015), and they're hoisted to the top of the block. So:</p>
+
+<pre><code>"use strict";
+if (someCondition) {
+    foo();               // Works just fine
+    function foo() {
+    }
+}
+console.log(typeof foo); // "undefined" (`foo` is not in scope here
+                         // because it's not in the same block)
+</code></pre>
+
+<h3>"Anonymous" <code>function</code> Expression</h3>
+
+<p>The second common form is called an <em>anonymous function expression</em>:</p>
+
+<pre><code>var y = function () {
+    console.log('y');
+};
+</code></pre>
+
+<p>Like all expressions, it's evaluated when it's reached in the step-by-step execution of the code.</p>
+
+<p>In ES5, the function this creates has no name (it's anonymous). In ES2015, the function is assigned a name if possible by inferring it from context. In the example above, the name would be <code>y</code>. Something similar is done when the function is the value of a property initializer. (For details on when this happens and the rules, search for <code>SetFunctionName</code> in the <a href="https://tc39.github.io/ecma262/" rel="noreferrer">the specification</a>&nbsp;&mdash; it appears <em>all over</em> the place.)</p>
+
+<h3>Named <code>function</code> Expression</h3>
+
+<p>The third form is a <em>named function expression</em> ("NFE"):</p>
+
+<pre><code>var z = function w() {
+    console.log('zw')
+};
+</code></pre>
+
+<p>The function this creates has a proper name (<code>w</code> in this case). Like all expressions, this is evaluated when it's reached in the step-by-step execution of the code. The name of the function is <em>not</em> added to the scope in which the expression appears; the name <em>is</em> in scope within the function itself:</p>
+
+<pre><code>var z = function w() {
+    console.log(typeof w); // "function"
+};
+console.log(typeof w);     // "undefined"
+</code></pre>
+
+<p>Note that NFEs have frequently been a source of bugs for JavaScript implementations. IE8 and earlier, for instance, handle NFEs <a href="http://blog.niftysnippets.org/2010/09/double-take.html" rel="noreferrer">completely incorrectly</a>, creating two different functions at two different times. Early versions of Safari had issues as well. The good news is that current versions of browsers (IE9 and up, current Safari) don't have those issues any more. (But as of this writing, sadly, IE8 remains in widespread use, and so using NFEs with code for the web in general is still problematic.)</p>
+
+<h3>Accessor Function Initializer (ES5+)</h3>
+
+<p>Sometimes functions can sneak in largely unnoticed; that's the case with <em>accessor functions</em>. Here's an example:</p>
+
+<pre><code>var obj = {
+    value: 0,
+    get f() {
+        return this.value;
+    },
+    set f(v) {
+        this.value = v;
+    }
+};
+console.log(obj.f);         // 0
+console.log(typeof obj.f);  // "number"
+</code></pre>
+
+<p>Note that when I used the function, I didn't use <code>()</code>! That's because it's an <em>accessor function</em> for a property. We get and set the property in the normal way, but behind the scenes, the function is called.</p>
+
+<p>You can also create accessor functions with <code>Object.defineProperty</code>, <code>Object.defineProperties</code>, and the lesser-known second argument to <code>Object.create</code>.</p>
+
+<h3>Arrow Function Expression (ES2015+)</h3>
+
+<p>ES2015 brings us the <em>arrow function</em>. Here's one example:</p>
+
+<pre><code>var a = [1, 2, 3];
+var b = a.map(n =&gt; n * 2);
+console.log(b.join(", ")); // 2, 4, 6
+</code></pre>
+
+<p>See that <code>n =&gt; n * 2</code> thing hiding in the <code>map()</code> call? That's a function.</p>
+
+<p>A couple of things about arrow functions:</p>
+
+<ol>
+<li><p>They don't have their own <code>this</code>. Instead, they <em>close over</em> the <code>this</code> of the context where they're defined. (They also close over <code>arguments</code> and, where relevant, <code>super</code>.) This means that the <code>this</code> within them is the same as the <code>this</code> where they're created, and cannot be changed.</p></li>
+<li><p>As you'll have noticed with the above, you don't use the keyword <code>function</code>; instead, you use <code>=&gt;</code>.</p></li>
+</ol>
+
+<p>The <code>n =&gt; n * 2</code> example above is one form of them. If you have multiple arguments to pass the function, you use parens:</p>
+
+<pre><code>var a = [1, 2, 3];
+var b = a.map((n, i) =&gt; n * i);
+console.log(b.join(", ")); // 0, 2, 6
+</code></pre>
+
+<p>(Remember that <code>Array#map</code> passes the entry as the first argument, and the index as the second.)</p>
+
+<p>In both cases, the body of the function is just an expression; the function's return value will automatically be the result of that expression (you don't use an explicit <code>return</code>).</p>
+
+<p>If you're doing more than just a single expression, use <code>{}</code> and an explicit <code>return</code> (if you need to return a value), as normal:</p>
+
+<pre><code>var a = [
+  {first: "Joe", last: "Bloggs"},
+  {first: "Albert", last: "Bloggs"},
+  {first: "Mary", last: "Albright"}
+];
+a = a.sort((a, b) =&gt; {
+  var rv = a.last.localeCompare(b.last);
+  if (rv === 0) {
+    rv = a.first.localeCompare(b.first);
+  }
+  return rv;
+});
+console.log(JSON.stringify(a));
+</code></pre>
+
+<p>The version without <code>{ ... }</code> is called an arrow function with an <em>expression body</em> or <em>concise body</em>. (Also: A <em>concise</em> arrow function.) The one with <code>{ ... }</code> defining the body is an arrow function with a <em>function body</em>. (Also: A <em>verbose</em> arrow function.)</p>
+
+<h3>Method Declaration in Object Initializer (ES2015+)</h3>
+
+<p>ES2015 allows a shorter form of declaring a property that references a function called a <em>method definition</em>; it looks like this:</p>
+
+<pre><code>var o = {
+    foo() {
+    }
+};
+</code></pre>
+
+<p>the almost-equivalent in ES5 and earlier would be:</p>
+
+<pre><code>var o = {
+    foo: function foo() {
+    }
+};
+</code></pre>
+
+<p>the difference (other than verbosity) is that a method can use <code>super</code>, but a function cannot. So for instance, if you had an object that defined (say) <code>valueOf</code> using method syntax, it could use <code>super.valueOf()</code> to get the value <code>Object.prototype.valueOf</code> would have returned (before presumably doing something else with it), whereas the ES5 version would have to do <code>Object.prototype.valueOf.call(this)</code> instead.</p>
+
+<p>That also means that the method has a reference to the object it was defined on, so if that object is temporary (for instance, you're passing it into <code>Object.assign</code> as one of the source objects), method syntax <em>could</em> mean that the object is retained in memory when otherwise it could have been garbage collected (if the JavaScript engine doesn't detect that situation and handle it if none of the methods uses <code>super</code>).</p>
+
+<h3>Constructor and Method Declarations in <code>class</code> (ES2015+)</h3>
+
+<p>ES2015 brings us <code>class</code> syntax, including declared constructors and methods:</p>
+
+<pre><code>class Person {
+    constructor(firstName, lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
+}
+</code></pre>
+
+<p>There are two function declarations above: One for the constructor, which gets the name <code>Person</code>, and one for <code>getFullName</code>, which is a function assigned to <code>Person.prototype</code>.</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encode URL in JavaScript · jsdigest</title>
+<meta name="description" content="How do you safely encode a URL using JavaScript such that it can be put into a GET string? var myUrl = &quot;http://example.com/index.html?param=1&amp;anotherParam=2&quot;;…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Encode URL in JavaScript</h1>
+    <div class="q-meta big"><span class="score hot" title="2939 votes">2.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/9021/nickf" rel="noopener">nickf</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">url</span><span class="tag">encode</span><span class="tag">urlencode</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/332872/encode-url-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do you safely encode a URL using JavaScript such that it can be put into a GET string?</p>
+
+<pre><code>var myUrl = "http://example.com/index.html?param=1&amp;anotherParam=2";
+var myOtherUrl = "http://example.com/index.html?url=" + myUrl;
+</code></pre>
+
+<p>I assume that you need to encode the <code>myUrl</code> variable on that second line?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3238 votes">3.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/17815/buu" rel="noopener">Buu</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/332888" rel="noopener">原文 ↗</a></div><div class="prose"><p>Check out the built-in function <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent" rel="noreferrer">encodeURIComponent(str)</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI" rel="noreferrer">encodeURI(str)</a>.<br />
+In your case, this should work:</p>
+<pre><code>var myOtherUrl = 
+       &quot;http://example.com/index.html?url=&quot; + encodeURIComponent(myUrl);
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1710 votes">1.7k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/5445/christian-c-salvad%c3%b3" rel="noopener">Christian C. Salvad&amp;#243;</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/332897" rel="noopener">原文 ↗</a></div><div class="prose"><p>You have three options:</p>
+<ul>
+<li><p><code>escape()</code> will not encode: <code>@*/+</code></p>
+</li>
+<li><p><code>encodeURI()</code> will not encode: <code>~!@#$&amp;*()=:/,;?+'</code></p>
+</li>
+<li><p><code>encodeURIComponent()</code> will not encode: <code>~!*()'</code></p>
+</li>
+</ul>
+<p>But in your case, if you want to pass a <a href="http://en.wikipedia.org/wiki/Uniform_Resource_Locator" rel="noreferrer">URL</a> into a <code>GET</code> parameter of other page, you should use <code>escape</code> or <code>encodeURIComponent</code>, but not <code>encodeURI</code>.</p>
+<p>See Stack Overflow question <em><a href="https://stackoverflow.com/questions/75980/best-practice-escape-or-encodeuri-encodeuricomponent">Best practice: escape, or encodeURI / encodeURIComponent</a></em> for further discussion.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="209 votes">209</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/658138/mike-brennan" rel="noopener">Mike Brennan</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6171234" rel="noopener">原文 ↗</a></div><div class="prose"><p>Stick with <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent" rel="noreferrer"><code>encodeURIComponent()</code></a>. The function <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI" rel="noreferrer"><code>encodeURI()</code></a> does not bother to encode many characters that have semantic importance in URLs (e.g. "#", "?", and "&amp;"). <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/escape" rel="noreferrer"><code>escape()</code></a> is deprecated, and does not bother to encode "+" characters, which will be interpreted as encoded spaces on the server (and, as pointed out by others here, does not properly URL-encode non-ASCII characters).</p>
+
+<p>There is a nice <a href="https://stackoverflow.com/questions/75980/best-practice-escape-or-encodeuri-encodeuricomponent">explanation of the difference between <code>encodeURI()</code> and <code>encodeURIComponent()</code></a> elsewhere. If you want to encode something so that it can safely be included as a component of a URI (e.g. as a query string parameter), you want to use <code>encodeURIComponent()</code>.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

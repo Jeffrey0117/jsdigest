@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set a default parameter value for a JavaScript function · jsdigest</title>
+<meta name="description" content="I would like a JavaScript function to have optional arguments which I set a default on, which get used if the value isn&#39;t defined (and ignored if the value is…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Set a default parameter value for a JavaScript function</h1>
+    <div class="q-meta big"><span class="score hot" title="2690 votes">2.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1470/tilendor" rel="noopener">Tilendor</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">function</span><span class="tag">parameters</span><span class="tag">arguments</span><span class="tag">default-parameters</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/894860/set-a-default-parameter-value-for-a-javascript-function" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I would like a JavaScript function to have optional arguments which I set a default on, which get used if the value isn't defined (and ignored if the value is passed). In Ruby you can do it like this:</p>
+
+<pre><code>def read_file(file, delete_after = false)
+  # code
+end
+</code></pre>
+
+<p>Does this work in JavaScript?</p>
+
+<pre><code>function read_file(file, delete_after = false) {
+  // Code
+}
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3596 votes">3.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/8435/tom-ritter" rel="noopener">Tom Ritter</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/894877" rel="noopener">原文 ↗</a></div><div class="prose"><p>From <a href="https://www.ecma-international.org/ecma-262/6.0/" rel="noreferrer">ES6/ES2015</a>, default parameters are in the language specification.</p>
+<pre><code>function read_file(file, delete_after = false) {
+  // Code
+}
+</code></pre>
+<p>just works.</p>
+<p>Reference: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Functions/default_parameters" rel="noreferrer">Default Parameters - MDN</a></p>
+<blockquote>
+<p>Default function parameters allow formal parameters to be initialized with default values if <strong>no value</strong> or <strong>undefined</strong> is passed.</p>
+</blockquote>
+<p>In ES6, you can <a href="http://exploringjs.com/es6/ch_parameter-handling.html#sec_named-parameters" rel="noreferrer">simulate default <em>named</em> parameters via destructuring</a>:</p>
+<pre><code>// the `= {}` below lets you call the function without any parameters
+function myFor({ start = 5, end = 1, step = -1 } = {}) { // (A)
+    // Use the variables `start`, `end` and `step` here
+    ···
+}
+
+// sample call using an object
+myFor({ start: 3, end: 0 });
+
+// also OK
+myFor();
+myFor({});
+</code></pre>
+<p><strong>Pre ES2015</strong>,</p>
+<p>There are a lot of ways, but this is my preferred method — it lets you pass in anything you want, including false or null. (<code>typeof null == &quot;object&quot;</code>)</p>
+<pre><code>function foo(a, b) {
+  a = typeof a !== 'undefined' ? a : 42;
+  b = typeof b !== 'undefined' ? b : 'default_b';
+  ...
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="637 votes">637</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1831/russ-cam" rel="noopener">Russ Cam</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/894871" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>function read_file(file, delete_after) {
+    delete_after = delete_after || "my default here";
+    //rest of code
+}
+</code></pre>
+
+<p>This assigns to <code>delete_after</code> the value of <code>delete_after</code> if it is not a <em>falsey</em> value otherwise it assigns the string <code>"my default here"</code>. For more detail, check out <a href="http://crockford.com/javascript/survey.html" rel="noreferrer">Doug Crockford's survey of the language and check out the section on Operators</a>.</p>
+
+<p>This approach does not work if you want to pass in a <em>falsey</em> value i.e. <code>false</code>, <code>null</code>, <code>undefined</code>, <code>0</code> or <code>""</code>. If you require <em>falsey</em> values to be passed in you would need to use the method in <a href="https://stackoverflow.com/questions/894860/how-do-i-make-a-default-value-for-a-parameter-to-a-javascript-function/894877#894877">Tom Ritter's answer</a>.</p>
+
+<p>When dealing with a number of parameters to a function, it is often useful to allow the consumer to pass the parameter arguments in an object and then <em>merge</em> these values with an object that contains the default values for the function</p>
+
+<pre><code>function read_file(values) {
+    values = merge({ 
+        delete_after : "my default here"
+    }, values || {});
+
+    // rest of code
+}
+
+// simple implementation based on $.extend() from jQuery
+function merge() {
+    var obj, name, copy,
+        target = arguments[0] || {},
+        i = 1,
+        length = arguments.length;
+
+    for (; i &lt; length; i++) {
+        if ((obj = arguments[i]) != null) {
+            for (name in obj) {
+                copy = obj[name];
+
+                if (target === copy) {
+                    continue;
+                }
+                else if (copy !== undefined) {
+                    target[name] = copy;
+                }
+            }
+        }
+    }
+
+    return target;
+};
+</code></pre>
+
+<p>to use</p>
+
+<pre><code>// will use the default delete_after value
+read_file({ file: "my file" }); 
+
+// will override default delete_after value
+read_file({ file: "my file", delete_after: "my value" }); 
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="159 votes">159</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/12605/tj-l" rel="noopener">TJ L</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/894929" rel="noopener">原文 ↗</a></div><div class="prose"><p>I find something simple like this to be much more concise and readable personally.</p>
+
+<pre><code>function pick(arg, def) {
+   return (typeof arg == 'undefined' ? def : arg);
+}
+
+function myFunc(x) {
+  x = pick(x, 'my default');
+} 
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

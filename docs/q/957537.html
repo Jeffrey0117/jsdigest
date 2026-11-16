@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I display a JavaScript object? · jsdigest</title>
+<meta name="description" content="How do I display the content of a JavaScript object in a string format like when we alert a variable? The same formatted way I want to display an object.">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I display a JavaScript object?</h1>
+    <div class="q-meta big"><span class="score hot" title="2152 votes">2.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/118061/maxjackie" rel="noopener">maxjackie</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">serialization</span><span class="tag">javascript-objects</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/957537/how-can-i-display-a-javascript-object" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I display the content of a JavaScript object in a string format like when we <code>alert</code> a variable?</p>
+
+<p>The same formatted way I want to display an object.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1362 votes">1.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/43089/kenan-banks" rel="noopener">Kenan Banks</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/957633" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you want to print the object for debugging purposes, use the code:</p>
+<pre><code>var obj = {
+  prop1: 'prop1Value',
+  prop2: 'prop2Value',
+  child: {
+    childProp1: 'childProp1Value',
+  },
+}
+console.log(obj)
+</code></pre>
+<p>will display:</p>
+<p><a href="https://i.sstatic.net/x0Tvz.png" rel="noreferrer"><img src="https://i.sstatic.net/x0Tvz.png" alt="screenshot console chrome" /></a></p>
+<p><strong>Note:</strong> you must <em>only</em> log the object. For example, this won't work:</p>
+<pre><code>console.log('My object : ' + obj)
+</code></pre>
+<p><strong>Note '</strong>: You can also use a comma in the <code>log</code> method, then the first line of the output will be the string and after that, the object will be rendered:</p>
+<pre><code>console.log('My object: ', obj);
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="2502 votes">2.5k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/218857/sandeep" rel="noopener">Sandeep</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4293047" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use native <code>JSON.stringify</code> method.
+Works with nested objects and all major browsers <a href="http://caniuse.com/#search=json" rel="noreferrer">support</a> this method.</p>
+<pre><code>str = JSON.stringify(obj);
+str = JSON.stringify(obj, null, 4); // (Optional) beautiful indented output.
+console.log(str); // Logs output to dev tools console.
+alert(str); // Displays output using window.alert()
+</code></pre>
+<p>Link to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify" rel="noreferrer">Mozilla API Reference</a> and other examples.</p>
+<pre><code>obj = JSON.parse(str); // Reverses above operation (Just in case if needed.)
+</code></pre>
+<hr />
+<p>Use a custom <a href="https://stackoverflow.com/a/11616993/218857">JSON.stringify replacer</a> if you
+encounter this Javascript error</p>
+<pre><code>&quot;Uncaught TypeError: Converting circular structure to JSON&quot;
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="423 votes">423</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/108168/flavius-stef" rel="noopener">Flavius Stef</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/957652" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h1>Simple display</h1>
+<p>Assembles direct properties and their values. Does not include objects within objects.</p>
+<pre><code>var output = '';
+for (var property in object) {
+  output += property + ': ' + object[property]+'; ';
+}
+console.log(output);
+</code></pre>
+<h1>Hierarchical display</h1>
+<p>A more full example includes objects within objects. The logic is a little tricky as some versions of Javascript detect arrays and null as objects. This code also displays functions in most browsers.</p>
+<pre><code>const order = {Apple: 12, Banana: 4, Watermelon: 1, Orange:8, Grape: {Muscat: 20}, Summary: [12,4,1,8,20], Pack: false, Null: null};
+
+function objectAsString(obj) {
+  var output = '';
+  for (var property in obj) {
+    if(obj.hasOwnProperty(property) &amp;&amp; typeof obj[property] !== 'function') {
+      var value = obj[property];
+      if(typeof value === 'object' &amp;&amp; !Array.isArray(value) &amp;&amp; value !== null) {
+        value = '{' + objectAsString(value) + '}';
+      }
+      output += property + ': ' + value +'; ';
+    }
+  }
+  return output;
+}
+console.log(objectAsString(order));
+</code></pre>
+<h2>Hierarchical display for post-2015 browsers</h2>
+<pre><code>const order = {Apple: 12, Banana: 4, Watermelon: 1, Orange:8, Grape: {Muscat: 20}, Summary: [12,4,1,8,20], Pack: false, Null: null};
+
+function objectAsString(obj) {
+  return Object.keys(obj)
+    .map(property =&gt; {
+      const value = obj[property];
+      if (typeof value === 'object' &amp;&amp; !Array.isArray(value) &amp;&amp; value !== null) {
+        return `${property}: {${objectAsString(value)}}`;
+      } else {
+        return `${property}: ${value}`;
+      }
+    })
+    .join('; ');
+}
+
+console.log(objectAsString(order));
+//  Apple: 12; Banana: 4; Watermelon: 1; Orange: 8; Grape: {Muscat: 20; }; Summary: 12,4,1,8,20; Pack: false; Null: null; 
+</code></pre>
+<p>If you want to omit functions, you would insert this line before '.map':</p>
+<pre><code>.filter(property =&gt; typeof obj[property] !== 'function')
+</code></pre>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

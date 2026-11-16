@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why does ++[[]][+[]]+[+[]] return the string &quot;10&quot;? · jsdigest</title>
+<meta name="description" content="This is valid and returns the string &quot;10&quot; in JavaScript ( more examples here ): console.log(++[[]][+[]]+[+[]]) Why? What is happening here?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Why does ++[[]][+[]]+[+[]] return the string &quot;10&quot;?</h1>
+    <div class="q-meta big"><span class="score hot" title="1896 votes">1.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/324853/johnjohnga" rel="noopener">JohnJohnGa</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">syntax</span><span class="tag">jsfuck</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/7202157/why-does-return-the-string-10" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>This is valid and returns the string <code>"10"</code> in JavaScript (<a href="http://sla.ckers.org/forum/read.php?24,33349,33405" rel="noreferrer">more examples here</a>):</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>console.log(++[[]][+[]]+[+[]])</code></pre>
+</div>
+</div>
+</p>
+
+<p>Why? What is happening here?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2282 votes">2.3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/514749/pimvdb" rel="noopener">pimvdb</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/7202287" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>If we split it up, the mess is equal to:</p>
+
+<pre><code>++[[]][+[]]
++
+[+[]]
+</code></pre>
+
+<p>In JavaScript, it is true that <code>+[] === 0</code>. <code>+</code> converts something into a number, and in this case it will come down to <code>+""</code> or <code>0</code> (see specification details below).</p>
+
+<p>Therefore, we can simplify it (<code>++</code> has precendence over <code>+</code>):</p>
+
+<pre><code>++[[]][0]
++
+[0]
+</code></pre>
+
+<p>Because <code>[[]][0]</code> means: get the first element from <code>[[]]</code>, it is true that:</p>
+
+<p><code>[[]][0]</code> returns the inner array (<code>[]</code>). Due to references it's wrong to say <code>[[]][0] === []</code>, but let's call the inner array <code>A</code> to avoid the wrong notation.</p>
+
+<p><code>++</code> before its operand means “increment by one and return the incremented result”. So <code>++[[]][0]</code> is equivalent to <code>Number(A) + 1</code> (or <code>+A + 1</code>).</p>
+
+<p>Again, we can simplify the mess into something more legible. Let's substitute <code>[]</code> back for <code>A</code>:</p>
+
+<pre><code>(+[] + 1)
++
+[0]
+</code></pre>
+
+<p>Before <code>+[]</code> can coerce the array into the number <code>0</code>, it needs to be coerced into a string first, which is <code>""</code>, again. Finally, <code>1</code> is added, which results in <code>1</code>.</p>
+
+<ul>
+<li><code>(+[] + 1) === (+"" + 1)</code></li>
+<li><code>(+"" + 1) === (0 + 1)</code></li>
+<li><code>(0 + 1) === 1</code></li>
+</ul>
+
+<p>Let's simplify it even more:</p>
+
+<pre><code>1
++
+[0]
+</code></pre>
+
+<p>Also, this is true in JavaScript: <code>[0] == "0"</code>, because it's joining an array with one element. Joining will concatenate the elements separated by <code>,</code>. With one element, you can deduce that this logic will result in the first element itself.</p>
+
+<p>In this case, <code>+</code> sees two operands: a number and an array. It’s now trying to coerce the two into the same type. First, the array is coerced into the string <code>"0"</code>, next, the number is coerced into a string (<code>"1"</code>). <em>Number <code>+</code> String <code>===</code> String</em>.</p>
+
+<pre><code>"1" + "0" === "10" // Yay!
+</code></pre>
+
+<hr>
+
+<p>Specification details for <code>+[]</code>:</p>
+
+<p>This is quite a maze, but to do <code>+[]</code>, first it is being converted to a string because that's what <code>+</code> says:</p>
+
+<blockquote>
+  <p>11.4.6 Unary + Operator</p>
+  
+  <p>The unary + operator converts its operand to Number type.</p>
+  
+  <p>The production UnaryExpression : + UnaryExpression is evaluated as follows:</p>
+  
+  <ol>
+  <li><p>Let expr be the result of evaluating UnaryExpression.</p></li>
+  <li><p>Return ToNumber(GetValue(expr)).</p></li>
+  </ol>
+</blockquote>
+
+<p><code>ToNumber()</code> says:</p>
+
+<blockquote>
+  <p>Object</p>
+  
+  <p>Apply the following steps:</p>
+  
+  <ol>
+  <li><p>Let primValue be ToPrimitive(input argument, hint String).</p></li>
+  <li><p>Return ToString(primValue).</p></li>
+  </ol>
+</blockquote>
+
+<p><code>ToPrimitive()</code> says:</p>
+
+<blockquote>
+  <p>Object</p>
+  
+  <p>Return a default value for the Object. The default value of an object is retrieved by calling the [[DefaultValue]] internal method of the object, passing the optional hint PreferredType. The behaviour of the [[DefaultValue]] internal method is defined by this specification for all native ECMAScript objects in 8.12.8.</p>
+</blockquote>
+
+<p><code>[[DefaultValue]]</code> says:</p>
+
+<blockquote>
+  <p>8.12.8 [[DefaultValue]] (hint)</p>
+  
+  <p>When the [[DefaultValue]] internal method of O is called with hint String, the following steps are taken:</p>
+  
+  <ol>
+  <li><p>Let toString be the result of calling the [[Get]] internal method of object O with argument "toString".</p></li>
+  <li><p>If IsCallable(toString) is true then,</p></li>
+  </ol>
+  
+  <p>a. Let str be the result of calling the [[Call]] internal method of toString, with O as the this value and an empty argument list.</p>
+  
+  <p>b. If str is a primitive value, return str.</p>
+</blockquote>
+
+<p>The <code>.toString</code> of an array says:</p>
+
+<blockquote>
+  <p>15.4.4.2 Array.prototype.toString ( )</p>
+  
+  <p>When the toString method is called, the following steps are taken:</p>
+  
+  <ol>
+  <li><p>Let array be the result of calling ToObject on the this value.</p></li>
+  <li><p>Let func be the result of calling the [[Get]] internal method of array with argument "join".</p></li>
+  <li><p>If IsCallable(func) is false, then let func be the standard built-in method Object.prototype.toString (15.2.4.2).</p></li>
+  <li><p>Return the result of calling the [[Call]] internal method of func providing array as the this value and an empty arguments list.</p></li>
+  </ol>
+</blockquote>
+
+<p>So <code>+[]</code> comes down to <code>+""</code>, because <code>[].join() === ""</code>.</p>
+
+<p>Again, the <code>+</code> is defined as:</p>
+
+<blockquote>
+  <p>11.4.6 Unary + Operator</p>
+  
+  <p>The unary + operator converts its operand to Number type.</p>
+  
+  <p>The production UnaryExpression : + UnaryExpression is evaluated as follows:</p>
+  
+  <ol>
+  <li><p>Let expr be the result of evaluating UnaryExpression.</p></li>
+  <li><p>Return ToNumber(GetValue(expr)).</p></li>
+  </ol>
+</blockquote>
+
+<p><code>ToNumber</code> is defined for <code>""</code> as:</p>
+
+<blockquote>
+  <p>The MV of StringNumericLiteral ::: [empty] is 0.</p>
+</blockquote>
+
+<p>So <code>+"" === 0</code>, and thus <code>+[] === 0</code>.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="135 votes">135</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/645186/shef" rel="noopener">Shef</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/7202301" rel="noopener">原文 ↗</a></div><div class="prose"><ul>
+<li><code>++[ [] ][+[]] === 1</code>
+<ul>
+<li><code>+[] === 0</code></li>
+<li><code>++[ [] ][0] === 1</code></li>
+</ul>
+</li>
+<li><code>[ +[] ]</code> is <code>[ 0 ]</code></li>
+</ul>
+<p>Then we have a string concatenation:</p>
+<p><code>1 + String([ 0 ]) === 10</code></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="73 votes">73</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/96100/tim-down" rel="noopener">Tim Down</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/7417498" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>The following is adapted from a <a href="http://tmik.co.uk/?p=672">blog post</a> answering this question that I posted while this question was still closed. Links are to (an HTML copy of) the ECMAScript 3 spec, still the baseline for JavaScript in today's commonly used web browsers.</p>
+
+<p>First, a comment: this kind of expression is never going to show up in any (sane) production environment and is only of any use as an exercise in just how well the reader knows the dirty edges of JavaScript. The general principle that JavaScript operators implicitly convert between types is useful, as are some of the common conversions, but much of the detail in this case is not.</p>
+
+<p>The expression <code>++[[]][+[]]+[+[]]</code> may initially look rather imposing and obscure, but is actually relatively easy break down into separate expressions. Below I’ve simply added parentheses for clarity; I can assure you they change nothing, but if you want to verify that then feel free to read up about the <a href="http://bclary.com/2004/11/07/#a-11.1.6">grouping operator</a>. So, the expression can be more clearly written as</p>
+
+<pre><code>( ++[[]][+[]] ) + ( [+[]] )
+</code></pre>
+
+<p>Breaking this down, we can simplify by observing that <code>+[]</code> evaluates to <code>0</code>. To satisfy yourself why this is true, check out the <a href="http://bclary.com/2004/11/07/#a-11.4.6">unary + operator</a> and follow the slightly tortuous trail which ends up with <a href="http://bclary.com/2004/11/07/#a-9.1">ToPrimitive</a> converting the empty array into an empty string, which is then finally converted to <code>0</code> by <a href="http://bclary.com/2004/11/07/#a-9.3">ToNumber</a>. We can now substitute <code>0</code> for each instance of <code>+[]</code>:</p>
+
+<pre><code>( ++[[]][0] ) + [0]
+</code></pre>
+
+<p>Simpler already. As for <code>++[[]][0]</code>, that’s a combination of the <a href="http://bclary.com/2004/11/07/#a-11.4.4">prefix increment operator</a> (<code>++</code>), an <a href="http://bclary.com/2004/11/07/#a-11.1.4">array literal</a> defining an array with single element that is itself an empty array (<code>[[]]</code>) and a <a href="http://bclary.com/2004/11/07/#a-11.2.1">property accessor</a> (<code>[0]</code>) called on the array defined by the array literal.</p>
+
+<p>So, we can simplify <code>[[]][0]</code> to just <code>[]</code> and we have <code>++[]</code>, right? In fact, this is not the case because evaluating <code>++[]</code> throws an error, which may initially seem confusing. However, a little thought about the nature of <code>++</code> makes this clear: it’s used to increment a variable (e.g. <code>++i</code>) or an object property (e.g. <code>++obj.count</code>). Not only does it evaluate to a value, it also stores that value somewhere. In the case of <code>++[]</code>, it has nowhere to put the new value (whatever it may be) because there is no reference to an object property or variable to update. In spec terms, this is covered by the internal <a href="http://bclary.com/2004/11/07/#a-8.7.2">PutValue</a> operation, which is called by the prefix increment operator.</p>
+
+<p>So then, what does <code>++[[]][0]</code> do? Well, by similar logic as <code>+[]</code>, the inner array is converted to <code>0</code> and this value is incremented by <code>1</code> to give us a final value of <code>1</code>. The value of property <code>0</code> in the outer array is updated to <code>1</code> and the whole expression evaluates to <code>1</code>.</p>
+
+<p>This leaves us with</p>
+
+<pre><code>1 + [0]
+</code></pre>
+
+<p>... which is a simple use of the <a href="http://bclary.com/2004/11/07/#a-11.6.1">addition operator</a>. Both operands are first <a href="http://bclary.com/2004/11/07/#a-9.1">converted to primitives</a> and if either primitive value is a string, string concatenation is performed, otherwise numeric addition is performed. <code>[0]</code> converts to <code>"0"</code>, so string concatenation is used, producing <code>"10"</code>.</p>
+
+<p>As a final aside, something that may not be immediately apparent is that overriding either one of the <code>toString()</code> or <code>valueOf()</code> methods of <code>Array.prototype</code> will change the result of the expression, because both are checked and used if present when converting an object into a primitive value. For example, the following</p>
+
+<pre><code>Array.prototype.toString = function() {
+  return "foo";
+};
+++[[]][+[]]+[+[]]
+</code></pre>
+
+<p>... produces <code>"NaNfoo"</code>. Why this happens is left as an exercise for the reader...</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

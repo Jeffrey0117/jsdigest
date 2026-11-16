@@ -1,0 +1,14 @@
+{
+  "name": "jsdigest",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A browsable, condensed StackOverflow for JavaScript — real top questions with their key answers, as a static site.",
+  "type": "commonjs",
+  "scripts": {
+    "fetch": "node src/fetch-questions.js",
+    "build": "node src/build.js",
+    "serve": "node src/serve.js",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}

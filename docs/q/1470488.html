@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is the purpose of the var keyword and when should I use it (or omit it)? · jsdigest</title>
+<meta name="description" content="NOTE : This question was asked from the viewpoint of ECMAScript version 3 or 5. The answers might become outdated with the introduction of new features in the…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What is the purpose of the var keyword and when should I use it (or omit it)?</h1>
+    <div class="q-meta big"><span class="score hot" title="1664 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/114916/alex" rel="noopener">Alex</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">keyword</span><span class="tag">ecmascript-5</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1470488/what-is-the-purpose-of-the-var-keyword-and-when-should-i-use-it-or-omit-it" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><blockquote>
+  <p><strong><em>NOTE</strong>: This question was asked from the viewpoint of ECMAScript version 3 or 5. The answers might become outdated with the introduction of new features in the release of ECMAScript 6.</em></p>
+</blockquote>
+
+<p>What exactly is the function of the <code>var</code> keyword in JavaScript, and what is the difference between</p>
+
+<pre><code>var someNumber = 2;
+var someFunction = function() { doSomething; }
+var someObject = { }
+var someObject.someProperty = 5;
+</code></pre>
+
+<p>and</p>
+
+<pre><code>someNumber = 2;
+someFunction = function() { doSomething; }
+someObject = { }
+someObject.someProperty = 5;
+</code></pre>
+
+<p>?</p>
+
+<p>When would you use either one, and why/what does it do?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1411 votes">1.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/24181/greg" rel="noopener">Greg</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1470494" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you're in the global scope then there's not much difference. Read <a href="https://stackoverflow.com/a/1471738/1541051">Kangax's</a> answer for explanation</p>
+
+<p>If you're in a function then <strong><code>var</code></strong> will create a local variable, "no var" will look up the scope chain until it finds the variable or hits the global scope (at which point it will create it):</p>
+
+<pre><code>// These are both globals
+var foo = 1;
+bar = 2;
+
+function()
+{
+    var foo = 1; // Local
+    bar = 2;     // Global
+
+    // Execute an anonymous function
+    (function()
+    {
+        var wibble = 1; // Local
+        foo = 2; // Inherits from scope above (creating a closure)
+        moo = 3; // Global
+    }())
+}
+</code></pre>
+
+<p>If you're not doing an assignment then you need to use <code>var</code>:</p>
+
+<pre><code>var x; // Declare x
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="775 votes">775</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/130652/kangax" rel="noopener">kangax</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1471738" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>There's a difference</strong>.</p>
+
+<p><code>var x = 1</code> <strong>declares variable</strong> <code>x</code> in current scope (aka execution context). If the declaration appears in a function - a local variable is declared; if it's in global scope - a global variable is declared.</p>
+
+<p><code>x = 1</code>, on the other hand, is merely a property assignment. It first tries to resolve <code>x</code> against scope chain. If it finds it anywhere in that scope chain, it performs assignment; if it doesn't find <code>x</code>, only then does <strong>it creates <code>x</code> property on a global object</strong> (which is a top level object in a scope chain). </p>
+
+<p>Now, notice that it doesn't declare a global variable, it creates a global property.</p>
+
+<p>The difference between the two is subtle and might be confusing unless you understand that <strong>variable declarations also create properties</strong> (only on a Variable Object) and that every property in Javascript (well, ECMAScript) have certain flags that describe their properties - ReadOnly, DontEnum and DontDelete.</p>
+
+<p>Since variable declaration creates property with the DontDelete flag, the difference between <code>var x = 1</code> and <code>x = 1</code> (when executed in global scope) is that the former one - variable declaration - creates the DontDelete'able property, and latter one doesn't. As a consequence, the property created via this implicit assignment can then be deleted from the global object, and the former one - the one created via variable declaration - cannot be deleted.</p>
+
+<p>But this is just theory of course, and <strong>in practice there are even more differences between the two</strong>, due to various bugs in implementations (such as those from IE).</p>
+
+<p>Hope it all makes sense : )</p>
+
+<hr>
+
+<p><strong>[Update 2010/12/16]</strong></p>
+
+<p>In ES5 (ECMAScript 5; recently standardized, 5th edition of the language) there's a so-called "strict mode" — an opt-in language mode, which slightly changes the behavior of undeclared assignments. In strict mode, assignment to an undeclared identifier is a <strong>ReferenceError</strong>. The rationale for this was to catch accidental assignments, preventing creation of undesired global properties. Some of the newer browsers have already started rolling support for strict mode. See, for example, <a href="http://kangax.github.com/es5-compat-table" rel="noreferrer">my compat table</a>.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="142 votes">142</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/15031/jonathan-lonowski" rel="noopener">Jonathan Lonowski</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1470719" rel="noopener">原文 ↗</a></div><div class="prose"><p>Saying it's the difference between "<strong>local</strong> and <strong>global</strong>" isn't entirely accurate.</p>
+
+<p>It might be better to think of it as the difference between "<strong>local</strong> and <strong>nearest</strong>". The nearest can surely be global, but that won't always be the case.</p>
+
+<pre><code>/* global scope */
+var local = true;
+var global = true;
+
+function outer() {
+    /* local scope */
+    var local = true;
+    var global = false;
+
+    /* nearest scope = outer */
+    local = !global;
+
+    function inner() {
+        /* nearest scope = outer */
+        local = false;
+        global = false;
+
+        /* nearest scope = undefined */
+        /* defaults to defining a global */
+        public = global;
+    }
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

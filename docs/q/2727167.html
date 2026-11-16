@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do you get a list of the names of all files present in a directory in Node.js? · jsdigest</title>
+<meta name="description" content="I&#39;m trying to get a list of the names of all the files present in a directory using Node.js. I want output that is an array of filenames. How can I do this?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do you get a list of the names of all files present in a directory in Node.js?</h1>
+    <div class="q-meta big"><span class="score hot" title="1655 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/76969/resopollution" rel="noopener">resopollution</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">node.js</span><span class="tag">directory-listing</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/2727167/how-do-you-get-a-list-of-the-names-of-all-files-present-in-a-directory-in-node-j" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm trying to get a list of the names of all the files present in a directory using Node.js.  I want output that is an array of filenames. How can I do this?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2222 votes">2.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/5445/christian-c-salvad%c3%b3" rel="noopener">Christian C. Salvad&amp;#243;</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2727191" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use the <a href="https://nodejs.org/api/fs.html#fsreaddirpath-options-callback" rel="noreferrer"><code>fs.readdir</code></a> or <a href="https://nodejs.org/api/fs.html#fsreaddirsyncpath-options" rel="noreferrer"><code>fs.readdirSync</code></a> methods. <code>fs</code> is included in Node.js core, so there's no need to install anything.</p>
+<p><strong>fs.readdir</strong></p>
+<pre><code>const testFolder = './tests/';
+const fs = require('fs');
+
+fs.readdir(testFolder, (err, files) =&gt; {
+  files.forEach(file =&gt; {
+    // will also include directory names
+    console.log(file);
+  });
+});
+</code></pre>
+<p><strong>fs.readdirSync</strong></p>
+<pre><code>const testFolder = './tests/';
+const fs = require('fs');
+
+fs.readdirSync(testFolder).forEach(file =&gt; {
+  // will also include directory names
+  console.log(file);
+});
+</code></pre>
+<p>The difference between the two methods, is that the first one is asynchronous, so you have to provide a callback function that will be executed when the read process ends.</p>
+<p>The second is synchronous, it will return the file name array, but it will stop any further execution of your code until the read process ends.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="276 votes">276</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/695964/kfl" rel="noopener">KFL</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/25580289" rel="noopener">原文 ↗</a></div><div class="prose"><p>IMO the most convenient way to do such tasks is to use a <a href="http://en.wikipedia.org/wiki/Glob_(programming)" rel="noreferrer">glob</a> tool. Here's a <a href="https://github.com/isaacs/node-glob" rel="noreferrer">glob package</a> for node.js. Install with</p>
+<pre><code>npm install glob
+</code></pre>
+<p>Then use wild card to match filenames (example taken from package's <a href="https://github.com/isaacs/node-glob" rel="noreferrer">website</a>)</p>
+<pre><code>var glob = require(&quot;glob&quot;)
+
+// options is optional
+glob(&quot;**/*.js&quot;, options, function (er, files) {
+  // files is an array of filenames.
+  // If the `nonull` option is set, and nothing
+  // was found, then files is [&quot;**/*.js&quot;]
+  // er is an error object or null.
+})
+</code></pre>
+<p>If you are planning on using <a href="https://github.com/sindresorhus/globby" rel="noreferrer">globby</a> here is an example to look for any xml files that are under current folder</p>
+<pre class="lang-js prettyprint-override"><code>var globby = require('globby');
+
+const paths = await globby(&quot;**/*.xml&quot;);  
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="232 votes">232</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1616963/bnp887" rel="noopener">bnp887</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/54439981" rel="noopener">原文 ↗</a></div><div class="prose"><p>As of Node v10.10.0, it is possible to use the new <code>withFileTypes</code> option for <a href="https://nodejs.org/api/fs.html#fs_fs_readdir_path_options_callback" rel="noreferrer"><code>fs.readdir</code></a> and <a href="https://nodejs.org/api/fs.html#fs_fs_readdirsync_path_options" rel="noreferrer"><code>fs.readdirSync</code></a> in combination with the <a href="https://nodejs.org/api/fs.html#fs_dirent_isdirectory" rel="noreferrer"><code>dirent.isDirectory()</code></a> function to filter for filenames in a directory. That looks like this:</p>
+<pre><code>fs.readdirSync('./dirpath', {withFileTypes: true})
+.filter(item =&gt; !item.isDirectory())
+.map(item =&gt; item.name)
+</code></pre>
+<p>The returned array is in the form:</p>
+<pre><code>['file1.txt', 'file2.txt', 'file3.txt']
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

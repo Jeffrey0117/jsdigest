@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I assign a multiline string literal to a variable? · jsdigest</title>
+<meta name="description" content="How do I convert this Ruby code with a multiline string into JavaScript? text = &lt;&lt;&quot;HERE&quot; This Is A Multiline String HERE">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I assign a multiline string literal to a variable?</h1>
+    <div class="q-meta big"><span class="score hot" title="3523 votes">3.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/95956/newy" rel="noopener">Newy</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">string</span><span class="tag">multiline</span><span class="tag">heredoc</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/805107/how-can-i-assign-a-multiline-string-literal-to-a-variable" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I convert this Ruby code with a multiline string into JavaScript?</p>
+<pre class="lang-none prettyprint-override"><code>text = &lt;&lt;&quot;HERE&quot;
+This
+Is
+A
+Multiline
+String
+HERE
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4563 votes">4.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/97408/anonymous" rel="noopener">Anonymous</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/805113" rel="noopener">原文 ↗</a></div><div class="prose"><p><a href="https://en.wikipedia.org/wiki/ECMAScript#6th_Edition_%E2%80%93_ECMAScript_2015" rel="noreferrer">ECMAScript 6</a> (ES6) introduces a new type of literal, namely <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/template_strings" rel="noreferrer"><strong>template literals</strong></a>. They have many features, variable interpolation among others, but most importantly for this question, they can be multiline.</p>
+<p>A template literal is delimited by <em>backticks</em>:</p>
+<pre><code>var html = `
+  &lt;div&gt;
+    &lt;span&gt;Some HTML here&lt;/span&gt;
+  &lt;/div&gt;
+`;
+</code></pre>
+<p>(Note: I'm not advocating to use HTML in strings)</p>
+<p><a href="https://caniuse.com/template-literals" rel="noreferrer">Browser support is OK</a>, but you can use <a href="https://babeljs.io/" rel="noreferrer">transpilers</a> to be more compatible.</p>
+<hr />
+<h3>Original <a href="https://en.wikipedia.org/wiki/ECMAScript#5th_Edition_%E2%80%93_ECMAScript_2009" rel="noreferrer">ES5</a> answer:</h3>
+<p>JavaScript doesn't have a <a href="https://en.wikipedia.org/wiki/Here_document" rel="noreferrer">heredoc</a> syntax. You can escape the literal newline, however, which comes close:</p>
+<pre><code>&quot;foo \
+bar&quot;
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1560 votes">1.6k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/565877/devin-rhode" rel="noopener">Devin Rhode</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6247331" rel="noopener">原文 ↗</a></div><div class="prose"><h2>ES6</h2>
+<p>As the first answer mentions, with <a href="https://en.wikipedia.org/wiki/ECMAScript#6th_Edition_%E2%80%93_ECMAScript_2015" rel="noreferrer">ES6</a>/<a href="https://en.wikipedia.org/wiki/Babel_(transcompiler)" rel="noreferrer">Babel</a>, you can now create multi-line strings simply by using backticks:</p>
+<pre><code>const htmlString = `Say hello to 
+multi-line
+strings!`;
+</code></pre>
+<p>Interpolating variables is a popular new feature that comes with back-tick delimited strings:</p>
+<pre><code>const htmlString = `${user.name} liked your post about strings`;
+</code></pre>
+<p>This just transpiles down to concatenation:</p>
+<pre><code>user.name + ' liked your post about strings'
+</code></pre>
+<h2>ES5</h2>
+<blockquote>
+<p><a href="https://google.github.io/styleguide/javascriptguide.xml?showone=Multiline_string_literals#Multiline_string_literals" rel="noreferrer">Google's JavaScript style guide</a> recommends to use string concatenation instead of escaping newlines:</p>
+</blockquote>
+<blockquote>
+<p><strong>Do not do this:</strong></p>
+</blockquote>
+<blockquote>
+<pre><code>var myString = 'A rather long string of English text, an error message \
+</code></pre>
+</blockquote>
+<pre><code>                actually that just keeps going and going -- an error \
+                message to make the Energizer bunny blush (right through \
+                those Schwarzenegger shades)! Where was I? Oh yes, \
+                you\'ve got an error and all the extraneous whitespace is \
+                just gravy.  Have a nice day.';
+</code></pre>
+<blockquote>
+<p>The whitespace at the beginning of each line can't be safely stripped at compile time; whitespace after the slash will result in tricky errors; and while most script engines support this, it is not part of ECMAScript.</p>
+</blockquote>
+<blockquote>
+<p><strong>Use string concatenation instead:</strong></p>
+</blockquote>
+<blockquote>
+<pre><code>var myString = 'A rather long string of English text, an error message ' +
+</code></pre>
+</blockquote>
+<pre><code>               'actually that just keeps going and going -- an error ' +
+               'message to make the Energizer bunny blush (right through ' +
+               'those Schwarzenegger shades)! Where was I? Oh yes, ' +
+               'you\'ve got an error and all the extraneous whitespace is ' +
+               'just gravy.  Have a nice day.';
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="740 votes">740</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/58186/kooiinc" rel="noopener">KooiInc</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/805755" rel="noopener">原文 ↗</a></div><div class="prose"><p>The pattern <code>text = &lt;&lt;&quot;HERE&quot; This Is A Multiline String HERE</code> is not available in JavaScript (I remember using it much in my good old Perl days).</p>
+<p>To keep oversight with complex or long multiline strings I sometimes use an array pattern:</p>
+<pre><code>var myString =
+   ['&lt;div id=&quot;someId&quot;&gt;',
+    'some content&lt;br /&gt;',
+    '&lt;a href=&quot;#someRef&quot;&gt;someRefTxt&lt;/a&gt;',
+    '&lt;/div&gt;'
+   ].join('\n');
+</code></pre>
+<p>Or the pattern <a href="https://stackoverflow.com/questions/805107/how-can-i-assign-a-multiline-string-literal-to-a-variable/805113#805113">Anonymous already showed</a> (escape newline), which can be an ugly block in your code:</p>
+<pre><code>    var myString =
+       '&lt;div id=&quot;someId&quot;&gt; \
+some content&lt;br /&gt; \
+&lt;a href=&quot;#someRef&quot;&gt;someRefTxt&lt;/a&gt; \
+&lt;/div&gt;';
+</code></pre>
+<p>Here's another weird, but working, 'trick'<sup><b>1</b></sup>:</p>
+<pre><code>var myString = (function () {/*
+   &lt;div id=&quot;someId&quot;&gt;
+     some content&lt;br /&gt;
+     &lt;a href=&quot;#someRef&quot;&gt;someRefTxt&lt;/a&gt;
+    &lt;/div&gt;
+*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+</code></pre>
+<p><em>External edit: <a href="http://jsfiddle.net/orwellophile/hna15vLw/2/" rel="nofollow noreferrer">jsfiddle</a></em></p>
+<p><strong><a href="https://en.wikipedia.org/wiki/ECMAScript#6th_Edition_%E2%80%93_ECMAScript_2015" rel="nofollow noreferrer">ES20xx</a></strong> supports spanning strings over multiple lines using <a href="http://www.2ality.com/2011/09/quasi-literals.html" rel="nofollow noreferrer">template strings</a>:</p>
+<pre><code>let str = `This is a text
+    with multiple lines.
+    Escapes are interpreted,
+    \n is a newline.`;
+let str = String.raw`This is a text
+    with multiple lines.
+    Escapes are not interpreted,
+    \n is not a newline.`;
+</code></pre>
+<p><sup><b>1</b></sup> Note: this will be lost after minifying/obfuscating your code</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

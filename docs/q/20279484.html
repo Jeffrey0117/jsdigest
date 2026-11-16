@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to access the correct `this` inside a callback · jsdigest</title>
+<meta name="description" content="I have a constructor function which registers an event handler: function MyConstructor(data, transport) { this.data = data; transport.on(&#39;data&#39;, function () {…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to access the correct `this` inside a callback</h1>
+    <div class="q-meta big"><span class="score hot" title="1924 votes">1.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/218196/felix-kling" rel="noopener">Felix Kling</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">callback</span><span class="tag">this</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/20279484/how-to-access-the-correct-this-inside-a-callback" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have a constructor function which registers an event handler:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function MyConstructor(data, transport) {
+    this.data = data;
+    transport.on('data', function () {
+        alert(this.data);
+    });
+}
+
+// Mock transport object
+var transport = {
+    on: function(event, callback) {
+        setTimeout(callback, 1000);
+    }
+};
+
+// called as
+var obj = new MyConstructor('foo', transport);</code></pre>
+</div>
+</div>
+</p>
+<p>However, I'm not able to access the <code>data</code> property of the created object inside the callback. It looks like <code>this</code> does not refer to the object that was created, but to another one.</p>
+<p>I also tried to use an object method instead of an anonymous function:</p>
+<pre><code>function MyConstructor(data, transport) {
+    this.data = data;
+    transport.on('data', this.alert);
+}
+
+MyConstructor.prototype.alert = function() {
+    alert(this.name);
+};
+</code></pre>
+<p>but it exhibits the same problems.</p>
+<p>How can I access the correct object?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2316 votes">2.3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/218196/felix-kling" rel="noopener">Felix Kling</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/20279485" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h2>What you should know about <code>this</code></h2>
+<p><code>this</code> (aka &quot;the context&quot;) is a special keyword inside each function and its value only depends on <em>how</em> the function was called, not how/when/where it was defined. It is not affected by lexical scopes like other variables (except for arrow functions, see below). Here are some examples:</p>
+<pre><code>function foo() {
+    console.log(this);
+}
+
+// normal function call
+foo(); // `this` will refer to `window`
+
+// as object method
+var obj = {bar: foo};
+obj.bar(); // `this` will refer to `obj`
+
+// as constructor function
+new foo(); // `this` will refer to an object that inherits from `foo.prototype`
+</code></pre>
+<p>To learn more about <code>this</code>, have a look at the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this" rel="noreferrer">MDN documentation</a>.</p>
+<hr />
+<h2>How to refer to the correct <code>this</code></h2>
+<h3>Use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions" rel="noreferrer">arrow functions</a></h3>
+<p>ECMAScript 6 introduced <em>arrow functions</em>, which can be thought of as lambda functions. They don't have their own <code>this</code> binding. Instead, <code>this</code> is looked up in scope just like a normal variable. That means you don't have to call <code>.bind</code>. That's not the only special behavior they have, please refer to the MDN documentation for more information.</p>
+<pre><code>function MyConstructor(data, transport) {
+    this.data = data;
+    transport.on('data', () =&gt; alert(this.data));
+}
+</code></pre>
+<h3>Don't use <code>this</code></h3>
+<p>You actually don't want to access <code>this</code> in particular, but <em>the object it refers to</em>. That's why an easy solution is to simply create a new variable that also refers to that object. The variable can have any name, but common ones are <code>self</code> and <code>that</code>.</p>
+<pre><code>function MyConstructor(data, transport) {
+    this.data = data;
+    var self = this;
+    transport.on('data', function() {
+        alert(self.data);
+    });
+}
+</code></pre>
+<p>Since <code>self</code> is a normal variable, it obeys lexical scope rules and is accessible inside the callback. This also has the advantage that you can access the <code>this</code> value of the callback itself.</p>
+<h3>Explicitly set <code>this</code> of the callback - part 1</h3>
+<p>It might look like you have no control over the value of <code>this</code> because its value is set automatically, but that is actually not the case.</p>
+<p>Every function has the method <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind" rel="noreferrer"><code>.bind</code> <em><sup>[docs]</sup></em></a>, which returns a new function with <code>this</code> bound to a value. The function has exactly the same behavior as the one you called <code>.bind</code> on, only that <code>this</code> was set by you. No matter how or when that function is called, <code>this</code> will always refer to the passed value.</p>
+<pre><code>function MyConstructor(data, transport) {
+    this.data = data;
+    var boundFunction = (function() { // parenthesis are not necessary
+        alert(this.data);             // but might improve readability
+    }).bind(this); // &lt;- here we are calling `.bind()` 
+    transport.on('data', boundFunction);
+}
+</code></pre>
+<p>In this case, we are binding the callback's <code>this</code> to the value of <code>MyConstructor</code>'s <code>this</code>.</p>
+<p><strong>Note:</strong> When a binding context for jQuery, use <a href="http://api.jquery.com/jQuery.proxy/" rel="noreferrer"><code>jQuery.proxy</code> <em><sup>[docs]</sup></em></a> instead. The reason to do this is so that you don't need to store the reference to the function when unbinding an event callback. jQuery handles that internally.</p>
+<h3>Set <code>this</code> of the callback - part 2</h3>
+<p>Some functions/methods which accept callbacks also accept a value to which the callback's <code>this</code> should refer to. This is basically the same as binding it yourself, but the function/method does it for you. <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map" rel="noreferrer"><code>Array#map</code> <em><sup>[docs]</sup></em></a> is such a method. Its signature is:</p>
+<pre><code>array.map(callback[, thisArg])
+</code></pre>
+<p>The first argument is the callback and the second argument is the value <code>this</code> should refer to. Here is a contrived example:</p>
+<pre><code>var arr = [1, 2, 3];
+var obj = {multiplier: 42};
+
+var new_arr = arr.map(function(v) {
+    return v * this.multiplier;
+}, obj); // &lt;- here we are passing `obj` as second argument
+</code></pre>
+<p><strong>Note:</strong> Whether or not you can pass a value for <code>this</code> is usually mentioned in the documentation of that function/method. For example, <a href="http://api.jquery.com/jQuery.ajax/" rel="noreferrer">jQuery's <code>$.ajax</code> method <em><sup>[docs]</sup></em></a> describes an option called <code>context</code>:</p>
+<blockquote>
+<p>This object will be made the context of all Ajax-related callbacks.</p>
+</blockquote>
+<hr />
+<h2>Common problem: Using object methods as callbacks/event handlers</h2>
+<p>Another common manifestation of this problem is when an object method is used as callback/event handler. Functions are first-class citizens in JavaScript and the term &quot;method&quot; is just a colloquial term for a function that is a value of an object property. But that function doesn't have a specific link to its &quot;containing&quot; object.</p>
+<p>Consider the following example:</p>
+<pre><code>function Foo() {
+    this.data = 42,
+    document.body.onclick = this.method;
+}
+
+Foo.prototype.method = function() {
+    console.log(this.data);
+};
+</code></pre>
+<p>The function <code>this.method</code> is assigned as click event handler, but if the <code>document.body</code> is clicked, the value logged will be <code>undefined</code>, because inside the event handler, <code>this</code> refers to the <code>document.body</code>, not the instance of <code>Foo</code>.<br />
+As already mentioned at the beginning, what <code>this</code> refers to depends on how the function is <strong>called</strong>, not how it is <strong>defined</strong>.<br />
+If the code was like the following, it might be more obvious that the function doesn't have an implicit reference to the object:</p>
+<pre><code>function method() {
+    console.log(this.data);
+}
+
+
+function Foo() {
+    this.data = 42,
+    document.body.onclick = this.method;
+}
+
+Foo.prototype.method = method;
+</code></pre>
+<p><strong>The solution</strong> is the same as mentioned above: If available, use <code>.bind</code> to explicitly bind <code>this</code> to a specific value</p>
+<pre><code>document.body.onclick = this.method.bind(this);
+</code></pre>
+<p>or explicitly call the function as a &quot;method&quot; of the object, by using an anonymous function as callback / event handler and assign the object (<code>this</code>) to another variable:</p>
+<pre><code>var self = this;
+document.body.onclick = function() {
+    self.method();
+};
+</code></pre>
+<p>or use an arrow function:</p>
+<pre><code>document.body.onclick = () =&gt; this.method();
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="273 votes">273</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2234618/mohan-dere" rel="noopener">Mohan Dere</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/38931751" rel="noopener">原文 ↗</a></div><div class="prose"><p>Here are several ways to access the parent context inside a child context</p>
+<ol>
+<li>You can use the <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_objects/Function/bind" rel="nofollow noreferrer"><code>bind()</code></a> function.</li>
+<li>Store a reference to context/this inside another variable (see the below example).</li>
+<li>Use ES6 <a href="https://derickbailey.com/2015/09/28/do-es6-arrow-functions-really-solve-this-in-javascript/" rel="nofollow noreferrer">Arrow</a> functions.</li>
+<li>Alter the code, function design, and architecture - for this you should have command over <a href="https://addyosmani.com/resources/essentialjsdesignpatterns/book/" rel="nofollow noreferrer">design patterns</a> in JavaScript.</li>
+</ol>
+<br>
+<ol>
+<li><p>Use the <code>bind()</code> function</p>
+<pre><code>function MyConstructor(data, transport) {
+    this.data = data;
+    transport.on('data', ( function () {
+        alert(this.data);
+    }).bind(this) );
+}
+// Mock transport object
+var transport = {
+    on: function(event, callback) {
+        setTimeout(callback, 1000);
+    }
+};
+// called as
+var obj = new MyConstructor('foo', transport);
+</code></pre>
+<p>If you are using Underscore.js - <a href="http://underscorejs.org/#bind" rel="nofollow noreferrer">http://underscorejs.org/#bind</a></p>
+<pre><code>transport.on('data', _.bind(function () {
+    alert(this.data);
+}, this));
+</code></pre>
+</li>
+<li><p>Store a reference to context/this inside another variable</p>
+<pre><code>function MyConstructor(data, transport) {
+  var self = this;
+  this.data = data;
+  transport.on('data', function() {
+    alert(self.data);
+  });
+}
+</code></pre>
+</li>
+<li><p>Arrow function</p>
+<pre><code>function MyConstructor(data, transport) {
+  this.data = data;
+  transport.on('data', () =&gt; {
+    alert(this.data);
+  });
+}
+</code></pre>
+</li>
+</ol>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="74 votes">74</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/69083/guffa" rel="noopener">Guffa</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/23771945" rel="noopener">原文 ↗</a></div><div class="prose"><p>It's all in the &quot;magic&quot; syntax of calling a method:</p>
+<pre><code>object.property();
+</code></pre>
+<p>When you get the property from the object and call it in one go, the object will be the context for the method. If you call the same method, but in separate steps, the context is the global scope (window) instead:</p>
+<pre><code>var f = object.property;
+f();
+</code></pre>
+<p>When you get the reference of a method, it's no longer attached to the object. It's just a reference to a plain function. The same happens when you get the reference to use as a callback:</p>
+<pre><code>this.saveNextLevelData(this.setAll);
+</code></pre>
+<p>That's where you would bind the context to the function:</p>
+<pre><code>this.saveNextLevelData(this.setAll.bind(this));
+</code></pre>
+<p>If you are using jQuery you should use the <code>$.proxy</code> method instead, as <code>bind</code> is not supported in all browsers:</p>
+<pre><code>this.saveNextLevelData($.proxy(this.setAll, this));
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

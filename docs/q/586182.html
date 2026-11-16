@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I insert an item into an array at a specific index? · jsdigest</title>
+<meta name="description" content="I am looking for a JavaScript array insert method, in the style of: arr.insert(index, item) It should preferably be in jQuery, but any JavaScript implementatio…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I insert an item into an array at a specific index?</h1>
+    <div class="q-meta big"><span class="score hot" title="4355 votes">4.4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/192/tags2k" rel="noopener">tags2k</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/586182/how-can-i-insert-an-item-into-an-array-at-a-specific-index" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I am looking for a JavaScript array insert method, in the style of:</p>
+<pre><code>arr.insert(index, item)
+</code></pre>
+<p>It should preferably be in jQuery, but any JavaScript implementation will do at this point.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="6879 votes">6.9k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/12950/tvanfosson" rel="noopener">tvanfosson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/586189" rel="noopener">原文 ↗</a></div><div class="prose"><p>You want the <strong><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice" rel="noreferrer"><code>splice</code></a></strong> function on the native array object.</p>
+<p><code>arr.splice(index, 0, item);</code> will insert <code>item</code> into <code>arr</code> at the specified <code>index</code> (deleting <code>0</code> items first, that is, it's just an insert).</p>
+<p>In this example we will create an array and add an element to it into index 2:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var arr = [];
+arr[0] = "Jani";
+arr[1] = "Hege";
+arr[2] = "Stale";
+arr[3] = "Kai Jim";
+arr[4] = "Borge";
+
+console.log(arr.join()); // Jani,Hege,Stale,Kai Jim,Borge
+arr.splice(2, 0, "Lene");
+console.log(arr.join()); // Jani,Hege,Lene,Stale,Kai Jim,Borge</code></pre>
+</div>
+</div>
+</p>
+<p><strong>UPDATE (24 May 2024)</strong></p>
+<p>You can now use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSpliced" rel="noreferrer"><code>toSpliced</code></a> method which behaves just like <code>splice</code>, however it returns a new array without mutating the existing one.</p>
+<p>You could update the previous example like so:</p>
+<pre class="lang-js prettyprint-override"><code>const updated = arr.toSpliced(2, 0, &quot;Lene&quot;);
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="427 votes">427</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1717410/fresc-81" rel="noopener">FrEsC 81</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/12710609" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can implement the <code>Array.insert</code> method by doing this:</p>
+<pre><code>Array.prototype.insert = function ( index, ...items ) {
+    this.splice( index, 0, ...items );
+};
+</code></pre>
+<p>Then you can use it like:</p>
+<pre><code>var arr = [ 'A', 'B', 'E' ];
+arr.insert(2, 'C', 'D');
+
+// =&gt; arr == [ 'A', 'B', 'C', 'D', 'E' ]
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="311 votes">311</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3716153/gafi" rel="noopener">gafi</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/38181008" rel="noopener">原文 ↗</a></div><div class="prose"><p>Other than splice, you can use this approach which will not mutate the original array, but it will create a new array with the added item. It is useful, when you need to avoid mutation. I'm using the <a href="https://en.wikipedia.org/wiki/ECMAScript#6th_Edition_%E2%80%93_ECMAScript_2015" rel="noreferrer">ES6</a> spread operator here.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="true">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const items = [1, 2, 3, 4, 5]
+
+const insert = (arr, index, newItem) =&gt; [
+  // part of the array before the specified index
+  ...arr.slice(0, index),
+  // inserted item
+  newItem,
+  // part of the array after the specified index
+  ...arr.slice(index)
+]
+
+const result = insert(items, 1, 10)
+
+console.log(result)
+// [1, 10, 2, 3, 4, 5]</code></pre>
+</div>
+</div>
+</p>
+<p>This can be used to add more than one item by tweaking the function a bit to use the rest operator for the new items, and spread that in the returned result as well:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="true">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const items = [1, 2, 3, 4, 5]
+
+const insert = (arr, index, ...newItems) =&gt; [
+  // part of the array before the specified index
+  ...arr.slice(0, index),
+  // inserted items
+  ...newItems,
+  // part of the array after the specified index
+  ...arr.slice(index)
+]
+
+const result = insert(items, 1, 10, 20)
+
+console.log(result)
+// [1, 10, 20, 2, 3, 4, 5]</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

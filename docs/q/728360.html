@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I correctly clone a JavaScript object? · jsdigest</title>
+<meta name="description" content="I have an object x . I&#39;d like to copy it as object y , such that changes to y do not modify x . I realized that copying objects derived from built-in JavaScrip…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I correctly clone a JavaScript object?</h1>
+    <div class="q-meta big"><span class="score hot" title="3830 votes">3.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/49695/soundly-typed" rel="noopener">soundly_typed</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">clone</span><span class="tag">javascript-objects</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/728360/how-do-i-correctly-clone-a-javascript-object" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have an object <code>x</code>. I'd like to copy it as object <code>y</code>, such that changes to <code>y</code> do not modify <code>x</code>. I realized that copying objects derived from built-in JavaScript objects will result in extra, unwanted properties. This isn't a problem, since I'm copying one of my own literal-constructed objects.</p>
+
+<p>How do I correctly clone a JavaScript object?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2097 votes">2.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/35881/a-levy" rel="noopener">A. Levy</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/728694" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h3>2022 update</h3>
+<p>There's a new JS standard called <a href="https://developer.mozilla.org/en-US/docs/Web/API/structuredClone" rel="noreferrer">structured cloning</a>. It works in many browsers (see <a href="https://caniuse.com/?search=structuredClone" rel="noreferrer">Can I Use</a>).</p>
+<pre class="lang-js prettyprint-override"><code>const clone = structuredClone(object);
+</code></pre>
+<h2>Old answer</h2>
+<p>To do this for any object in JavaScript will not be simple or straightforward. You will run into the problem of erroneously picking up attributes from the object's prototype that should be left in the prototype and not copied to the new instance. If, for instance, you are adding a <code>clone</code> method to <code>Object.prototype</code>, as some answers depict, you will need to explicitly skip that attribute. But what if there are other additional methods added to <code>Object.prototype</code>, or other intermediate prototypes, that you don't know about? In that case, you will copy attributes you shouldn't, so you need to detect unforeseen, non-local attributes with the <a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Object/hasOwnProperty" rel="noreferrer" title="Mozilla JavaScript Reference: Object.hasOwnProperty"><code>hasOwnProperty</code></a> method.</p>
+<p>In addition to non-enumerable attributes, you'll encounter a tougher problem when you try to copy objects that have hidden properties. For example, <code>prototype</code> is a hidden property of a function. Also, an object's prototype is referenced with the attribute <code>__proto__</code>, which is also hidden, and will not be copied by a for/in loop iterating over the source object's attributes. I think <code>__proto__</code> might be specific to Firefox's JavaScript interpreter and it may be something different in other browsers, but you get the picture. Not everything is enumerable. You can copy a hidden attribute if you know its name, but I don't know of any way to discover it automatically.</p>
+<p>Yet another snag in the quest for an elegant solution is the problem of setting up the prototype inheritance correctly. If your source object's prototype is <code>Object</code>, then simply creating a new general object with <code>{}</code> will work, but if the source's prototype is some descendant of <code>Object</code>, then you are going to be missing the additional members from that prototype which you skipped using the <code>hasOwnProperty</code> filter, or which were in the prototype, but weren't enumerable in the first place. One solution might be to call the source object's <code>constructor</code> property to get the initial copy object and then copy over the attributes, but then you still will not get non-enumerable attributes. For example, a <a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date" rel="noreferrer" title="Mozilla JavaScript Reference: Date"><code>Date</code></a> object stores its data as a hidden member:</p>
+<pre><code>function clone(obj) {
+    if (null == obj || &quot;object&quot; != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+    }
+    return copy;
+}
+
+var d1 = new Date();
+
+/* Executes function after 5 seconds. */
+setTimeout(function(){
+    var d2 = clone(d1);
+    alert(&quot;d1 = &quot; + d1.toString() + &quot;\nd2 = &quot; + d2.toString());
+}, 5000);
+</code></pre>
+<p>The date string for <code>d1</code> will be 5 seconds behind that of <code>d2</code>. A way to make one <code>Date</code> the same as another is by calling the <code>setTime</code> method, but that is specific to the <code>Date</code> class. I don't think there is a bullet-proof general solution to this problem, though I would be happy to be wrong!</p>
+<p>When I had to implement general deep copying I ended up compromising by assuming that I would only need to copy a plain <code>Object</code>, <code>Array</code>, <code>Date</code>, <code>String</code>, <code>Number</code>, or <code>Boolean</code>. The last 3 types are immutable, so I could perform a shallow copy and not worry about it changing. I further assumed that any elements contained in <code>Object</code> or <code>Array</code> would also be one of the 6 simple types in that list. This can be accomplished with code like the following:</p>
+<pre><code>function clone(obj) {
+    var copy;
+
+    // Handle the 3 simple types, and null or undefined
+    if (null == obj || &quot;object&quot; != typeof obj) return obj;
+
+    // Handle Date
+    if (obj instanceof Date) {
+        copy = new Date();
+        copy.setTime(obj.getTime());
+        return copy;
+    }
+
+    // Handle Array
+    if (obj instanceof Array) {
+        copy = [];
+        for (var i = 0, len = obj.length; i &lt; len; i++) {
+            copy[i] = clone(obj[i]);
+        }
+        return copy;
+    }
+
+    // Handle Object
+    if (obj instanceof Object) {
+        copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+        }
+        return copy;
+    }
+
+    throw new Error(&quot;Unable to copy obj! Its type isn't supported.&quot;);
+}
+</code></pre>
+<p>The above function will work adequately for the 6 simple types I mentioned, as long as the data in the objects and arrays form a tree structure. That is, there isn't more than one reference to the same data in the object. For example:</p>
+<pre><code>// This would be cloneable:
+var tree = {
+    &quot;left&quot;  : { &quot;left&quot; : null, &quot;right&quot; : null, &quot;data&quot; : 3 },
+    &quot;right&quot; : null,
+    &quot;data&quot;  : 8
+};
+
+// This would kind-of work, but you would get 2 copies of the 
+// inner node instead of 2 references to the same copy
+var directedAcylicGraph = {
+    &quot;left&quot;  : { &quot;left&quot; : null, &quot;right&quot; : null, &quot;data&quot; : 3 },
+    &quot;data&quot;  : 8
+};
+directedAcyclicGraph[&quot;right&quot;] = directedAcyclicGraph[&quot;left&quot;];
+
+// Cloning this would cause a stack overflow due to infinite recursion:
+var cyclicGraph = {
+    &quot;left&quot;  : { &quot;left&quot; : null, &quot;right&quot; : null, &quot;data&quot; : 3 },
+    &quot;data&quot;  : 8
+};
+cyclicGraph[&quot;right&quot;] = cyclicGraph;
+</code></pre>
+<p>It will not be able to handle any JavaScript object, but it may be sufficient for many purposes as long as you don't assume that it will just work for anything you throw at it.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1181 votes">1.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1031916/heinob" rel="noopener">heinob</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10869248" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you do not use <code>Date</code>s, functions, undefined, regExp or Infinity within your object, a very simple one liner is <code>JSON.parse(JSON.stringify(object))</code>:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const a = {
+  string: 'string',
+  number: 123,
+  bool: false,
+  nul: null,
+  date: new Date(),  // stringified
+  undef: undefined,  // lost
+  inf: Infinity,  // forced to 'null'
+}
+console.log(a);
+console.log(typeof a.date);  // Date object
+const clone = JSON.parse(JSON.stringify(a));
+console.log(clone);
+console.log(typeof clone.date);  // result of .toISOString()</code></pre>
+</div>
+</div>
+</p>
+
+<p>This works for all kind of objects containing objects, arrays, strings, booleans and numbers.</p>
+
+<p>See also <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/The_structured_clone_algorithm" rel="noreferrer">this article about the structured clone algorithm of browsers</a> which is used when posting messages to and from a worker. It also contains a function for deep cloning.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="854 votes">854</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/288671/vitalii-fedorenko" rel="noopener">Vitalii Fedorenko</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/30042948" rel="noopener">原文 ↗</a></div><div class="prose"><p>In ECMAScript 6 there is <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign" rel="noreferrer">Object.assign</a> method, which copies values of all enumerable own properties from one object to another. For example:</p>
+<pre><code>var x = {myProp: &quot;value&quot;};
+var y = Object.assign({}, x); 
+</code></pre>
+<p>But be aware <strong>this is a shallow copy</strong> - nested objects are still copied as reference.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

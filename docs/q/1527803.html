@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generating random whole numbers in JavaScript in a specific range · jsdigest</title>
+<meta name="description" content="How can I generate random whole numbers between two specified variables in JavaScript, e.g. x = 4 and y = 8 would output any of 4, 5, 6, 7, 8 ?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Generating random whole numbers in JavaScript in a specific range</h1>
+    <div class="q-meta big"><span class="score hot" title="2573 votes">2.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/133211/zacharyliu" rel="noopener">zacharyliu</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">random</span><span class="tag">integer</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How can I generate random whole numbers between two specified variables in JavaScript, e.g. <code>x = 4</code> and <code>y = 8</code> would output any of <code>4, 5, 6, 7, 8</code>?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4927 votes">4.9k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/58808/ionu%c8%9b-g-stan" rel="noopener">Ionuț G. Stan</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1527820" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>There are some examples on the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random" rel="noreferrer">Mozilla Developer Network</a> page:</p>
+<pre><code>/**
+ * Returns a random number between min (inclusive) and max (exclusive)
+ */
+function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive).
+ * The value is no lower than min (or the next integer greater than min
+ * if min isn't an integer) and no greater than max (or the next integer
+ * lower than max if max isn't an integer).
+ * Using Math.round() will give you a non-uniform distribution!
+ */
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+</code></pre>
+<hr>
+<p>Here's the logic behind it. It's a simple rule of three:</p>
+<p><code>Math.random()</code> returns a <code>Number</code> between 0 (inclusive) and 1 (exclusive). So we have an interval like this:</p>
+<pre class="lang-none prettyprint-override"><code>[0 .................................... 1)
+</code></pre>
+<p>Now, we'd like a number between <code>min</code> (inclusive) and <code>max</code> (exclusive):</p>
+<pre class="lang-none prettyprint-override"><code>[0 .................................... 1)
+[min .................................. max)
+</code></pre>
+<p>We can use the <code>Math.random</code> to get the correspondent in the [min, max) interval. But, first we should factor a little bit the problem by subtracting <code>min</code> from the second interval:</p>
+<pre class="lang-none prettyprint-override"><code>[0 .................................... 1)
+[min - min ............................ max - min)
+</code></pre>
+<p>This gives:</p>
+<pre class="lang-none prettyprint-override"><code>[0 .................................... 1)
+[0 .................................... max - min)
+</code></pre>
+<p>We may now apply <code>Math.random</code> and then calculate the correspondent. Let's choose a random number:</p>
+<pre class="lang-none prettyprint-override"><code>                Math.random()
+                    |
+[0 .................................... 1)
+[0 .................................... max - min)
+                    |
+                    x (what we need)
+</code></pre>
+<p>So, in order to find <code>x</code>, we would do:</p>
+<pre><code>x = Math.random() * (max - min);
+</code></pre>
+<p>Don't forget to add <code>min</code> back, so that we get a number in the [min, max) interval:</p>
+<pre><code>x = Math.random() * (max - min) + min;
+</code></pre>
+<p>That was the first function from MDN. The second one, returns an integer between <code>min</code> and <code>max</code>, both inclusive.</p>
+<p>Now for getting integers, you could use <code>round</code>, <code>ceil</code> or <code>floor</code>.</p>
+<p>You could use <code>Math.round(Math.random() * (max - min)) + min</code>, this however gives a non-even distribution. Both, <code>min</code> and <code>max</code> only have approximately half the chance to roll:</p>
+<pre class="lang-none prettyprint-override"><code>min...min+0.5...min+1...min+1.5   ...    max-0.5....max
+└───┬───┘└────────┬───────┘└───── ... ─────┘└───┬──┘   ← Math.round()
+   min          min+1                          max
+</code></pre>
+<p>With <code>max</code> excluded from the interval, it has an even less chance to roll than <code>min</code>.</p>
+<p>With <code>Math.floor(Math.random() * (max - min +1)) + min</code> you have a perfectly even distribution.</p>
+<pre class="lang-none prettyprint-override"><code> min...  min+1...    ...      max-1... max....   (max+1 is excluded from interval)
+└───┬───┘└───┬───┘└─── ... ┘└───┬───┘└───┬───┘   ← Math.floor()
+   min     min+1               max-1    max
+</code></pre>
+<p>You can't use <code>ceil()</code> and <code>-1</code> in that equation because <code>max</code> now had a slightly less chance to roll, but you can roll the (unwanted) <code>min-1</code> result too.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="658 votes">658</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/29407/darin-dimitrov" rel="noopener">Darin Dimitrov</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1527834" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>var randomnumber = Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="275 votes">275</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1843451/lior-elrom" rel="noopener">Lior Elrom</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/29246176" rel="noopener">原文 ↗</a></div><div class="prose"><h1><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random" rel="noreferrer">Math.random()</a></h1>
+<p>Returns an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#Getting_a_random_integer_between_two_values_inclusive" rel="noreferrer">integer random number</a> between min (<strong>included</strong>) and max (<strong>included</strong>):</p>
+<pre><code>function randomInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+</code></pre>
+<p>Or <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#Getting_a_random_number_between_two_values" rel="noreferrer">any random number</a> between min (<strong>included</strong>) and max (<strong>not included</strong>):</p>
+<pre><code>function randomNumber(min, max) {
+  return Math.random() * (max - min) + min;
+}
+</code></pre>
+<p>Useful examples (integers):</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// 0 -&gt; 10
+const rand1 = Math.floor(Math.random() * 11);
+
+// 1 -&gt; 10
+const rand2 = Math.floor(Math.random() * 10) + 1;
+
+// 5 -&gt; 20
+const rand3 = Math.floor(Math.random() * 16) + 5;
+
+// -10 -&gt; (-2)
+const rand4 = Math.floor(Math.random() * 9) - 10;
+
+console.log(rand1);
+console.log(rand2);
+console.log(rand3);
+console.log(rand4);</code></pre>
+</div>
+</div>
+</p>
+<p>** And always nice to be reminded (Mozilla):</p>
+<blockquote>
+<p>Math.random() does not provide cryptographically secure random
+numbers. Do not use them for anything related to security. Use the Web
+Crypto API instead, and more precisely the
+window.crypto.getRandomValues() method.</p>
+</blockquote>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

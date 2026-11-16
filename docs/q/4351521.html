@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I pass command line arguments to a Node.js program and receive them? · jsdigest</title>
+<meta name="description" content="I have a web server written in Node.js and I would like to launch with a specific folder. I&#39;m not sure how to access arguments in JavaScript. I&#39;m running node…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I pass command line arguments to a Node.js program and receive them?</h1>
+    <div class="q-meta big"><span class="score hot" title="3147 votes">3.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/245777/milkplus" rel="noopener">milkplus</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">node.js</span><span class="tag">arguments</span><span class="tag">command-line-arguments</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/4351521/how-do-i-pass-command-line-arguments-to-a-node-js-program-and-receive-them" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have a web server written in <a href="http://en.wikipedia.org/wiki/Node.js" rel="noreferrer">Node.js</a> and I would like to launch with a specific folder. I'm not sure how to access arguments in JavaScript. I'm running node like this:</p>
+
+<pre><code>$ node server.js folder
+</code></pre>
+
+<p>here <code>server.js</code> is my server code. Node.js help says this is possible:</p>
+
+<pre><code>$ node -h
+Usage: node [options] script.js [arguments]
+</code></pre>
+
+<p>How would I access those arguments in JavaScript? Somehow I was not able to find this information on the web.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3782 votes">3.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/375394/moogoo" rel="noopener">MooGoo</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4351548" rel="noopener">原文 ↗</a></div><div class="prose"><h1>Standard Method (no library)</h1>
+
+<p>The arguments are stored in <code>process.argv</code></p>
+
+<p>Here are <a href="http://nodejs.org/docs/latest/api/process.html#process_process_argv" rel="noreferrer">the node docs on handling command line args:</a></p>
+
+<blockquote>
+  <p><code>process.argv</code> is an array containing the command line arguments. The first element will be 'node', the second element will be the name of the JavaScript file. The next elements will be any additional command line arguments.</p>
+</blockquote>
+
+<pre class="lang-js prettyprint-override"><code>// print process.argv
+process.argv.forEach(function (val, index, array) {
+  console.log(index + ': ' + val);
+});
+</code></pre>
+
+<p>This will generate:</p>
+
+<pre class="lang-none prettyprint-override"><code>$ node process-2.js one two=three four
+0: node
+1: /Users/mjr/work/node/process-2.js
+2: one
+3: two=three
+4: four
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1025 votes">1k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/704703/mauvis-ledford" rel="noopener">Mauvis Ledford</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5767589" rel="noopener">原文 ↗</a></div><div class="prose"><p>To normalize the arguments like a regular javascript function would receive, I do this in my node.js shell scripts:</p>
+
+<pre><code>var args = process.argv.slice(2);
+</code></pre>
+
+<p>Note that the first arg is usually the path to nodejs, and the second arg is the location of the script you're executing.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="519 votes">519</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/690826/real-ate" rel="noopener">real_ate</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/24638042" rel="noopener">原文 ↗</a></div><div class="prose"><p>The up-to-date <em>right</em> answer for this it to use the <a href="https://www.npmjs.org/package/minimist">minimist</a> library. We used to use <a href="https://github.com/substack/node-optimist#deprecation-notice">node-optimist</a> but it has since been deprecated. </p>
+
+<p>Here is an example of how to use it taken straight from the minimist documentation:</p>
+
+<pre><code>var argv = require('minimist')(process.argv.slice(2));
+console.dir(argv);
+</code></pre>
+
+<p>-</p>
+
+<pre><code>$ node example/parse.js -a beep -b boop
+{ _: [], a: 'beep', b: 'boop' }
+</code></pre>
+
+<p>-</p>
+
+<pre><code>$ node example/parse.js -x 3 -y 4 -n5 -abc --beep=boop foo bar baz
+{ _: [ 'foo', 'bar', 'baz' ],
+  x: 3,
+  y: 4,
+  n: 5,
+  a: true,
+  b: true,
+  c: true,
+  beep: 'boop' }
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

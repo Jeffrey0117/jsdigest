@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I find out which DOM element has the focus? · jsdigest</title>
+<meta name="description" content="I would like to find out, in JavaScript, which element currently has focus. I&#39;ve been looking through the DOM and haven&#39;t found what I need, yet. Is there a wa…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I find out which DOM element has the focus?</h1>
+    <div class="q-meta big"><span class="score hot" title="1693 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/26140/tony-peterson" rel="noopener">Tony Peterson</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">dom</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/497094/how-do-i-find-out-which-dom-element-has-the-focus" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I would like to find out, in JavaScript, which element currently has focus. I've been looking through the DOM and haven't found what I need, yet. Is there a way to do this, and how?</p>
+
+<p>The reason I was looking for this:</p>
+
+<p>I'm trying to make keys like the arrows and <code>enter</code> navigate through a table of input elements. Tab works now, but enter, and arrows do not by default it seems. I've got the key handling part set up but now I need to figure out how to move the focus over in the event handling functions.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1988 votes">2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4321/jw" rel="noopener">JW.</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/497108" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement" rel="noreferrer"><code>document.activeElement</code></a>, it is supported in all major browsers.</p>
+
+<p>Previously, if you were trying to find out what form field has focus, you could not. To emulate detection within older browsers, add a "focus" event handler to all fields and record the last-focused field in a variable. Add a "blur" handler to clear the variable upon a blur event for the last-focused field.</p>
+
+<p>If you need to remove the <code>activeElement</code> you can use blur; <code>document.activeElement.blur()</code>. It will change the <code>activeElement</code> to <code>body</code>.</p>
+
+<p>Related links:</p>
+
+<ul>
+<li><a href="https://developer.mozilla.org/en/DOM/document.activeElement#Browser_compatibility" rel="noreferrer">activeElement Browser Compatibility</a></li>
+<li><a href="https://stackoverflow.com/questions/3328320/jquery-alternative-for-document-activeelement">jQuery alternative for document.activeElement</a></li>
+</ul>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="165 votes">165</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/56761/wookai" rel="noopener">Wookai</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/497144" rel="noopener">原文 ↗</a></div><div class="prose"><p>As said by JW, you can't find the current focused element, at least in a browser-independent way. But if your app is IE only (some are...), you can find it the following way:</p>
+<pre><code>document.activeElement
+</code></pre>
+<p>It looks like IE did not have everything wrong after all, this is part of HTML5 draft and seems to be supported by the latest version of Chrome, Safari and Firefox at least.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="98 votes">98</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/72176/william-denniss" rel="noopener">William Denniss</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/7216179" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you can use jQuery, it now supports :focus, just make sure you are using version 1.6+.</p>
+
+<p>This statement will get you the currently focused element.</p>
+
+<pre><code>$(":focus")
+</code></pre>
+
+<p>From: <a href="https://stackoverflow.com/questions/516152/how-to-select-an-element-that-has-focus-on-it-with-jquery/2061798#2061798">How to select an element that has focus on it with jQuery</a></p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

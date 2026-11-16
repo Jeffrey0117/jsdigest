@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I check for &quot;undefined&quot; in JavaScript? · jsdigest</title>
+<meta name="description" content="What is the most appropriate way to test if a variable is undefined in JavaScript? I&#39;ve seen several possible ways: if (window.myVariable) Or if (typeof(myVari…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I check for &quot;undefined&quot; in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="3108 votes">3.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/328397/makerofthings7" rel="noopener">makerofthings7</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">undefined</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/3390396/how-can-i-check-for-undefined-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What is the most appropriate way to test if a variable is undefined in JavaScript?</p>
+<p>I've seen several possible ways:</p>
+<pre><code>if (window.myVariable)
+</code></pre>
+<p>Or</p>
+<pre><code>if (typeof(myVariable) != &quot;undefined&quot;)
+</code></pre>
+<p>Or</p>
+<pre><code>if (myVariable) // This throws an error if undefined. Should this be in Try/Catch?
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3240 votes">3.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/165737/anurag" rel="noopener">Anurag</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3390426" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>If you are interested in finding out whether a variable has been declared regardless of its value, then using the <code>in</code> operator is the safest way to go. Consider this example:</p>
+
+<pre><code>// global scope
+var theFu; // theFu has been declared, but its value is undefined
+typeof theFu; // "undefined"
+</code></pre>
+
+<p>But this may not be the intended result for some cases, since the variable or property was declared but just not initialized. Use the <code>in</code> operator for a more robust check.</p>
+
+<pre><code>"theFu" in window; // true
+"theFoo" in window; // false
+</code></pre>
+
+<p>If you are interested in knowing whether the variable hasn't been declared or has the value <code>undefined</code>, then use the <code>typeof</code> operator, which is guaranteed to return a string:</p>
+
+<pre><code>if (typeof myVar !== 'undefined')
+</code></pre>
+
+<p>Direct comparisons against <code>undefined</code> are troublesome as <code>undefined</code> can be overwritten. </p>
+
+<pre><code>window.undefined = "foo";
+"foo" == undefined // true
+</code></pre>
+
+<p>As @CMS pointed out, this has been patched in ECMAScript 5th ed., and <code>undefined</code> is non-writable.</p>
+
+<p><code>if (window.myVar)</code> will also include these falsy values, so it's not very robust:</p>
+
+<pre>
+false
+0
+""
+NaN
+null
+undefined
+</pre>
+
+<p>Thanks to @CMS for pointing out that your third case - <code>if (myVariable)</code> can also throw an error in two cases. The first is when the variable hasn't been defined which throws a <code>ReferenceError</code>. </p>
+
+<pre><code>// abc was never declared.
+if (abc) {
+    // ReferenceError: abc is not defined
+} 
+</code></pre>
+
+<p>The other case is when the variable has been defined, but has a getter function which throws an error when invoked. For example,</p>
+
+<pre><code>// or it's a property that can throw an error
+Object.defineProperty(window, "myVariable", { 
+    get: function() { throw new Error("W00t?"); }, 
+    set: undefined 
+});
+if (myVariable) {
+    // Error: W00t?
+}
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1589 votes">1.6k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/239916/thomas-eding" rel="noopener">Thomas Eding</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3390635" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>I personally use </p>
+
+<pre><code>myVar === undefined
+</code></pre>
+
+<p>Warning: Please note that <code>===</code> is used over <code>==</code> and that <code>myVar</code> has been previously <em>declared</em> (not <em>defined</em>).</p>
+
+<hr>
+
+<p>I do not like <code>typeof myVar === "undefined"</code>. I think it is long winded and unnecessary. (I can get the same done in less code.)</p>
+
+<p>Now some people will keel over in pain when they read this, screaming: "Wait! WAAITTT!!! <code>undefined</code> can be redefined!"</p>
+
+<p>Cool. I know this. Then again, most variables in Javascript can be redefined. Should you never use any built-in identifier that can be redefined?</p>
+
+<p>If you follow this rule, good for you: you aren't a hypocrite.</p>
+
+<p>The thing is, in order to do lots of real work in JS, developers need to rely on redefinable identifiers to be what they are. I don't hear people telling me that I shouldn't use <code>setTimeout</code> because someone can</p>
+
+<pre><code>window.setTimeout = function () {
+    alert("Got you now!");
+};
+</code></pre>
+
+<p>Bottom line, the "it can be redefined" argument to not use a raw <code>=== undefined</code> is bogus. </p>
+
+<p>(If you are still scared of <code>undefined</code> being redefined, why are you blindly integrating untested library code into your code base? Or even simpler: a linting tool.)</p>
+
+<hr>
+
+<p>Also, like the <code>typeof</code> approach, this technique can "detect" undeclared variables: </p>
+
+<pre><code>if (window.someVar === undefined) {
+    doSomething();
+}
+</code></pre>
+
+<p>But both these techniques leak in their abstraction. I urge you not to use this or even </p>
+
+<pre><code>if (typeof myVar !== "undefined") {
+    doSomething();
+}
+</code></pre>
+
+<p>Consider:</p>
+
+<pre><code>var iAmUndefined;
+</code></pre>
+
+<p>To catch whether or not that variable is declared or not, you may need to resort to the <code>in</code> operator. (In many cases, you can simply read the code O_o).</p>
+
+<pre><code>if ("myVar" in window) {
+    doSomething();
+}
+</code></pre>
+
+<p>But wait! There's more! What if some prototype chain magic is happening…? Now even the superior <code>in</code> operator does not suffice. (Okay, I'm done here about this part except to say that for 99% of the time, <code>=== undefined</code> (and ****cough**** <code>typeof</code>) works just fine. If you really care, you can read about this subject on its own.)</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="397 votes">397</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/96100/tim-down" rel="noopener">Tim Down</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3390468" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>2020 Update</strong></p>
+
+<p>One of my reasons for preferring a <code>typeof</code> check (namely, that <code>undefined</code> can be redefined) became irrelevant with the mass adoption of ECMAScript 5. The other, that you can use <code>typeof</code> to check the type of an undeclared variable, was always niche. Therefore, I'd now recommend using a direct comparison in most situations:</p>
+
+<pre><code>myVariable === undefined
+</code></pre>
+
+<p><strong>Original answer from 2010</strong></p>
+
+<p>Using <code>typeof</code> is my preference. It will work when the variable has never been declared, unlike any comparison with the <code>==</code> or <code>===</code> operators or type coercion using <code>if</code>. (<code>undefined</code>, unlike <code>null</code>, may also be redefined in ECMAScript 3 environments, making it unreliable for comparison, although nearly all common environments now are compliant with ECMAScript 5 or above).</p>
+
+<pre><code>if (typeof someUndeclaredVariable == "undefined") {
+    // Works
+}
+
+if (someUndeclaredVariable === undefined) { 
+    // Throws an error
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

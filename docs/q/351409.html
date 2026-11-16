@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to append something to an array? · jsdigest</title>
+<meta name="description" content="How do I append an object (such as a string or number) to an array in JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to append something to an array?</h1>
+    <div class="q-meta big"><span class="score hot" title="2889 votes">2.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/8482/interstar" rel="noopener">interstar</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">append</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/351409/how-to-append-something-to-an-array" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I append an object (such as a string or number) to an array in JavaScript?          </p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5430 votes">5.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/296/jdecuyper" rel="noopener">jdecuyper</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/351421" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push" rel="noreferrer"><code>Array.prototype.push</code></a> method to append values to the end of an array:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// initialize array
+var arr = [
+  "Hi",
+  "Hello",
+  "Bonjour"
+];
+
+// append new value to the array
+arr.push("Hola");
+
+console.log(arr);</code></pre>
+</div>
+</div>
+</p>
+<hr />
+<p>You can use the <code>push()</code> function to append more than one value to an array in a single call:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// initialize array
+var arr = ["Hi", "Hello", "Bonjour", "Hola"];
+
+// append multiple values to the array
+arr.push("Salut", "Hey");
+
+// display all values
+for (var i = 0; i &lt; arr.length; i++) {
+  console.log(arr[i]);
+}</code></pre>
+</div>
+</div>
+</p>
+<p>Note that the <code>push()</code> method returns the updated length of the array.</p>
+<hr />
+<p><strong>Update</strong></p>
+<p>If you want to add the items of one array to another array, you can use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat" rel="noreferrer"><code>firstArray.concat(secondArray)</code></a>:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var arr = [
+  "apple",
+  "banana",
+  "cherry"
+];
+
+// Do not forget to assign the result as, unlike push, concat does not change the existing array
+arr = arr.concat([
+  "dragonfruit",
+  "elderberry",
+  "fig"
+]);
+
+console.log(arr);</code></pre>
+</div>
+</div>
+</p>
+<p><strong>Update</strong></p>
+<p>Just an addition to this answer if you want to prepend any value to the start of an array (i.e. first index) then you can use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift" rel="noreferrer"><code>Array.prototype.unshift</code></a> for this purpose.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var arr = [1, 2, 3];
+arr.unshift(0);
+console.log(arr);</code></pre>
+</div>
+</div>
+</p>
+<p>It also supports appending multiple values at once just like <code>push</code>.</p>
+<hr />
+<p><strong>Update</strong></p>
+<p>Another way with <em><strong>ES6</strong></em> syntax is to return a new array with the <em><strong><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax" rel="noreferrer">spread syntax</a></strong></em>. This leaves the original array unchanged, but returns a new array with new items appended or prepended, compliant with the spirit of functional programming.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const arr1 = [
+  "Hi",
+  "Hello",
+  "Bonjour",
+];
+const arr2 = [
+  "Ciao",
+  "Hej",
+  "Merhaba",
+];
+
+const newArr1 = [
+  ...arr1,
+  "Salut",
+];
+const newArr2 = [
+  "Salut",
+  ...arr2,
+];
+const newArr3 = [
+  ...arr1,
+  ...arr2,
+];
+
+console.log(newArr1, newArr2, newArr3);</code></pre>
+</div>
+</div>
+</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1123 votes">1.1k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/39843/mk-dev" rel="noopener">MK_Dev</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/351444" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you're only appending a single variable, then <code>push()</code> works just fine. If you need to append another array, use <code>concat()</code>:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var ar1 = [1, 2, 3];
+var ar2 = [4, 5, 6];
+
+var ar3 = ar1.concat(ar2);
+
+alert(ar1);
+alert(ar2);
+alert(ar3);</code></pre>
+</div>
+</div>
+</p>
+<p>The concat does not affect <code>ar1</code> and <code>ar2</code> unless reassigned, for example:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var ar1 = [1, 2, 3];
+var ar2 = [4, 5, 6];
+
+ar1 = ar1.concat(ar2);
+alert(ar1);</code></pre>
+</div>
+</div>
+</p>
+<p>There is a lot of great information on <em><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference" rel="noreferrer">JavaScript Reference</a></em>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="429 votes">429</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/57068/jens-roland" rel="noopener">Jens Roland</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3826423" rel="noopener">原文 ↗</a></div><div class="prose"><p>Some quick benchmarking (each test = 500k appended elements and the results are averages of multiple runs) showed the following:</p>
+
+<p>Firefox 3.6 (Mac):</p>
+
+<ul>
+<li>Small arrays: <strong><code>arr[arr.length] = b</code> is faster</strong> (300ms vs. 800ms)</li>
+<li>Large arrays: <strong><code>arr.push(b)</code> is faster</strong> (500ms vs. 900ms)</li>
+</ul>
+
+<p>Safari 5.0 (Mac):</p>
+
+<ul>
+<li>Small arrays: <strong><code>arr[arr.length] = b</code> is faster</strong> (90ms vs. 115ms)</li>
+<li>Large arrays: <strong><code>arr[arr.length] = b</code> is faster</strong> (160ms vs. 185ms)</li>
+</ul>
+
+<p>Google Chrome 6.0 (Mac):</p>
+
+<ul>
+<li>Small arrays: <strong>No significant difference</strong> (and Chrome is FAST! Only ~38ms !!)</li>
+<li>Large arrays: <strong>No significant difference</strong> (160ms)</li>
+</ul>
+
+<p>I like the <code>arr.push()</code> syntax better, but I think I'd be better off with the <code>arr[arr.length]</code> Version, at least in raw speed. I'd love to see the results of an IE run though.</p>
+
+<hr>
+
+<p>My benchmarking loops:</p>
+
+<pre><code>function arrpush_small() {
+    var arr1 = [];
+    for (a = 0; a &lt; 100; a++)
+    {
+        arr1 = [];
+        for (i = 0; i &lt; 5000; i++)
+        {
+            arr1.push('elem' + i);
+        }
+    }
+}
+
+function arrlen_small() {
+    var arr2 = [];
+    for (b = 0; b &lt; 100; b++)
+    {
+        arr2 = [];
+        for (j = 0; j &lt; 5000; j++)
+        {
+            arr2[arr2.length] = 'elem' + j;
+        }
+    }
+}
+
+
+function arrpush_large() {
+    var arr1 = [];
+    for (i = 0; i &lt; 500000; i++)
+    {
+        arr1.push('elem' + i);
+    }
+}
+
+function arrlen_large() {
+    var arr2 = [];
+    for (j = 0; j &lt; 500000; j++)
+    {
+        arr2[arr2.length] = 'elem' + j;
+    }
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

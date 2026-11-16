@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is the preferred syntax for defining enums in JavaScript? · jsdigest</title>
+<meta name="description" content="What is the preferred syntax for defining enums in JavaScript? Something like: my.namespace.ColorEnum = { RED : 0, GREEN : 1, BLUE : 2 } // later on if(current…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What is the preferred syntax for defining enums in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="2396 votes">2.4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/5309/david-citron" rel="noopener">David Citron</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">syntax</span><span class="tag">enums</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/287903/what-is-the-preferred-syntax-for-defining-enums-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What is the preferred syntax for defining enums in JavaScript? Something like:</p>
+<pre><code>my.namespace.ColorEnum = {
+    RED : 0,
+    GREEN : 1,
+    BLUE : 2
+}
+
+// later on
+
+if(currentColor == my.namespace.ColorEnum.RED) {
+   // whatever
+}
+</code></pre>
+<p>Or is there a more preferable idiom?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1201 votes">1.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/572370/artur-czajka" rel="noopener">Artur Czajka</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5040502" rel="noopener">原文 ↗</a></div><div class="prose"><p>Since 1.8.5 it's possible to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze" rel="noreferrer">seal and freeze the object</a>, so define the above as:</p>
+<pre><code>const DaysEnum = Object.freeze({&quot;monday&quot;:1, &quot;tuesday&quot;:2, &quot;wednesday&quot;:3, ...})
+</code></pre>
+<p>or</p>
+<pre><code>const DaysEnum = {&quot;monday&quot;:1, &quot;tuesday&quot;:2, &quot;wednesday&quot;:3, ...}
+Object.freeze(DaysEnum)
+</code></pre>
+<p>and voila! JS enums.</p>
+<p>However, this doesn't prevent you from assigning an undesired value to a variable, which is often the main goal of enums:</p>
+<pre><code>let day = DaysEnum.tuesday
+day = 298832342 // goes through without any errors
+</code></pre>
+<p>One way to ensure a stronger degree of type safety (with enums or otherwise) is to use a tool like <a href="https://www.typescriptlang.org/" rel="noreferrer">TypeScript</a> or <a href="https://flow.org/" rel="noreferrer">Flow</a>.</p>
+<p>Quotes aren't needed but I kept them for consistency.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="627 votes">627</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/31582/gareth" rel="noopener">Gareth</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/287917" rel="noopener">原文 ↗</a></div><div class="prose"><p>This isn't much of an answer, but I'd say that works just fine, personally</p>
+
+<p>Having said that, since it doesn't matter what the values are (you've used 0, 1, 2), I'd use a meaningful string in case you ever wanted to output the current value.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="522 votes">522</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/286685/stijn-de-witt" rel="noopener">Stijn de Witt</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2383215" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h2>UPDATE</h2>
+<p>I don't think my answer below is the best way to write enums in JavaScript anymore. See my blog post for more details: <a href="https://stijndewitt.com/2014/01/26/enums-in-javascript/" rel="noreferrer">Enums in JavaScript</a>.</p>
+<hr />
+<p>Alerting the name is already possible:</p>
+<pre><code>if (currentColor == my.namespace.ColorEnum.RED) {
+   // alert name of currentColor (RED: 0)
+   var col = my.namespace.ColorEnum;
+   for (var name in col) {
+     if (col[name] == col.RED)
+       alert(name);
+   }
+}
+</code></pre>
+<p>Alternatively, you could make the values objects, so you can have the cake and eat it too:</p>
+<pre><code>var SIZE = {
+  SMALL : {value: 0, name: &quot;Small&quot;, code: &quot;S&quot;}, 
+  MEDIUM: {value: 1, name: &quot;Medium&quot;, code: &quot;M&quot;}, 
+  LARGE : {value: 2, name: &quot;Large&quot;, code: &quot;L&quot;}
+};
+
+var currentSize = SIZE.MEDIUM;
+if (currentSize == SIZE.MEDIUM) {
+  // this alerts: &quot;1: Medium&quot;
+  alert(currentSize.value + &quot;: &quot; + currentSize.name);
+}
+</code></pre>
+<p>In JavaScript, as it is a dynamic language, it is even possible to add enum values to the set later:</p>
+<pre><code>// Add EXTRALARGE size
+SIZE.EXTRALARGE = {value: 3, name: &quot;Extra Large&quot;, code: &quot;XL&quot;};
+</code></pre>
+<p>Remember, the fields of the enum (value, name and code in this example) are not needed for the identity check and are only there for convenience. Also the name of the size property itself does not need to be hard coded, but can also be set dynamically. So supposing you only know the name for your new enum value, you can still add it without problems:</p>
+<pre><code>// Add 'Extra Large' size, only knowing it's name
+var name = &quot;Extra Large&quot;;
+SIZE[name] = {value: -1, name: name, code: &quot;?&quot;};
+</code></pre>
+<p>Of course this means that some assumptions can no longer be made (that value represents the correct order for the size for example).</p>
+<p>Remember, in JavaScript an object is just like a <em>map</em> or <em>hash table</em>. A set of name-value pairs. You can loop through them or otherwise manipulate them without knowing much about them in advance.</p>
+<h2>Example</h2>
+<pre><code>for (var sz in SIZE) {
+  // sz will be the names of the objects in SIZE, so
+  // 'SMALL', 'MEDIUM', 'LARGE', 'EXTRALARGE'
+  var size = SIZE[sz]; // Get the object mapped to the name in sz
+  for (var prop in size) {
+    // Get all the properties of the size object, iterates over
+    // 'value', 'name' and 'code'. You can inspect everything this way.        
+  }
+} 
+</code></pre>
+<p>And by the way, if you are interested in namespaces, you may want to have a look at my solution for simple but powerful namespace and dependency management for JavaScript: <a href="http://packagesinjavascript.wordpress.com/" rel="noreferrer">Packages JS</a></p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

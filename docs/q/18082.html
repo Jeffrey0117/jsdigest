@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validate decimal numbers in JavaScript - IsNumeric() · jsdigest</title>
+<meta name="description" content="What&#39;s the cleanest, most effective way to validate decimal numbers in JavaScript? Bonus points for: Clarity. Solution should be clean and simple. Cross-platfo…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Validate decimal numbers in JavaScript - IsNumeric()</h1>
+    <div class="q-meta big"><span class="score hot" title="2575 votes">2.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/29/michael-haren" rel="noopener">Michael Haren</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">validation</span><span class="tag">numbers</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What's the cleanest, most effective way to validate decimal numbers in JavaScript?</p>
+
+<p>Bonus points for:</p>
+
+<ol>
+<li>Clarity. Solution should be clean and simple.</li>
+<li>Cross-platform.</li>
+</ol>
+
+<p>Test cases:</p>
+
+<pre><code>01. IsNumeric('-1')      =&gt; true
+02. IsNumeric('-1.5')    =&gt; true
+03. IsNumeric('0')       =&gt; true
+04. IsNumeric('0.42')    =&gt; true
+05. IsNumeric('.42')     =&gt; true
+06. IsNumeric('99,999')  =&gt; false
+07. IsNumeric('0x89f')   =&gt; false
+08. IsNumeric('#abcdef') =&gt; false
+09. IsNumeric('1.2.3')   =&gt; false
+10. IsNumeric('')        =&gt; false
+11. IsNumeric('blah')    =&gt; false
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3007 votes">3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/5445/christian-c-salvad%c3%b3" rel="noopener">Christian C. Salvad&amp;#243;</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1830844" rel="noopener">原文 ↗</a></div><div class="prose"><p>Some time ago I had to implement an <code>IsNumeric</code> function, to find out if a variable contained a numeric value, <strong>regardless of its type</strong>, it could be a <code>String</code> containing a numeric value (I had to consider also exponential notation, etc.), a <code>Number</code> object, virtually anything could be passed to that function, I couldn't make any type assumptions,  taking care of type coercion (eg. <code>+true == 1;</code> but <code>true</code> shouldn't be considered as <code>&quot;numeric&quot;</code>).</p>
+<p>I think is worth sharing this set of <a href="http://run.plnkr.co/plunks/93FPpacuIcXqqKMecLdk/" rel="noreferrer"><strong>+30 unit tests</strong></a> made to numerous function implementations, and also share the one that passes all my tests:</p>
+<pre><code>function isNumeric(n) {
+    return !isNaN(parseFloat(n)) &amp;&amp; isFinite(n);
+}
+</code></pre>
+<p><strong>Note</strong>: This returns <code>true</code> for <strong>any</strong> numeric value, <strong>not</strong> only decimal (i.e., base ten) numbers as specified in the question.  In particular, this considers <code>'0x89f'</code> to be numeric.</p>
+<p><strong>P.S.</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isNaN" rel="noreferrer">isNaN</a> &amp; <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isFinite" rel="noreferrer">isFinite</a> have a confusing behavior due to forced conversion to number. In ES6, <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN" rel="noreferrer">Number.isNaN</a> &amp; <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isFinite" rel="noreferrer">Number.isFinite</a> would fix these issues. Keep that in mind when using them.</p>
+<hr />
+<p><strong>Update</strong> :
+<a href="https://github.com/jquery/jquery/blob/2.2-stable/src/core.js#L215" rel="noreferrer">Here's how jQuery does it now (2.2-stable)</a>:</p>
+<pre><code>isNumeric: function(obj) {
+    var realStringObj = obj &amp;&amp; obj.toString();
+    return !jQuery.isArray(obj) &amp;&amp; (realStringObj - parseFloat(realStringObj) + 1) &gt;= 0;
+}
+</code></pre>
+<p><strong>Update</strong> :
+<a href="https://github.com/angular/angular/blob/4.3.x/packages/common/src/pipes/number_pipe.ts#L172" rel="noreferrer">Angular 4.3</a>:</p>
+<pre><code>export function isNumeric(value: any): boolean {
+    return !isNaN(value - parseFloat(value));
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="357 votes">357</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3043/joel-coehoorn" rel="noopener">Joel Coehoorn</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/174921" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Arrrgh!  Don't listen to the regular expression answers.  RegEx is icky for this, and I'm not talking just performance.  It's so easy to make subtle, impossible to spot mistakes with your regular expression.</p>
+<p>If you can't use <code>isNaN()</code> — and remember: I said, &quot;IF&quot; —  this should work much better:</p>
+<pre><code>function IsNumeric(input)
+{
+    return (input - 0) == input &amp;&amp; (''+input).trim().length &gt; 0;
+}
+</code></pre>
+<p>Here's how it works:</p>
+<p>The <code>(input - 0)</code> expression forces JavaScript to do type coercion on your input value; it must first be interpreted as a number for the subtraction operation.  If that conversion to a number fails, the expression will result in <code>NaN</code> (Not a Number).  This <em>numeric</em> result is then compared to the original value you passed in.  Since the left hand side is now numeric, type coercion is again used.  Now that the input from both sides was coerced to the same type from the same original value, you would think they should always be the same (always true). However, there's a special rule that says <code>NaN</code> is never equal to <code>NaN</code>, and so a value that can't be converted to a number (and only values that cannot be converted to numbers) will result in false.</p>
+<p>The check on the length is for a special case involving empty strings. Also note that it falls down on your 0x89f test, but that's because for javascript <em>that's a valid way to define a number literal.</em>  If you want to catch that specific scenario you could add an additional check.  Even better, if that's your reason for not using <code>isNaN()</code> then just wrap your own function around <code>isNaN()</code> that can also do the additional check.</p>
+<p>In summary, <em><strong>if you want to know if a value can be converted to a number, actually try to convert it to a number.</strong></em></p>
+<hr />
+<p>I went back and did some research for <em>why</em> a whitespace string did not have the expected output, and I think I get it now: an empty string is coerced to <code>0</code> rather than <code>NaN</code>. Simply trimming the string before the length check will handle this case.</p>
+<p>Running the unit tests against the new code and it only fails on the infinity and boolean literals, and the only time that should be a problem is if you're generating code (really, who would type in a literal and check if it's numeric? You should <em>know</em>), and that would be some strange code to generate.</p>
+<p>But, again, <strong>the only reason ever to use this is if for some reason you have to avoid isNaN().</strong></p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="86 votes">86</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/29/michael-haren" rel="noopener">Michael Haren</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/18085" rel="noopener">原文 ↗</a></div><div class="prose"><p>This way seems to work well:</p>
+
+<pre><code>function IsNumeric(input){
+    var RE = /^-{0,1}\d*\.{0,1}\d+$/;
+    return (RE.test(input));
+}
+</code></pre>
+
+<p>In one line:</p>
+
+<pre><code>const IsNumeric = (num) =&gt; /^-{0,1}\d*\.{0,1}\d+$/.test(num);
+</code></pre>
+
+<p>And to test it:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const IsNumeric = (num) =&gt; /^-{0,1}\d*\.{0,1}\d+$/.test(num);
+    
+    function TestIsNumeric(){
+        var results = ''
+        results += (IsNumeric('-1')?"Pass":"Fail") + ": IsNumeric('-1') =&gt; true\n";
+        results += (IsNumeric('-1.5')?"Pass":"Fail") + ": IsNumeric('-1.5') =&gt; true\n";
+        results += (IsNumeric('0')?"Pass":"Fail") + ": IsNumeric('0') =&gt; true\n";
+        results += (IsNumeric('0.42')?"Pass":"Fail") + ": IsNumeric('0.42') =&gt; true\n";
+        results += (IsNumeric('.42')?"Pass":"Fail") + ": IsNumeric('.42') =&gt; true\n";
+        results += (!IsNumeric('99,999')?"Pass":"Fail") + ": IsNumeric('99,999') =&gt; false\n";
+        results += (!IsNumeric('0x89f')?"Pass":"Fail") + ": IsNumeric('0x89f') =&gt; false\n";
+        results += (!IsNumeric('#abcdef')?"Pass":"Fail") + ": IsNumeric('#abcdef') =&gt; false\n";
+        results += (!IsNumeric('1.2.3')?"Pass":"Fail") + ": IsNumeric('1.2.3') =&gt; false\n";
+        results += (!IsNumeric('')?"Pass":"Fail") + ": IsNumeric('') =&gt; false\n";
+        results += (!IsNumeric('blah')?"Pass":"Fail") + ": IsNumeric('blah') =&gt; false\n";
+        
+        return results;
+    }
+
+console.log(TestIsNumeric());</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.as-console-wrapper { max-height: 100% !important; top: 0; }</code></pre>
+</div>
+</div>
+</p>
+
+<p>I borrowed that regex from <a href="http://www.codetoad.com/javascript/isnumeric.asp" rel="noreferrer">http://www.codetoad.com/javascript/isnumeric.asp</a>. Explanation:</p>
+
+<pre><code>/^ match beginning of string
+-{0,1} optional negative sign
+\d* optional digits
+\.{0,1} optional decimal point
+\d+ at least one digit
+$/ match end of string
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

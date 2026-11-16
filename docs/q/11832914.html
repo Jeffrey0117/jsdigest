@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to round to at most 2 decimal places, if necessary · jsdigest</title>
+<meta name="description" content="I&#39;d like to round at most two decimal places, but only if necessary . Input: 10 1.7777777 9.1 Output: 10 1.78 9.1 How can I do this in JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to round to at most 2 decimal places, if necessary</h1>
+    <div class="q-meta big"><span class="score hot" title="4338 votes">4.3k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/360705/stinkycheeseman" rel="noopener">stinkycheeseman</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">rounding</span><span class="tag">decimal-point</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'd like to round at most two decimal places, but <em>only if necessary</em>.</p>
+<p>Input:</p>
+<pre class="lang-none prettyprint-override"><code>10
+1.7777777
+9.1
+</code></pre>
+<p>Output:</p>
+<pre class="lang-none prettyprint-override"><code>10
+1.78
+9.1
+</code></pre>
+<p>How can I do this in JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5574 votes">5.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1575238/brian-ustas" rel="noopener">Brian Ustas</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11832950" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round" rel="noreferrer"><code>Math.round()</code></a> :</p>
+<pre><code>Math.round(num * 100) / 100
+</code></pre>
+<p>Or to be more specific and to ensure things like 1.005 round correctly, use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/EPSILON" rel="noreferrer">Number.EPSILON </a> :</p>
+<pre><code>Math.round((num + Number.EPSILON) * 100) / 100
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="4382 votes">4.4k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1736537/a-kunin" rel="noopener">A Kunin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/12830454" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>If the value is a text type:</p>
+<pre><code>parseFloat(&quot;123.456&quot;).toFixed(2);
+</code></pre>
+<p>If the value is a number:</p>
+<pre><code>var numb = 123.23454;
+numb = numb.toFixed(2);
+</code></pre>
+<p>There is a downside that values like 1.5 will give &quot;1.50&quot; as the output. A fix suggested by @minitech:</p>
+<pre><code>var numb = 1.5;
+numb = +numb.toFixed(2);
+// Note the plus sign that drops any &quot;extra&quot; zeroes at the end.
+// It changes the result (which is a string) into a number again (think &quot;0 + foo&quot;),
+// which means that it uses only as many digits as necessary.
+</code></pre>
+<p>It seems like <code>Math.round</code> is a better solution. <strong>But it is not!</strong> In some cases it will <em><strong>not</strong></em> round correctly:</p>
+<pre><code>Math.round(1.005 * 100)/100 // Returns 1 instead of expected 1.01!
+</code></pre>
+<p>toFixed() will also <em><strong>not</strong></em> round correctly in some cases (tested in Chrome v.55.0.2883.87)!</p>
+<p>Examples:</p>
+<pre><code>parseFloat(&quot;1.555&quot;).toFixed(2); // Returns 1.55 instead of 1.56.
+parseFloat(&quot;1.5550&quot;).toFixed(2); // Returns 1.55 instead of 1.56.
+// However, it will return correct result if you round 1.5551.
+parseFloat(&quot;1.5551&quot;).toFixed(2); // Returns 1.56 as expected.
+
+1.3555.toFixed(3) // Returns 1.355 instead of expected 1.356.
+// However, it will return correct result if you round 1.35551.
+1.35551.toFixed(2); // Returns 1.36 as expected.
+</code></pre>
+<p>I guess, this is because 1.555 is actually something like float 1.55499994 behind the scenes.</p>
+<p><strong>Solution 1</strong> is to use a script with required rounding algorithm, for example:</p>
+<pre><code>function roundNumber(num, scale) {
+  if(!(&quot;&quot; + num).includes(&quot;e&quot;)) {
+    return +(Math.round(num + &quot;e+&quot; + scale)  + &quot;e-&quot; + scale);
+  } else {
+    var arr = (&quot;&quot; + num).split(&quot;e&quot;);
+    var sig = &quot;&quot;
+    if(+arr[1] + scale &gt; 0) {
+      sig = &quot;+&quot;;
+    }
+    return +(Math.round(+arr[0] + &quot;e&quot; + sig + (+arr[1] + scale)) + &quot;e-&quot; + scale);
+  }
+}
+</code></pre>
+<p>It is also <a href="https://plnkr.co/edit/uau8BlS1cqbvWPCHJeOy?p=preview" rel="noreferrer">at Plunker</a>.</p>
+<p><em><strong>Note:</strong></em> This is not a universal solution for everyone. There are several different rounding algorithms. Your implementation can be different, and it depends on your requirements. See also <em><a href="https://en.wikipedia.org/wiki/Rounding" rel="noreferrer">Rounding</a></em>.</p>
+<p><strong>Solution 2</strong> is to avoid front end calculations and pull rounded values from the backend server.</p>
+<p>Another possible solution, which is not a bulletproof either.</p>
+<pre><code>Math.round((num + Number.EPSILON) * 100) / 100
+</code></pre>
+<p>In some cases, when you round a number like 1.3549999999999998, it will return an incorrect result. It should be 1.35, but the result is 1.36.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="667 votes">667</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1243836/markg" rel="noopener">MarkG</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/18358056" rel="noopener">原文 ↗</a></div><div class="prose"><p>I found this <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round" rel="noreferrer">on MDN</a>. Their way avoids the problem with 1.005 that <a href="https://stackoverflow.com/questions/11832914/round-up-to-2-decimal-places-in-javascript#comment24719818_11832950">was mentioned</a>.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function roundToTwo(num) {
+    return +(Math.round(num + "e+2")  + "e-2");
+}
+
+console.log('1.005 =&gt; ', roundToTwo(1.005));
+console.log('10 =&gt; ', roundToTwo(10));
+console.log('1.7777777 =&gt; ', roundToTwo(1.7777777));
+console.log('9.1 =&gt; ', roundToTwo(9.1));
+console.log('1234.5678 =&gt; ', roundToTwo(1234.5678));
+console.log('1.3549999999999998 =&gt; ', roundToTwo(1.3549999999999998));
+console.log('10.075 =&gt; ', roundToTwo(10.075));</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

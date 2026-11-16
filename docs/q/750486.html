@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to ensure closures created in a loop capture the value of the loop variable from their particular iteration? · jsdigest</title>
+<meta name="description" content="var funcs = []; // let&#39;s create 3 functions for (var i = 0; i &lt; 3; i++) { // and store them in funcs funcs[i] = function() { // each should log its value. cons…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to ensure closures created in a loop capture the value of the loop variable from their particular iteration?</h1>
+    <div class="q-meta big"><span class="score hot" title="3264 votes">3.3k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/9021/nickf" rel="noopener">nickf</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">loops</span><span class="tag">closures</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/750486/how-to-ensure-closures-created-in-a-loop-capture-the-value-of-the-loop-variable" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var funcs = [];
+// let's create 3 functions
+for (var i = 0; i &lt; 3; i++) {
+  // and store them in funcs
+  funcs[i] = function() {
+    // each should log its value.
+    console.log("My value:", i);
+  };
+}
+for (var j = 0; j &lt; 3; j++) {
+  // and now let's run each one to see
+  funcs[j]();
+}</code></pre>
+</div>
+</div>
+</p>
+<p>It outputs this:</p>
+<blockquote>
+<p>My value: 3<br />
+My value: 3<br />
+My value: 3</p>
+</blockquote>
+<p>Whereas I'd like it to output:</p>
+<blockquote>
+<p>My value: 0<br />
+My value: 1<br />
+My value: 2</p>
+</blockquote>
+<hr />
+<p>The same problem occurs when the delay in running the function is caused by using event listeners:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var buttons = document.getElementsByTagName("button");
+// let's create 3 functions
+for (var i = 0; i &lt; buttons.length; i++) {
+  // as event listeners
+  buttons[i].addEventListener("click", function() {
+    // each should log its value.
+    console.log("My value:", i);
+  });
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;button&gt;0&lt;/button&gt;
+&lt;br /&gt;
+&lt;button&gt;1&lt;/button&gt;
+&lt;br /&gt;
+&lt;button&gt;2&lt;/button&gt;</code></pre>
+</div>
+</div>
+</p>
+<p>… or asynchronous code, e.g. using Promises:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// Some async wait function
+const wait = (ms) =&gt; new Promise((resolve, reject) =&gt; setTimeout(resolve, ms));
+
+for (var i = 0; i &lt; 3; i++) {
+  // Log `i` as soon as each promise resolves.
+  wait(i * 100).then(() =&gt; console.log(i));
+}</code></pre>
+</div>
+</div>
+</p>
+<p>It is also apparent in <code>for in</code> and <code>for of</code> loops:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const arr = [1,2,3];
+const fns = [];
+
+for (var i in arr){
+  fns.push(() =&gt; console.log("index:", i));
+}
+
+for (var v of arr){
+  fns.push(() =&gt; console.log("value:", v));
+}
+
+for (const n of arr) {
+  var obj = { number: n }; // or new MyLibObject({ ... })
+  fns.push(() =&gt; console.log("n:", n, "|", "obj:", JSON.stringify(obj)));
+}
+
+for(var f of fns){
+  f();
+}</code></pre>
+</div>
+</div>
+</p>
+<p>What’s the solution to this basic problem?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2405 votes">2.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/86463/harto" rel="noopener">harto</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/750506" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Well, the problem is that the variable <code>i</code>, within each of your anonymous functions, is bound to the same variable outside of the function.</p>
+<h1>ES6 solution: <code>let</code></h1>
+<p>ECMAScript 6 (ES6) introduces new <code>let</code> and <code>const</code> keywords that are scoped differently than <code>var</code>-based variables. For example, in a loop with a <code>let</code>-based index, each iteration through the loop will have a new variable <code>i</code> with loop scope, so your code would work as you expect. There are many resources, but I'd recommend <a href="http://www.2ality.com/2015/02/es6-scoping.html" rel="noreferrer">2ality's block-scoping post</a> as a great source of information.</p>
+<pre><code>for (let i = 0; i &lt; 3; i++) {
+  funcs[i] = function() {
+    console.log(&quot;My value: &quot; + i);
+  };
+}
+</code></pre>
+<p>Beware, though, that IE9-IE11 and Edge prior to Edge 14 support <code>let</code> but get the above wrong (they don't create a new <code>i</code> each time, so all the functions above would log 3 like they would if we used <code>var</code>). Edge 14 finally gets it right.</p>
+<hr />
+<h1>ES5.1 solution: forEach</h1>
+<p>With the relatively widespread availability of the <code>Array.prototype.forEach</code> function (in 2015), it's worth noting that in those situations involving iteration primarily over an array of values, <code>.forEach()</code> provides a clean, natural way to get a distinct closure for every iteration. That is, assuming you've got some sort of array containing values (DOM references, objects, whatever), and the problem arises of setting up callbacks specific to each element, you can do this:</p>
+<pre><code>var someArray = [ /* whatever */ ];
+// ...
+someArray.forEach(function(arrayElement) {
+  // ... code code code for this one element
+  someAsynchronousFunction(arrayElement, function() {
+    arrayElement.doSomething();
+  });
+});
+</code></pre>
+<p>The idea is that each invocation of the callback function used with the <code>.forEach</code> loop will be its own closure. The parameter passed in to that handler is the array element specific to that particular step of the iteration. If it's used in an asynchronous callback, it won't collide with any of the other callbacks established at other steps of the iteration.</p>
+<p>If you happen to be working in jQuery, the <code>$.each()</code> function gives you a similar capability.</p>
+<hr />
+<h1>Classic solution: Closures</h1>
+<p>What you want to do is bind the variable within each function to a separate, unchanging value outside of the function:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var funcs = [];
+
+function createfunc(i) {
+  return function() {
+    console.log("My value: " + i);
+  };
+}
+
+for (var i = 0; i &lt; 3; i++) {
+  funcs[i] = createfunc(i);
+}
+
+for (var j = 0; j &lt; 3; j++) {
+  // and now let's run each one to see
+  funcs[j]();
+}</code></pre>
+</div>
+</div>
+</p>
+<p>Since there is no block scope in JavaScript - only function scope - by wrapping the function creation in a new function, you ensure that the value of &quot;i&quot; remains as you intended.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="423 votes">423</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/66475/bjorn" rel="noopener">Bjorn</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/750495" rel="noopener">原文 ↗</a></div><div class="prose"><p>Try:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var funcs = [];
+    
+for (var i = 0; i &lt; 3; i++) {
+    funcs[i] = (function(index) {
+        return function() {
+            console.log("My value: " + index);
+        };
+    }(i));
+}
+
+for (var j = 0; j &lt; 3; j++) {
+    funcs[j]();
+}</code></pre>
+</div>
+</div>
+</p>
+
+<p><strong>Edit</strong> (2014):</p>
+
+<p>Personally I think @Aust's <a href="https://stackoverflow.com/a/19323214/918959">more recent answer about using <code>.bind</code></a> is the best way to do this kind of thing now. There's also lo-dash/underscore's <code>_.partial</code> when you don't need or want to mess with <code>bind</code>'s <code>thisArg</code>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="392 votes">392</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1408717/aust" rel="noopener">Aust</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/19323214" rel="noopener">原文 ↗</a></div><div class="prose"><p>Another way that hasn't been mentioned yet is the use of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind" rel="noreferrer"><code>Function.prototype.bind</code></a></p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var funcs = {};
+for (var i = 0; i &lt; 3; i++) {
+  funcs[i] = function(x) {
+    console.log('My value: ' + x);
+  }.bind(this, i);
+}
+for (var j = 0; j &lt; 3; j++) {
+  funcs[j]();
+}</code></pre>
+</div>
+</div>
+</p>
+
+<p><strong>UPDATE</strong></p>
+
+<p>As pointed out by @squint and @mekdev, you get better performance by creating the function outside the loop first and then binding the results within the loop.</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function log(x) {
+  console.log('My value: ' + x);
+}
+
+var funcs = [];
+
+for (var i = 0; i &lt; 3; i++) {
+  funcs[i] = log.bind(this, i);
+}
+
+for (var j = 0; j &lt; 3; j++) {
+  funcs[j]();
+}</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

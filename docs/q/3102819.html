@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Disable same origin policy in Chrome · jsdigest</title>
+<meta name="description" content="Is there any way to disable the Same-origin policy on Google&#39;s Chrome browser?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Disable same origin policy in Chrome</h1>
+    <div class="q-meta big"><span class="score hot" title="2220 votes">2.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1785/landon-kuhn" rel="noopener">Landon Kuhn</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">ajax</span><span class="tag">google-chrome</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/3102819/disable-same-origin-policy-in-chrome" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Is there any way to disable the <a href="https://en.wikipedia.org/wiki/Same_origin_policy" rel="noreferrer">Same-origin policy</a> on Google's <a href="http://en.wikipedia.org/wiki/Google_Chrome" rel="noreferrer">Chrome</a> browser?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1310 votes">1.3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/886931/dagg-nabbit" rel="noopener">Dagg Nabbit</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3177718" rel="noopener">原文 ↗</a></div><div class="prose"><p>Close Chrome (or Chromium) and restart with the <code>--disable-web-security</code> argument. I just tested this and verified that I can access the contents of an <em>iframe</em> with <code>src=&quot;http://google.com&quot;</code> embedded in a page served from <code>localhost</code> (tested under Chromium 5 / Ubuntu).</p>
+<p><strong>Note:  Kill all Chrome instances before running this command.</strong></p>
+<hr />
+<p>For me the exact command was:</p>
+<pre><code>chromium-browser --disable-web-security --user-data-dir=&quot;[some directory here]&quot;
+</code></pre>
+<p>The browser will warn you that &quot;you are using an unsupported command line&quot; when it first opens, which you can ignore.</p>
+<p>From the Chromium source:</p>
+<pre><code>// Don't enforce the same-origin policy. (Used by people testing their sites.)
+const wchar_t kDisableWebSecurity[] = L&quot;disable-web-security&quot;;
+</code></pre>
+<hr />
+<p>Before Chrome 48, you could just use:</p>
+<pre><code>chromium-browser --disable-web-security
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1217 votes">1.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/499430/ectype" rel="noopener">ectype</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6083677" rel="noopener">原文 ↗</a></div><div class="prose"><p>Yes, it is possible.</p>
+<hr />
+<p>For Mac OS X / macOS, open Terminal and run:</p>
+<pre><code>$ open -a Google\ Chrome --args --disable-web-security --user-data-dir
+</code></pre>
+<p><a href="https://stackoverflow.com/a/35509189/773263">--user-data-dir required on Chrome 49+ on OSX</a></p>
+<hr />
+<p>For Linux run:</p>
+<pre><code>$ google-chrome --disable-web-security
+</code></pre>
+<p>Also if you're trying to access local files for dev purposes like AJAX or JSON, you can use this flag too.</p>
+<pre><code>--allow-file-access-from-files
+</code></pre>
+<hr />
+<p>For Windows go into the command prompt and go into the folder where Chrome.exe is and type</p>
+<pre><code>chrome.exe --disable-web-security
+</code></pre>
+<p>That should disable the same origin policy and allow you to access local files.</p>
+<hr />
+<h2>UPDATE</h2>
+<p>For Chrome 22+ you will be presented with an error message that says:</p>
+<blockquote>
+<p>You are using an unsupported command-line flag: --disable-web-security. Stability and security will suffer.</p>
+</blockquote>
+<p>However you can just ignore that message while developing.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="679 votes">679</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/10696/ola-karlsson" rel="noopener">Ola Karlsson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/19317888" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>For Windows users:</strong></p>
+<p>The problem with the solution accepted here, in my opinion is that if you already have Chrome open and try to run the <code>chrome.exe --disable-web-security</code> command it won't work.</p>
+<p>However, when researching this, I came across a post on Super User, <em><a href="https://superuser.com/questions/593726/is-it-possible-to-run-chrome-with-and-without-web-security-at-the-same-time">Is it possible to run Chrome with and without web security at the same time?</a></em>.</p>
+<p>Basically, you need to add to the command and run it like this instead (or create a shortcut with it and run a new Chrome instance through that)</p>
+<pre><code>chrome.exe --user-data-dir=&quot;C:/Chrome dev session&quot; --disable-web-security
+</code></pre>
+<p><strong>this will open a new &quot;insecure&quot; instance of Chrome at the same time as you keep your other &quot;secure&quot; browser instances open and working as normal.</strong></p>
+<p>This works by creating a new folder/directory &quot;Chrome dev session&quot; under C: and tells this new Chrome instance to use that folder/directory for its user and session data. Because of this, the new instance is separated from your &quot;normal&quot; Chrome data and your bookmarks and other saved data will not be available in this instance.</p>
+<p><strong>Note:</strong> only the first &quot;new&quot; instance of Chrome opened with this method, is effected, hence it is only the first tab in the first new Chrome window, which is effected.
+If you close that instance, you can use the same command again and for example any bookmarks to your local app or similar will still be there as it's pointing to the same folder.</p>
+<p>If you want to run multiple &quot;insecure&quot; instances, each one will need its own folder/directory, so you will need to runt he command again with a different folder name. This however also means that each insecure instance will be separated from the others, so any bookmarks or other saves user or session data will not be available across instances.</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

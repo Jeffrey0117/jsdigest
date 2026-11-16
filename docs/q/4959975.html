@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generate random number between two numbers in JavaScript · jsdigest</title>
+<meta name="description" content="Is there a way to generate a random number in a specified range with JavaScript ? For example : a specified range from 1 to 6 were the random number could be e…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Generate random number between two numbers in JavaScript</h1>
+    <div class="q-meta big"><span class="score hot" title="2619 votes">2.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/568975/mirgorod" rel="noopener">Mirgorod</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">random</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Is there a way to generate a <em>random number</em> in a <em>specified range</em> with JavaScript ?</p>
+<p><strong>For example</strong>: a specified range from <em>1 to 6</em> were the random number could be either <em>1, 2, 3, 4, 5, or 6</em>.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2535 votes">2.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/529548/khr055" rel="noopener">khr055</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4960020" rel="noopener">原文 ↗</a></div><div class="prose"><h3>Important</h3>
+The following code works only if the minimum value is `1`. It does not work for minimum values other than `1`.
+<p>If you wanted to get a random integer between 1 (<strong>and only 1</strong>) and 6, you would calculate:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>    const rndInt = Math.floor(Math.random() * 6) + 1
+    console.log(rndInt)</code></pre>
+</div>
+</div>
+</p>
+<p>Where:</p>
+<ul>
+<li>1 is the start number</li>
+<li>6 is the number of possible results (1 + start <em>(6)</em> - end <em>(1)</em>)</li>
+</ul>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="3449 votes">3.4k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/383148/francisc" rel="noopener">Francisc</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/7228322" rel="noopener">原文 ↗</a></div><div class="prose"><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function randomIntFromInterval(min, max) { // min and max included 
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+const rndInt = randomIntFromInterval(1, 6);
+console.log(rndInt);</code></pre>
+</div>
+</div>
+</p>
+<p>What it does &quot;extra&quot; is it allows random intervals that do not start with 1.
+So you can get a random number from 10 to 15 for example. Flexibility.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="504 votes">504</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1843451/lior-elrom" rel="noopener">Lior Elrom</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/24152886" rel="noopener">原文 ↗</a></div><div class="prose"><h1><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random" rel="noreferrer">Math.random()</a></h1>
+<p>Returns an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#Getting_a_random_integer_between_two_values_inclusive" rel="noreferrer">Integer Random Number</a> between min (<strong>included</strong>) and max (<strong>included</strong>):</p>
+<pre><code>function randomInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+</code></pre>
+<p>Returns <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#Getting_a_random_number_between_two_values" rel="noreferrer">Any Random Number</a> between min (<strong>included</strong>) and max (<strong>not included</strong>):</p>
+<pre><code>function randomNumber(min, max) {
+  return Math.random() * (max - min) + min;
+}
+</code></pre>
+<p>Useful Examples (Integers):</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// 0 -&gt; 10
+const rand1 = Math.floor(Math.random() * 11);
+
+// 1 -&gt; 10
+const rand2 = Math.floor(Math.random() * 10) + 1;
+
+// 5 -&gt; 20
+const rand3 = Math.floor(Math.random() * 16) + 5;
+
+// -10 -&gt; (-2)
+const rand4 = Math.floor(Math.random() * 9) - 10;
+
+console.log(rand1);
+console.log(rand2);
+console.log(rand3);
+console.log(rand4);</code></pre>
+</div>
+</div>
+</p>
+<p>** And always nice to be reminded (Mozilla):</p>
+<blockquote>
+<p>Math.random() does not provide cryptographically secure random
+numbers. Do not use them for anything related to security. Use the Web
+Crypto API instead, and more precisely, the
+window.crypto.getRandomValues() method.</p>
+</blockquote>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

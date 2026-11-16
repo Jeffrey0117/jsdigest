@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I merge properties of two JavaScript objects? · jsdigest</title>
+<meta name="description" content="I need to be able to merge two (very simple) JavaScript objects at runtime. For example I&#39;d like to: var obj1 = { food: &#39;pizza&#39;, car: &#39;ford&#39; } var obj2 = { ani…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I merge properties of two JavaScript objects?</h1>
+    <div class="q-meta big"><span class="score hot" title="3376 votes">3.4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/4541/jc-grubbs" rel="noopener">JC Grubbs</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">javascript-objects</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/171251/how-can-i-merge-properties-of-two-javascript-objects" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I need to be able to merge two (very simple) JavaScript objects at runtime. For example I'd like to:</p>
+<pre><code>var obj1 = { food: 'pizza', car: 'ford' }
+var obj2 = { animal: 'dog' }
+
+obj1.merge(obj2);
+
+//obj1 now has three properties: food, car, and animal
+</code></pre>
+<p>Is there a built in way to do this? I do not need recursion, and I do not need to merge functions, just methods on flat objects.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4198 votes">4.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3560/john-millikin" rel="noopener">John Millikin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/171256" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>ECMAScript 2018 Standard Method</strong></p>
+<p>You would use <a href="https://github.com/tc39/proposal-object-rest-spread" rel="noreferrer">object spread</a>:</p>
+<pre><code>let merged = {...obj1, ...obj2};
+</code></pre>
+<p><code>merged</code> is now the union of <code>obj1</code> and <code>obj2</code>. Properties in <code>obj2</code> will overwrite those in <code>obj1</code>.</p>
+<pre><code>/** There's no limit to the number of objects you can merge.
+ *  Later properties overwrite earlier properties with the same name. */
+const allRules = {...obj1, ...obj2, ...obj3};
+</code></pre>
+<p>Here is also the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax" rel="noreferrer">MDN documentation</a> for this syntax. If you're using babel you'll need the <a href="https://babeljs.io/docs/en/babel-plugin-proposal-object-rest-spread" rel="noreferrer">@babel/plugin-proposal-object-rest-spread</a> plugin for it to work (This plugin is included in <code>@babel/preset-env</code>, in <a href="https://github.com/tc39/proposals/blob/main/finished-proposals.md" rel="noreferrer">ES2018</a>).</p>
+<p><strong>ECMAScript 2015 (ES6) Standard Method</strong></p>
+<pre><code>/* For the case in question, you would do: */
+Object.assign(obj1, obj2);
+
+/** There's no limit to the number of objects you can merge.
+ *  All objects get merged into the first object. 
+ *  Only the object in the first argument is mutated and returned.
+ *  Later properties overwrite earlier properties with the same name. */
+const allRules = Object.assign({}, obj1, obj2, obj3, etc);
+</code></pre>
+<p>(see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Browser_compatibility" rel="noreferrer">MDN JavaScript Reference</a>)</p>
+<hr />
+<p><strong>Method for ES5 and Earlier</strong></p>
+<pre><code>for (var attrname in obj2) { obj1[attrname] = obj2[attrname]; }
+</code></pre>
+<p>Note that this will simply add all attributes of <code>obj2</code> to <code>obj1</code> which might not be what you want if you still want to use the unmodified <code>obj1</code>.</p>
+<p>If you're using a framework that craps all over your prototypes then you have to get fancier with checks like <code>hasOwnProperty</code>, but that code will work for 99% of cases.</p>
+<p>Example function:</p>
+<pre><code>/**
+ * Overwrites obj1's values with obj2's and adds obj2's if non existent in obj1
+ * @param obj1
+ * @param obj2
+ * @returns obj3 a new object based on obj1 and obj2
+ */
+function merge_options(obj1,obj2){
+    var obj3 = {};
+    for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+    for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+    return obj3;
+}
+</code></pre>
+<hr />
+<p>additionally :- <a href="https://jsfiddle.net/fmcajhsv/" rel="noreferrer">check this program</a> for see differnce between Object.assign &amp; spread syntax object literals</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1245 votes">1.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/20487/avdi" rel="noopener">Avdi</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/171455" rel="noopener">原文 ↗</a></div><div class="prose"><p>jQuery also has a utility for this: <a href="http://api.jquery.com/jQuery.extend/" rel="noreferrer">http://api.jquery.com/jQuery.extend/</a>.</p>
+
+<p>Taken from the jQuery documentation:</p>
+
+<pre><code>// Merge options object into settings object
+var settings = { validate: false, limit: 5, name: "foo" };
+var options  = { validate: true, name: "bar" };
+jQuery.extend(settings, options);
+
+// Now the content of settings object is the following:
+// { validate: true, limit: 5, name: "bar" }
+</code></pre>
+
+<p>The above code will mutate the <strong>existing object</strong> named <em><code>settings</code></em>.</p>
+
+<hr>
+
+<p>If you want to create a <strong>new object</strong> without modifying either argument, use this:</p>
+
+<pre><code>var defaults = { validate: false, limit: 5, name: "foo" };
+var options = { validate: true, name: "bar" };
+
+/* Merge defaults and options, without modifying defaults */
+var settings = $.extend({}, defaults, options);
+
+// The content of settings variable is now the following:
+// {validate: true, limit: 5, name: "bar"}
+// The 'defaults' and 'options' variables remained the same.
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="396 votes">396</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4019986/nanowizard" rel="noopener">NanoWizard</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/26206246" rel="noopener">原文 ↗</a></div><div class="prose"><p>The <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-object.assign" rel="noreferrer">Harmony ECMAScript 2015 (ES6)</a> specifies <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign" rel="noreferrer"><strong><code>Object.assign</code></strong></a> which will do this.</p>
+
+<pre><code>Object.assign(obj1, obj2);
+</code></pre>
+
+<p>Current browser support is <a href="http://kangax.github.io/compat-table/es6/#test-Object_static_methods_Object.assign" rel="noreferrer">getting better</a>, but if you're developing for browsers that don't have support, you can use a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill" rel="noreferrer">polyfill</a>.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

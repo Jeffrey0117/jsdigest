@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to decide when to use Node.js? · jsdigest</title>
+<meta name="description" content="I am new to this kind of stuff, but lately I&#39;ve been hearing a lot about how good Node.js is. Considering how much I love working with jQuery and JavaScript in…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to decide when to use Node.js?</h1>
+    <div class="q-meta big"><span class="score hot" title="2190 votes">2.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/184046/legend" rel="noopener">Legend</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">node.js</span><span class="tag">web-applications</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/5062614/how-to-decide-when-to-use-node-js" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I am new to this kind of stuff, but lately I've been hearing a lot about how good <a href="http://en.wikipedia.org/wiki/Node.js" rel="nofollow noreferrer">Node.js</a> is. Considering how much I love working with jQuery and JavaScript in general, I can't help but wonder how to decide when to use Node.js. The web application I have in mind is something like <a href="https://en.wikipedia.org/wiki/Bitly" rel="nofollow noreferrer">Bitly</a> - takes some content, archives it.</p>
+<p>From all the homework I have been doing in the last few days, I obtained the following information. Node.js</p>
+<ul>
+<li>is a command-line tool that can be run as a regular web server and lets one run JavaScript programs</li>
+<li>utilizes the great <a href="http://en.wikipedia.org/wiki/V8_%28JavaScript_engine%29" rel="nofollow noreferrer">V8 JavaScript engine</a></li>
+<li>is very good when you need to do several things at the same time</li>
+<li>is event-based so all the wonderful <a href="http://en.wikipedia.org/wiki/Ajax_%28programming%29" rel="nofollow noreferrer">Ajax</a>-like stuff can be done on the server side</li>
+<li>lets us share code between the browser and the backend</li>
+<li>lets us talk with MySQL</li>
+</ul>
+<p>Some of the sources that I have come across are:</p>
+<ul>
+<li><a href="http://www.stoimen.com/blog/2010/11/16/diving-into-node-js-introduction-and-installation/" rel="nofollow noreferrer">Diving into Node.js – Introduction and Installation</a></li>
+<li><a href="http://debuggable.com/posts/understanding-node-js:4bd98440-45e4-4a9a-8ef7-0f7ecbdd56cb" rel="nofollow noreferrer">Understanding NodeJS</a></li>
+<li><a href="http://blog.osbutler.com/categories/node-by-example/?page=3" rel="nofollow noreferrer">Node by Example</a> (<a href="http://web.archive.org/web/20110222055120/http://blog.osbutler.com/categories/node-by-example/?page=3" rel="nofollow noreferrer">Wayback Machine</a>)</li>
+<li><a href="http://dailyjs.com/2010/11/01/node-tutorial/" rel="nofollow noreferrer">Let’s Make a Web App: NodePad</a></li>
+</ul>
+<p>Considering that Node.js can be run almost out-of-the-box on <a href="http://en.wikipedia.org/wiki/Amazon_Elastic_Compute_Cloud" rel="nofollow noreferrer">Amazon's EC2</a> instances, I am trying to understand what type of problems require Node.js as opposed to any of the mighty kings out there like <a href="http://en.wikipedia.org/wiki/PHP" rel="nofollow noreferrer">PHP</a>, <a href="http://en.wikipedia.org/wiki/Python_%28programming_language%29" rel="nofollow noreferrer">Python</a> and <a href="http://en.wikipedia.org/wiki/Ruby_%28programming_language%29" rel="nofollow noreferrer">Ruby</a>. I understand that it really depends on the expertise one has on a language, but my question falls more into the general category of: When to use a particular framework and what type of problems is it particularly suited for?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1354 votes">1.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/13816/benson" rel="noopener">Benson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5062670" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>You did a great job of summarizing what's awesome about Node.js. My feeling is that Node.js is especially suited for applications where you'd like to maintain a persistent connection from the browser back to the server. Using a technique known as <a href="http://en.wikipedia.org/wiki/Push_technology#Long_polling" rel="noreferrer">"long-polling"</a>, you can write an application that sends updates to the user in real time. Doing long polling on many of the web's giants, like <a href="http://en.wikipedia.org/wiki/Ruby_on_Rails" rel="noreferrer">Ruby on Rails</a> or <a href="http://en.wikipedia.org/wiki/Django_%28web_framework%29" rel="noreferrer">Django</a>, would create immense load on the server, because each active client eats up one server process. This situation amounts to a <a href="http://en.wikipedia.org/wiki/Tarpit_(networking)" rel="noreferrer">tarpit</a> attack. When you use something like Node.js, the server has no need of maintaining separate threads for each open connection.  </p>
+
+<p>This means you can create a <a href="https://github.com/rivalslayer/node_chat" rel="noreferrer">browser-based chat application</a> in Node.js that takes almost no system resources to serve a great many clients. Any time you want to do this sort of long-polling, Node.js is a great option.  </p>
+
+<p>It's worth mentioning that Ruby and Python both have tools to do this sort of thing (<a href="http://rubyeventmachine.com/" rel="noreferrer">eventmachine</a> and <a href="https://twistedmatrix.com/trac/" rel="noreferrer">twisted</a>, respectively), but that Node.js does it exceptionally well, and from the ground up. JavaScript is exceptionally well situated to a callback-based concurrency model, and it excels here. Also, being able to serialize and deserialize with JSON native to both the client and the server is pretty nifty. </p>
+
+<p>I look forward to reading other answers here, this is a fantastic question. </p>
+
+<p>It's worth pointing out that Node.js is also great for situations in which you'll be reusing a lot of code across the client/server gap. The <a href="http://meteor.com" rel="noreferrer">Meteor framework</a> makes this really easy, and a lot of folks are suggesting this might be the future of web development. I can say from experience that it's a whole lot of fun to write code in Meteor, and a big part of this is spending less time thinking about how you're going to restructure your data, so the code that runs in the browser can easily manipulate it and pass it back. </p>
+
+<p>Here's an article on Pyramid and long-polling, which turns out to be very easy to set up with a little help from gevent: <a href="http://michael.merickel.org/2011/6/21/tictactoe-and-long-polling-with-pyramid/" rel="noreferrer"><em>TicTacToe and Long Polling with Pyramid</em></a>.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="409 votes">409</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/395379/fisherwebdev" rel="noopener">fisherwebdev</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5063079" rel="noopener">原文 ↗</a></div><div class="prose"><p>I believe Node.js is best suited for real-time applications: online games, collaboration tools, chat rooms, or anything where what one user (or robot?  or sensor?) does with the application needs to be seen by other users immediately, without a page refresh.</p>
+
+<p>I should also mention that Socket.IO in combination with Node.js will reduce your real-time latency even further than what is possible with long polling.  Socket.IO will fall back to long polling as a worst case scenario, and instead use web sockets or even Flash if they are available.</p>
+
+<p>But I should also mention that just about any situation where the code might block due to threads can be better addressed with Node.js.  Or any situation where you need the application to be event-driven.</p>
+
+<p>Also, Ryan Dahl said in a talk that I once attended that the Node.js benchmarks closely rival Nginx for regular old HTTP requests.  So if we build with Node.js, we can serve our normal resources quite effectively, and when we need the event-driven stuff, it's ready to handle it.</p>
+
+<p>Plus it's all JavaScript all the time.  Lingua Franca on the whole stack.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="209 votes">209</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/99777/joeytwiddle" rel="noopener">joeytwiddle</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/20204021" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Reasons to use NodeJS:</p>
+
+<ul>
+<li><p>It runs Javascript, so you can use the <strong>same language</strong> on server and client, and even share some code between them (e.g. for form validation, or to render views at either end.)</p></li>
+<li><p>The <a href="http://www.haneycodes.net/to-node-js-or-not-to-node-js/" rel="nofollow noreferrer">single-threaded</a> event-driven system is <a href="https://stackoverflow.com/questions/9290160/node-js-vs-net-performance"><strong>fast</strong></a> even when handling lots of requests at once, and also simple, compared to traditional multi-threaded <a href="http://www.infoworld.com/article/2883328/java/java-vs-nodejs-an-epic-battle-for-developer-mindshare.html" rel="nofollow noreferrer">Java</a> or ROR frameworks.</p></li>
+<li><p>The ever-growing pool of <strong><a href="http://npmjs.org/" rel="nofollow noreferrer">packages</a> accessible through NPM</strong>, including client and server-side libraries/modules, as well as command-line tools for web development.  Most of these are conveniently hosted on github, where sometimes you can report an issue and find it fixed within hours!  It's nice to have everything under one roof, with standardized issue reporting and easy forking.</p></li>
+<li><p>It has become the defacto standard environment in which to run <strong>Javascript-related tools</strong> and other <strong>web-related tools</strong>, including task runners, minifiers, beautifiers, linters, preprocessors, bundlers and analytics processors.</p></li>
+<li><p>It seems quite suitable for prototyping, agile development and <strong>rapid product iteration</strong>.</p></li>
+</ul>
+
+<p>Reasons <strong>not</strong> to use NodeJS:</p>
+
+<ul>
+<li><p>It runs Javascript, which has no compile-time type checking.  For large, complex <strong>safety-critical</strong> systems, or projects including collaboration between different organizations, a language which encourages <strong>contractual interfaces</strong> and provides <strong>static type checking</strong> may save you some debugging time (and <em>explosions</em>) in the long run.  (Although the JVM is stuck with <code>null</code>, so please use Haskell for your nuclear reactors.)</p></li>
+<li><p>Added to that, many of the packages in NPM are a little <strong>raw</strong>, and still under rapid development.  Some libraries for older frameworks have undergone a decade of testing and bugfixing, and are very <strong>stable</strong> by now. <a href="https://pinboard.in/u:dandv/t:npm/t:against" rel="nofollow noreferrer">Npmjs.org has no mechanism to rate packages</a>, which has lead to a proliferation of packages doing more or less the same thing, out of which a large percentage are no longer maintained.</p></li>
+<li><p>Nested callback hell.  (Of course there are <a href="https://github.com/nodejs/node/wiki/Modules#async-flow" rel="nofollow noreferrer">20 different solutions</a> to this...)</p></li>
+<li><p>The ever-growing pool of packages can make one NodeJS project appear <strong>radically different</strong> from the next.  There is a large diversity in implementations due to the huge number of options available (e.g. Express/<a href="http://sailsjs.org/" rel="nofollow noreferrer">Sails.js</a>/<a href="https://www.meteor.com/" rel="nofollow noreferrer">Meteor</a>/<a href="http://derbyjs.com/" rel="nofollow noreferrer">Derby</a>).  This can sometimes make it harder for a new developer to jump in on a Node project.  Contrast that with a <strong>Rails</strong> developer joining an existing project: he should be able to get familiar with the app pretty quickly, because all Rails apps are encouraged to use a <strong>similar structure</strong>.</p></li>
+<li><p>Dealing with files can be a bit of a pain. Things that are trivial in other languages, like reading a line from a text file, are <a href="https://stackoverflow.com/questions/6156501/read-a-file-one-line-at-a-time-in-node-js#comment23691959_6156501">weird enough to do with Node.js</a> that there's a StackOverflow question on that with 80+ upvotes. There's <a href="https://stackoverflow.com/questions/19587936/how-can-i-parse-records-on-demand-with-node-js">no simple way to read one record at a time from a CSV file</a>. Etc.</p></li>
+</ul>
+
+<p>I love NodeJS, it is fast and wild and fun, but I am concerned it has little interest in provable-correctness.  Let's hope we can eventually merge the best of both worlds.  I am eager to see what will replace Node in the future... :)</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

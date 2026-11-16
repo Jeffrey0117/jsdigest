@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why don&#39;t self-closing script elements work? · jsdigest</title>
+<meta name="description" content="What is the reason browsers do not correctly recognize: &lt;script src=&quot;foobar.js&quot; /&gt; &lt;!-- self-closing script element --&gt; Only this is recognized: &lt;script src=&quot;f…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Why don&#39;t self-closing script elements work?</h1>
+    <div class="q-meta big"><span class="score hot" title="1536 votes">1.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/10778/dimarzionist" rel="noopener">dimarzionist</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">html</span><span class="tag">internet-explorer</span><span class="tag">xhtml</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/69913/why-dont-self-closing-script-elements-work" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What is the reason browsers do not correctly recognize:</p>
+
+<pre><code>&lt;script src="foobar.js" /&gt; &lt;!-- self-closing script element --&gt;
+</code></pre>
+
+<p>Only this is recognized:</p>
+
+<pre><code>&lt;script src="foobar.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>Does this break the concept of XHTML support?</p>
+
+<p>Note: This statement is correct at least for all IE (6-8 beta 2).</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score" title="524 votes">524</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/7754/squadette" rel="noopener">squadette</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/69984" rel="noopener">原文 ↗</a></div><div class="prose"><p>The non-normative appendix ‘HTML Compatibility Guidelines’ of the XHTML 1 specification says:</p>
+<p><a href="http://www.w3.org/TR/xhtml1/#C_3" rel="noreferrer">С.3. Element Minimization and Empty Element Content</a></p>
+<blockquote>
+<p>Given an empty instance of an element whose content model is not <code>EMPTY</code> (for example, an empty title or paragraph) do not use the minimized form (e.g. use <code>&lt;p&gt; &lt;/p&gt;</code> and not <code>&lt;p /&gt;</code>).</p>
+</blockquote>
+<p><a href="http://www.w3.org/TR/xhtml1/dtds.html#a_dtd_XHTML-1.0-Strict" rel="noreferrer">XHTML DTD</a> specifies script elements as:</p>
+<pre><code>&lt;!-- script statements, which may include CDATA sections --&gt;
+&lt;!ELEMENT script (#PCDATA)&gt;
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="259 votes">259</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/11438/joelhardi" rel="noopener">joelhardi</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/70288" rel="noopener">原文 ↗</a></div><div class="prose"><p>To add to what Brad and squadette have said, the self-closing XML syntax <code>&lt;script /&gt;</code> actually <strong>is</strong> correct XML, but for it to work in practice, your web server also needs to send your documents as properly formed XML with an XML mimetype like <code>application/xhtml+xml</code> in the HTTP Content-Type header (and <em>not</em> as <code>text/html</code>).</p>
+
+<p>However, sending an XML mimetype will cause your pages not to be parsed by IE7, which only likes <code>text/html</code>.</p>
+
+<p>From <a href="http://www.w3.org/TR/xhtml-media-types/" rel="noreferrer">w3</a>:</p>
+
+<blockquote>
+  <p>In summary, 'application/xhtml+xml'
+  SHOULD be used for XHTML Family
+  documents, and the use of 'text/html'
+  SHOULD be limited to HTML-compatible
+  XHTML 1.0 documents. 'application/xml'
+  and 'text/xml' MAY also be used, but
+  whenever appropriate,
+  'application/xhtml+xml' SHOULD be used
+  rather than those generic XML media
+  types.</p>
+</blockquote>
+
+<p>I puzzled over this a few months ago, and the only workable (compatible with FF3+ and IE7) solution was to use the old <code>&lt;script&gt;&lt;/script&gt;</code> syntax with <code>text/html</code> (HTML syntax + HTML mimetype).</p>
+
+<p>If your server sends the <code>text/html</code> type in its HTTP headers, even with otherwise properly formed XHTML documents, FF3+ will use its HTML rendering mode which means that <code>&lt;script /&gt;</code> will not work (this is a change, Firefox was previously less strict).</p>
+
+<p>This will happen regardless of any fiddling with <code>http-equiv</code> meta elements, the XML prolog or doctype inside your document -- Firefox branches once it gets the <code>text/html</code> header, that determines whether the HTML or XML parser looks inside the document, and the HTML parser does not understand <code>&lt;script /&gt;</code>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="232 votes">232</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/893578/sheepy" rel="noopener">Sheepy</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/28719226" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Others have answered &quot;how&quot; and quoted spec. Here is the real story of &quot;why no <code>&lt;script/&gt;</code>&quot;, after many hours digging into bug reports and mailing lists.</p>
+<hr />
+<p><strong>HTML 4</strong></p>
+<p>HTML 4 is based on <a href="http://www.iso.org/iso/catalogue_detail.htm?csnumber=16387" rel="noreferrer">SGML</a>.</p>
+<p>SGML has some <a href="https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language#SHORTTAG" rel="noreferrer">shorttags</a>, such as <code>&lt;BR//</code>, <code>&lt;B&gt;text&lt;/&gt;</code>, <code>&lt;B/text/</code>, or <code>&lt;OL&lt;LI&gt;item&lt;/LI&lt;/OL&gt;</code>.
+XML takes the first form, redefines the ending as &quot;&gt;&quot; (SGML is flexible), so that it becomes <code>&lt;BR/&gt;</code>.</p>
+<p>However, HTML did not redefine this, so <code>&lt;SCRIPT/&gt;</code> <a href="https://stackoverflow.com/a/3201889/893578"><em>should</em> mean</a> <code>&lt;SCRIPT&gt;&gt;</code>. <br>
+(Yes, the '&gt;' should be part of content, and the tag is still <em>not</em> closed.)</p>
+<p>Obviously, this is incompatible with XHTML and <em>will</em> break many sites (by the time browsers were mature enough <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=47522" rel="noreferrer">to care</a> <a href="https://bugs.webkit.org/show_bug.cgi?id=6393" rel="noreferrer">about this</a>), so <a href="https://stackoverflow.com/a/9619296/893578">nobody implemented shorttags</a> and the specification <a href="http://www.w3.org/TR/html401/appendix/notes.html#h-B.3.3" rel="noreferrer">advises against them</a>.</p>
+<p>Effectively, all 'working' self-ended tags are tags with prohibited end tag on technically non-conformant parsers and are in fact invalid.
+It was W3C which <a href="https://www.webkit.org/blog/68/understanding-html-xml-and-xhtml/" rel="noreferrer">came up with this hack</a> to help transitioning to XHTML by making it <a href="http://www.w3.org/TR/xhtml1/#guidelines" rel="noreferrer">HTML-compatible</a>.</p>
+<p>And <code>&lt;script&gt;</code>'s end tag is <a href="http://www.w3.org/TR/html401/interact/scripts.html#h-18.2.1" rel="noreferrer">not prohibited</a>.</p>
+<p><strong>&quot;Self-ending&quot; tag is a hack in HTML 4 and is meaningless.</strong></p>
+<hr />
+<p><strong>HTML 5</strong></p>
+<p>HTML5 has <a href="https://html.spec.whatwg.org/multipage/syntax.html#elements-2" rel="noreferrer">five types of tags</a> and only 'void' and 'foreign' tags are <a href="https://html.spec.whatwg.org/multipage/syntax.html#syntax-tags" rel="noreferrer">allowed to be self-closing</a>.</p>
+<p>Because <code>&lt;script&gt;</code> is not void (it <em>may</em> have content) and is not foreign (like MathML or SVG), <code>&lt;script&gt;</code> cannot be self-closed, regardless of how you use it.</p>
+<p>But why? Can't they regard it as foreign, make special case, or something?</p>
+<p>HTML 5 aims to be <a href="https://html.spec.whatwg.org/multipage/introduction.html#history-2" rel="noreferrer">backward-compatible</a> with <em>implementations</em> of HTML 4 and XHTML 1.
+It is not based on SGML or XML; its syntax is mainly concerned with documenting and uniting the implementations.
+(This is why <code>&lt;br/&gt;</code> <code>&lt;hr/&gt;</code> etc. are <a href="https://html.spec.whatwg.org/multipage/syntax.html#start-tags" rel="noreferrer">valid HTML 5</a> despite being invalid HTML4.)</p>
+<p>Self-closing <code>&lt;script&gt;</code> is one of the tags where implementations used to differ.
+It <a href="https://www.webkit.org/blog/1273/the-html5-parsing-algorithm/" rel="noreferrer">used to work in Chrome, Safari</a>, <a href="http://www.opera.com/docs/changelogs/windows/900b1/" rel="noreferrer">and Opera</a>; to my knowledge it never worked in Internet Explorer or Firefox.</p>
+<p><a href="http://lists.w3.org/Archives/Public/public-whatwg-archive/2009Aug/0101.html" rel="noreferrer">This was discussed</a> when HTML 5 was being drafted and got rejected because it <a href="http://lists.w3.org/Archives/Public/public-whatwg-archive/2009Aug/0104.html" rel="noreferrer">breaks</a> <a href="http://lists.w3.org/Archives/Public/public-whatwg-archive/2009Aug/0117.html" rel="noreferrer">browser</a> <a href="http://lists.w3.org/Archives/Public/public-whatwg-archive/2009Aug/0119.html" rel="noreferrer">compatibility</a>.
+Webpages that self-close script tag may not render correctly (if at all) in old browsers.
+There were <a href="http://lists.w3.org/Archives/Public/public-whatwg-archive/2009Aug/0384.html" rel="noreferrer">other proposals</a>, but they can't solve the compatibility problem either.</p>
+<p>After the draft was released, WebKit updated the parser to be in conformance.</p>
+<p><strong>Self-closing <code>&lt;script&gt;</code> does not happen in HTML 5 because of backward compatibility to HTML 4 and XHTML 1.</strong></p>
+<hr />
+<p><strong>XHTML 1 / XHTML 5</strong></p>
+<p>When <em>really</em> served as XHTML, <code>&lt;script/&gt;</code> is really closed, as <a href="https://stackoverflow.com/a/70288/893578">other answers</a> have stated.</p>
+<p>Except that <a href="http://www.w3.org/TR/xhtml1/#media" rel="noreferrer">the spec says</a> it <em>should</em> have worked when served as HTML:</p>
+<blockquote>
+<p>XHTML Documents ... may be labeled with the Internet Media Type &quot;text/html&quot; [RFC2854], as they are compatible with most HTML browsers.</p>
+</blockquote>
+<p>So, what happened?</p>
+<p>People <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=67646" rel="noreferrer">asked Mozilla</a> to <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=107904" rel="noreferrer">let Firefox parse</a> conforming documents as <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=109837" rel="noreferrer">XHTML</a> regardless of the specified content header (known as <a href="https://en.wikipedia.org/wiki/Content_sniffing" rel="noreferrer">content sniffing</a>).
+This would have allowed self-closing scripts, and content sniffing <a href="http://blogs.msdn.com/b/ie/archive/2005/02/01/364581.aspx" rel="noreferrer">was necessary</a> anyway because web hosters were not mature enough to serve the correct header; IE was <a href="https://msdn.microsoft.com/en-us/library/ie/ms775147%28v=vs.85%29.aspx" rel="noreferrer">good at it</a>.</p>
+<p>If the <a href="https://en.wikipedia.org/wiki/Browser_wars#First_browser_war" rel="noreferrer">first browser war</a> didn't end with IE 6, XHTML may have been on the list, too. But it did end. And IE 6 <a href="http://blog.isotoma.com/2008/01/xhtml-ccs-crashes-ie6/" rel="noreferrer">has a problem</a> with XHTML.
+In fact IE <a href="https://stackoverflow.com/questions/268526/blank-page-in-ie6">did not support</a> the correct MIME type <a href="http://blogs.msdn.com/b/ie/archive/2005/09/15/467901.aspx" rel="noreferrer">at all</a>, forcing <em>everyone</em> to use <code>text/html</code> for XHTML because IE held <a href="https://en.wikipedia.org/wiki/Usage_share_of_web_browsers#TheCounter.com_.282000_to_2009.29" rel="noreferrer">major market share</a> for a whole decade.</p>
+<p>And also content sniffing <a href="http://blogs.msdn.com/b/ie/archive/2008/07/02/ie8-security-part-v-comprehensive-protection.aspx" rel="noreferrer">can be</a> <a href="http://www.h-online.com/security/features/Risky-MIME-sniffing-in-Internet-Explorer-746229.html" rel="noreferrer">really bad</a> and people are saying <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=68421" rel="noreferrer">it should be stopped</a>.</p>
+<p>Finally, it turns out that the W3C <a href="http://lists.w3.org/Archives/Public/www-html/2000Sep/0024.html" rel="noreferrer">didn't mean XHTML to be sniffable</a>: the document is <em>both</em>, HTML and XHTML, and <code>Content-Type</code> rules.
+One can say they were standing firm on &quot;just follow our spec&quot; and <a href="http://lemire.me/blog/archives/2006/10/30/reinventing-html-or-yes-we-admit-it-xhtml-failed/" rel="noreferrer">ignoring what was practical</a>. A mistake that <a href="https://www.cnet.com/news/an-epitaph-for-the-web-standard-xhtml-2/" rel="noreferrer">continued</a> into later XHTML versions.</p>
+<p>Anyway, this decision <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=109837#c11" rel="noreferrer">settled the matter</a> for Firefox.
+It was 7 years before Chrome <a href="https://en.wikipedia.org/wiki/Google_Chrome#Public_release" rel="noreferrer">was born</a>; there were no other significant browser. Thus it was decided.</p>
+<p><strong>Specifying the doctype alone does not trigger XML parsing because of following specifications.</strong></p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

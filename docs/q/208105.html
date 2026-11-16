@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I remove a property from a JavaScript object? · jsdigest</title>
+<meta name="description" content="Given an object: let myObject = { &quot;ircEvent&quot;: &quot;PRIVMSG&quot;, &quot;method&quot;: &quot;newURI&quot;, &quot;regex&quot;: &quot;^http://.*&quot; }; How do I remove the property regex to end up with the fol…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I remove a property from a JavaScript object?</h1>
+    <div class="q-meta big"><span class="score hot" title="7585 votes">7.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/27929/johnstok" rel="noopener">johnstok</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">object</span><span class="tag">properties</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/208105/how-do-i-remove-a-property-from-a-javascript-object" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Given an object:</p>
+<pre><code>let myObject = {
+  &quot;ircEvent&quot;: &quot;PRIVMSG&quot;,
+  &quot;method&quot;: &quot;newURI&quot;,
+  &quot;regex&quot;: &quot;^http://.*&quot;
+};
+</code></pre>
+<p>How do I remove the property <code>regex</code> to end up with the following <code>myObject</code>?</p>
+<pre><code>let myObject = {
+  &quot;ircEvent&quot;: &quot;PRIVMSG&quot;,
+  &quot;method&quot;: &quot;newURI&quot;
+};
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="10002 votes">10k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/9021/nickf" rel="noopener">nickf</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/208106" rel="noopener">原文 ↗</a></div><div class="prose"><p>To remove a property from an object (mutating the object), you can do it by using the <code>delete</code> keyword, like this:</p>
+<pre><code>delete myObject.regex;
+// or,
+delete myObject['regex'];
+// or,
+var prop = &quot;regex&quot;;
+delete myObject[prop];
+</code></pre>
+<p>Demo</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var myObject = {
+  "ircEvent": "PRIVMSG",
+  "method": "newURI",
+  "regex": "^http://.*"
+};
+delete myObject.regex;
+
+console.log(myObject);</code></pre>
+</div>
+</div>
+</p>
+<p>For anyone interested in reading more about it, Stack Overflow user <a href="https://stackoverflow.com/users/130652/kangax">kangax</a> has written an incredibly in-depth blog post about the <code>delete</code> statement on their blog, <em><a href="http://perfectionkills.com/understanding-delete" rel="noreferrer">Understanding delete</a></em>. It is highly recommended.</p>
+<p>If you'd like a <em>new</em> object with all the keys of the original except some, you could use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#object_destructuring" rel="noreferrer">destructuring</a>.</p>
+<p>Demo
+<div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>let myObject = {
+  "ircEvent": "PRIVMSG",
+  "method": "newURI",
+  "regex": "^http://.*"
+};
+
+// assign the key regex to the variable _ indicating it will be unused
+const { regex: _, ...newObj } = myObject;
+
+console.log(newObj);   // has no 'regex' key
+console.log(myObject); // remains unchanged</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1130 votes">1.1k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/139361/dan" rel="noopener">Dan</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/21735614" rel="noopener">原文 ↗</a></div><div class="prose"><p>Objects in JavaScript can be thought of as maps between keys and values. The <code>delete</code> operator is used to remove these keys, more commonly known as object properties, one at a time.</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var obj = {
+  myProperty: 1    
+}
+console.log(obj.hasOwnProperty('myProperty')) // true
+delete obj.myProperty
+console.log(obj.hasOwnProperty('myProperty')) // false</code></pre>
+</div>
+</div>
+</p>
+
+<p>The <code>delete</code> operator does not directly free memory, and it differs from simply assigning the value of <code>null</code> or <code>undefined</code> to a property, in that the property <em>itself</em> is removed from the object. Note that if the <em>value</em> of a deleted property was a reference type (an object), and another part of your program still holds a reference to that object, then that object will, of course, not be garbage collected until all references to it have disappeared.</p>
+
+<p><code>delete</code> will only work on properties whose descriptor marks them as configurable.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="436 votes">436</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/189431/koen" rel="noopener">Koen.</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/40493600" rel="noopener">原文 ↗</a></div><div class="prose"><p>Old question, modern answer. Using object destructuring, an <a href="https://en.wikipedia.org/wiki/ECMAScript#6th_Edition_-_ECMAScript_2015">ECMAScript&nbsp;6</a> feature, it's as simple as:</p>
+
+<pre><code>const { a, ...rest } = { a: 1, b: 2, c: 3 };
+</code></pre>
+
+<p>Or with the questions sample:</p>
+
+<pre><code>const myObject = {"ircEvent": "PRIVMSG", "method": "newURI", "regex": "^http://.*"};
+const { regex, ...newObject } = myObject;
+console.log(newObject);
+</code></pre>
+
+<p><a href="https://babeljs.io/repl/#?babili=false&amp;evaluate=true&amp;lineWrap=true&amp;presets=es2015%2Cstage-0&amp;experimental=true&amp;loose=true&amp;spec=false&amp;code=const%20myObject%20%3D%20%7B%22ircEvent%22%3A%20%22PRIVMSG%22%2C%20%22method%22%3A%20%22newURI%22%2C%20%22regex%22%3A%20%22%5Ehttp%3A%2F%2F.*%22%7D%3B%0Aconst%20%7B%20regex%2C%20...newObject%20%7D%20%3D%20myObject%3B%0Aconsole.log(newObject)%3B">You can see it in action in the Babel try-out editor.</a></p>
+
+<hr>
+
+<p><strong>Edit:</strong></p>
+
+<p>To reassign to the same variable, use a <code>let</code>:</p>
+
+<pre><code>let myObject = {"ircEvent": "PRIVMSG", "method": "newURI", "regex": "^http://.*"};
+({ regex, ...myObject } = myObject);
+console.log(myObject);
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

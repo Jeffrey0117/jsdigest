@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sorting an array of objects by property values · jsdigest</title>
+<meta name="description" content="I&#39;ve got the following objects using AJAX and stored them in an array: var homes = [ { &quot;h_id&quot;: &quot;3&quot;, &quot;city&quot;: &quot;Dallas&quot;, &quot;state&quot;: &quot;TX&quot;, &quot;zip&quot;: &quot;75201&quot;, &quot;price&quot;: &quot;…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Sorting an array of objects by property values</h1>
+    <div class="q-meta big"><span class="score hot" title="1728 votes">1.7k</span><span class="q-by">asked by TomHankers</span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">sorting</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/979256/sorting-an-array-of-objects-by-property-values" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I've got the following objects using AJAX and stored them in an array:</p>
+
+<pre><code>var homes = [
+    {
+        "h_id": "3",
+        "city": "Dallas",
+        "state": "TX",
+        "zip": "75201",
+        "price": "162500"
+    }, {
+        "h_id": "4",
+        "city": "Bevery Hills",
+        "state": "CA",
+        "zip": "90210",
+        "price": "319250"
+    }, {
+        "h_id": "5",
+        "city": "New York",
+        "state": "NY",
+        "zip": "00010",
+        "price": "962500"
+    }
+];
+</code></pre>
+
+<p>How do I create a function to sort the objects by the <code>price</code> property in <em>ascending</em> <strong>or</strong> <em>descending</em> order using JavaScript only?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2234 votes">2.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/43452/stobor" rel="noopener">Stobor</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/979289" rel="noopener">原文 ↗</a></div><div class="prose"><p>Sort homes by price in ascending order:</p>
+
+<pre class="lang-js prettyprint-override"><code>homes.sort(function(a, b) {
+    return parseFloat(a.price) - parseFloat(b.price);
+});
+</code></pre>
+
+<p>Or after ES6 version:</p>
+
+<pre><code>homes.sort((a, b) =&gt; parseFloat(a.price) - parseFloat(b.price));
+</code></pre>
+
+<p>Some documentation can be found <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/sort" rel="noreferrer">here</a>.</p>
+
+<p>For descending order, you may use </p>
+
+<pre><code>homes.sort((a, b) =&gt; parseFloat(b.price) - parseFloat(a.price));
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="740 votes">740</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/43089/kenan-banks" rel="noopener">Kenan Banks</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/979325" rel="noopener">原文 ↗</a></div><div class="prose"><p>Here's a more flexible version, which allows you to create 
+reusable sort functions, and sort by any field.</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const sort_by = (field, reverse, primer) =&gt; {
+
+  const key = primer ?
+    function(x) {
+      return primer(x[field])
+    } :
+    function(x) {
+      return x[field]
+    };
+
+  reverse = !reverse ? 1 : -1;
+
+  return function(a, b) {
+    return a = key(a), b = key(b), reverse * ((a &gt; b) - (b &gt; a));
+  }
+}
+
+
+//Now you can sort by any field at will...
+
+const homes=[{h_id:"3",city:"Dallas",state:"TX",zip:"75201",price:"162500"},{h_id:"4",city:"Bevery Hills",state:"CA",zip:"90210",price:"319250"},{h_id:"5",city:"New York",state:"NY",zip:"00010",price:"962500"}];
+
+// Sort by price high to low
+console.log(homes.sort(sort_by('price', true, parseInt)));
+
+// Sort by city, case-insensitive, A-Z
+console.log(homes.sort(sort_by('city', false, (a) =&gt;  a.toUpperCase()
+)));</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="153 votes">153</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/103260/ricardo-marimon" rel="noopener">Ricardo Marimon</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/979278" rel="noopener">原文 ↗</a></div><div class="prose"><p>To sort it you need to create a comparator function taking two arguments. Then call the sort function with that comparator function as follows:</p>
+
+<pre class="lang-js prettyprint-override"><code>// a and b are object elements of your array
+function mycomparator(a,b) {
+  return parseInt(a.price, 10) - parseInt(b.price, 10);
+}
+homes.sort(mycomparator);
+</code></pre>
+
+<p>If you want to sort ascending switch the expressions on each side of the minus sign.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

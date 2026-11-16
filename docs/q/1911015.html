@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I debug Node.js applications? · jsdigest</title>
+<meta name="description" content="How do I debug a Node.js server application? Right now I&#39;m mostly using alert debugging with print statements like this: sys.puts(sys.inspect(someVariable)); T…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I debug Node.js applications?</h1>
+    <div class="q-meta big"><span class="score hot" title="1715 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/129322/fabian-jakobs" rel="noopener">Fabian Jakobs</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">node.js</span><span class="tag">debugging</span><span class="tag">google-chrome-devtools</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1911015/how-do-i-debug-node-js-applications" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I debug a Node.js server application?</p>
+
+<p>Right now I'm mostly using <em>alert debugging</em> with print statements like this:</p>
+
+<pre><code>sys.puts(sys.inspect(someVariable));
+</code></pre>
+
+<p>There must be a better way to debug. I know that <a href="http://en.wikipedia.org/wiki/Google_Chrome" rel="noreferrer">Google Chrome</a> has a command-line debugger. Is this debugger available for Node.js as well?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score" title="268 votes">268</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/129322/fabian-jakobs" rel="noopener">Fabian Jakobs</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2536734" rel="noopener">原文 ↗</a></div><div class="prose"><p>The <a href="http://en.wikipedia.org/wiki/V8_%28JavaScript_engine%29" rel="noreferrer">V8</a> debugger released as part of the Google <a href="http://code.google.com/p/chromedevtools/" rel="noreferrer">Chrome Developer Tools</a> can be used to debug Node.js scripts. A detailed explanation of how this works can be found in the <a href="https://github.com/nodejs/node/wiki/Using-Eclipse-as-Node-Applications-Debugger" rel="noreferrer">Node.js GitHub wiki</a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1311 votes">1.3k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/477157/daralthus" rel="noopener">daralthus</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3944507" rel="noopener">原文 ↗</a></div><div class="prose"><p><a href="http://github.com/dannycoates/node-inspector" rel="noreferrer">node-inspector</a> could save the day! Use it from any browser supporting <a href="http://en.wikipedia.org/wiki/WebSocket" rel="noreferrer">WebSocket</a>. Breakpoints, profiler, livecoding, etc... It is really awesome.</p>
+
+<p>Install it with:</p>
+
+<pre><code>npm install -g node-inspector
+</code></pre>
+
+<p>Then run:</p>
+
+<pre><code>node-debug app.js
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="796 votes">796</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/130638/balupton" rel="noopener">balupton</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/16512303" rel="noopener">原文 ↗</a></div><div class="prose"><h2>Debugging</h2>
+
+<ul>
+<li><a href="http://www.joyent.com/developers/node/debug" rel="noreferrer">Joyent's Guide</a></li>
+<li><a href="https://nodejs.org/api/debugger.html" rel="noreferrer">Debugger</a></li>
+<li><a href="https://github.com/node-inspector/node-inspector" rel="noreferrer">Node Inspector</a></li>
+<li><a href="https://code.visualstudio.com/docs/runtimes/nodejs#_debugging-your-node-application" rel="noreferrer">Visual Studio Code</a></li>
+<li><a href="https://docs.c9.io/running_and_debugging_code.html" rel="noreferrer">Cloud9</a></li>
+<li><a href="https://github.com/adobe-research/theseus" rel="noreferrer">Brackets</a></li>
+</ul>
+
+<h2>Profiling</h2>
+
+<ol>
+<li><code>node --prof ./app.js</code></li>
+<li><code>node --prof-process ./the-generated-log-file</code></li>
+</ol>
+
+<h2>Heapdumps</h2>
+
+<ul>
+<li><a href="https://github.com/bnoordhuis/node-heapdump" rel="noreferrer">node-heapdump with Chrome Developer Tools</a></li>
+</ul>
+
+<h2>Flamegraphs</h2>
+
+<ul>
+<li><a href="https://github.com/davidmarkclements/0x" rel="noreferrer">0x</a></li>
+<li><a href="https://github.com/jam3/devtool" rel="noreferrer">jam3/devtool</a> then <a href="https://youtu.be/g0g4ML4nhPg" rel="noreferrer">Chrome Developer Tools Flame Charts</a></li>
+<li><a href="http://dtrace.org/" rel="noreferrer">Dtrace</a> and <a href="https://github.com/joyent/node-stackvis" rel="noreferrer">StackVis</a> — <a href="http://blog.nodejs.org/2012/04/25/profiling-node-js/" rel="noreferrer">Only supported on SmartOS</a></li>
+<li><a href="https://clinicjs.org/flame/" rel="noreferrer">clinicjs</a></li>
+</ul>
+
+<h2>Tracing</h2>
+
+<ul>
+<li><a href="https://github.com/traceglMPL/tracegl" rel="noreferrer">Interactive Stack Traces with TraceGL</a></li>
+</ul>
+
+<h2>Logging</h2>
+
+<p>Libraries that output debugging information</p>
+
+<ul>
+<li><a href="https://github.com/bevry/caterpillar" rel="noreferrer">Caterpillar</a></li>
+<li><a href="https://github.com/baryon/tracer" rel="noreferrer">Tracer</a></li>
+<li><a href="https://www.npmjs.com/package/scribbles" rel="noreferrer">scribbles</a></li>
+</ul>
+
+<p>Libraries that enhance stack trace information</p>
+
+<ul>
+<li><a href="https://github.com/mattinsler/longjohn" rel="noreferrer">Longjohn</a></li>
+</ul>
+
+<h2>Benchmarking</h2>
+
+<ul>
+<li><a href="http://httpd.apache.org/docs/2.2/programs/ab.html" rel="noreferrer">Apache Bench</a>: <code>ab -n 100000 -c 1 http://127.0.0.1:9778/</code></li>
+<li><a href="https://github.com/wg/wrk" rel="noreferrer">wrk</a></li>
+</ul>
+
+<h2>Other</h2>
+
+<ul>
+<li><a href="https://trace.risingstack.com" rel="noreferrer">Trace</a></li>
+<li><a href="https://github.com/dthree/vantage" rel="noreferrer">Vantage</a></li>
+<li><a href="https://github.com/buggerjs/bugger" rel="noreferrer">Bugger</a></li>
+<li><a href="http://google.github.io/tracing-framework" rel="noreferrer">Google Tracing Framework</a></li>
+<li><a href="https://github.com/paulirish/automated-chrome-profiling" rel="noreferrer">Paul Irish's Guide</a></li>
+</ul>
+
+<h2>Legacy</h2>
+
+<p>These use to work but are no longer maintained or no longer applicable to modern node versions.</p>
+
+<ul>
+<li><a href="https://github.com/bnoordhuis/node-profiler" rel="noreferrer">https://github.com/bnoordhuis/node-profiler</a> - replaced by built-in debugging</li>
+<li><a href="https://github.com/c4milo/node-webkit-agent" rel="noreferrer">https://github.com/c4milo/node-webkit-agent</a> - replaced by node inspector</li>
+<li><a href="https://nodetime.com/" rel="noreferrer">https://nodetime.com/</a> - defunct</li>
+</ul>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

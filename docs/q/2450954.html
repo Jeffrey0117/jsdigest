@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to randomize (shuffle) a JavaScript array? · jsdigest</title>
+<meta name="description" content="I have an array like this: var arr1 = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]; How can I randomize / shuffle it?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to randomize (shuffle) a JavaScript array?</h1>
+    <div class="q-meta big"><span class="score hot" title="2068 votes">2.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/49153/ali" rel="noopener">Ali</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">random</span><span class="tag">shuffle</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have an array like this:</p>
+
+<pre><code>var arr1 = ["a", "b", "c", "d"];
+</code></pre>
+
+<p>How can I randomize / shuffle it?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2631 votes">2.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/81179/christophed" rel="noopener">ChristopheD</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2450976" rel="noopener">原文 ↗</a></div><div class="prose"><p>The de-facto unbiased shuffle algorithm is the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle" rel="noreferrer">Fisher–Yates (aka Knuth) Shuffle</a>.</p>
+<p>You can see a <a href="http://bost.ocks.org/mike/shuffle/" rel="noreferrer">great visualization here</a>.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function shuffle(array) {
+  let currentIndex = array.length;
+
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+}
+
+// Used like so
+let arr = [2, 11, 37, 42];
+shuffle(arr);
+console.log(arr);</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1284 votes">1.3k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/310500/laurens-holst" rel="noopener">Laurens Holst</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/12646864" rel="noopener">原文 ↗</a></div><div class="prose"><p>Here's a JavaScript implementation of the <a href="http://en.wikipedia.org/wiki/Fisher-Yates_shuffle#The_modern_algorithm" rel="noreferrer">Durstenfeld shuffle</a>, an optimized version of Fisher-Yates:</p>
+<pre><code>/* Randomize array in-place using Durstenfeld shuffle algorithm */
+function shuffleArray(array) {
+    for (var i = array.length - 1; i &gt; 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+</code></pre>
+<p>It picks a random element for each original array element, and excludes it from the next draw, like picking randomly from a deck of cards.</p>
+<p>This clever exclusion swaps the picked element with the current one, then picks the next random element from the remainder, looping backwards for optimal efficiency, ensuring the random pick is simplified (it can always start at 0).</p>
+<p>Note the loop condition skips <code>i==0</code>, since <code>j</code> can only ever be 0 then, leading to no swap.</p>
+<p>Algorithm runtime is <code>O(n)</code>. <strong>Note</strong> that the shuffle is done in-place so if you don't want to modify the original array, first make a copy of it with <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/slice" rel="noreferrer"><code>.slice(0)</code></a>.</p>
+<hr />
+<h2><em>EDIT:</em> Updating to ES6 / ECMAScript 2015</h2>
+<p>The new ES6 allows us to assign two variables at once. This is especially handy when we want to swap the values of two variables, as we can do it in one line of code. Here is a shorter form of the same function, using this feature.</p>
+<pre><code>function shuffleArray(array) {
+    for (let i = array.length - 1; i &gt; 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="537 votes">537</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/687677/superluminary" rel="noopener">superluminary</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/46545530" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can do it easily with map and sort:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>let unshuffled = ['hello', 'a', 't', 'q', 1, 2, 3, {cats: true}]
+
+let shuffled = unshuffled
+    .map(value =&gt; ({ value, sort: Math.random() }))
+    .sort((a, b) =&gt; a.sort - b.sort)
+    .map(({ value }) =&gt; value)
+   
+console.log(shuffled)</code></pre>
+</div>
+</div>
+</p>
+<ol>
+<li>We put each element in the array in an object, and give it a random sort key</li>
+<li>We sort using the random key</li>
+<li>We unmap to get the original objects</li>
+</ol>
+<p>You can shuffle polymorphic arrays, and the sort is as random as Math.random, which is good enough for most purposes.</p>
+<p>Since the elements are sorted against consistent keys that are not regenerated each iteration, and each comparison pulls from the same distribution, any non-randomness in the distribution of Math.random is canceled out.</p>
+<p><strong>Speed</strong></p>
+<p>Time complexity is O(N log N), same as quick sort. Space complexity is O(N). This is not as efficient as a Fischer Yates shuffle but, in my opinion, the code is significantly shorter and more functional. If you have a large array you should certainly use Fischer Yates. If you have a small array with a few hundred items, you might do this.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

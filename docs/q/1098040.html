@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checking if a key exists in a JavaScript object? · jsdigest</title>
+<meta name="description" content="How do I check if a particular key exists in a JavaScript object or array? If a key doesn&#39;t exist, and I try to access it, will it return false? Or throw an er…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Checking if a key exists in a JavaScript object?</h1>
+    <div class="q-meta big"><span class="score hot" title="4141 votes">4.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/79/adam-ernst" rel="noopener">Adam Ernst</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">object</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1098040/checking-if-a-key-exists-in-a-javascript-object" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I check if a particular key exists in a JavaScript object or array?</p>
+
+<p>If a key doesn't exist, and I try to access it, will it return false? Or throw an error?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5622 votes">5.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/23501/ate%c5%9f-g%c3%b6ral" rel="noopener">Ateş G&amp;#246;ral</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1098955" rel="noopener">原文 ↗</a></div><div class="prose"><p>Checking for undefined-ness is not an accurate way of testing whether a key exists. What if the key exists but the value is actually <code>undefined</code>?</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var obj = { key: undefined };
+console.log(obj["key"] !== undefined); // false, but the key exists!</code></pre>
+</div>
+</div>
+</p>
+<p>You should instead use the <code>in</code> operator:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var obj = { key: undefined };
+console.log("key" in obj); // true, regardless of the actual value</code></pre>
+</div>
+</div>
+</p>
+<p>If you want to check if a key doesn't exist, remember to use parenthesis:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var obj = { not_key: undefined };
+console.log(!("key" in obj)); // true if "key" doesn't exist in object
+console.log(!"key" in obj);   // Do not do this! It is equivalent to "false in obj"</code></pre>
+</div>
+</div>
+</p>
+<p>Or, if you want to particularly test for properties of the object instance (and not inherited properties), use <code>hasOwnProperty</code>:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var obj = { key: undefined };
+console.log(obj.hasOwnProperty("key")); // true</code></pre>
+</div>
+</div>
+</p>
+<p>For performance comparison between the methods that are <code>in</code>, <code>hasOwnProperty</code> and key is <code>undefined</code>, see <a href="https://jsben.ch/WqlIl" rel="noreferrer">this <strong>benchmark</strong></a>:</p>
+<p><a href="https://i.sstatic.net/PEuZT.png" rel="noreferrer"><img src="https://i.sstatic.net/PEuZT.png" alt="Benchmark results" /></a></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="399 votes">399</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1879686/rdllopes" rel="noopener">rdllopes</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/22074727" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h1>Quick Answer</h1>
+<blockquote>
+<p>How do I check if a particular key exists in a JavaScript object or array?
+If a key doesn't exist and I try to access it, will it return false? Or throw an error?</p>
+</blockquote>
+<p>Accessing directly a missing property using (associative) array style or object style will return an <em>undefined</em> constant.</p>
+<h2>The slow and reliable <em>in</em> operator and <em>hasOwnProperty</em> method</h2>
+<p>As people have already mentioned here, you could have an object with a property associated with an &quot;undefined&quot; constant.</p>
+<pre><code> var bizzareObj = {valid_key:  undefined};
+</code></pre>
+<p>In that case, you will have to use <em>hasOwnProperty</em> or <em>in</em> operator to know if the key is really there. But, <em>but at what price?</em></p>
+<p>so, I tell you...</p>
+<p><em>in</em> operator and <em>hasOwnProperty</em> are &quot;methods&quot; that use the Property Descriptor mechanism in Javascript (similar to Java reflection in the Java language).</p>
+<p><a href="http://www.ecma-international.org/ecma-262/5.1/#sec-8.10" rel="noreferrer">http://www.ecma-international.org/ecma-262/5.1/#sec-8.10</a></p>
+<blockquote>
+<p>The Property Descriptor type is used to explain the manipulation and reification of named property attributes. Values of the Property Descriptor type are records composed of named fields where each field’s name is an attribute name and its value is a corresponding attribute value as specified in 8.6.1. In addition, any field may be present or absent.</p>
+</blockquote>
+<p>On the other hand, calling an object method or key will use Javascript [[Get]] mechanism. That is a far way faster!</p>
+<h2>Benchmark</h2>
+<p><a href="https://jsben.ch/HaHQt" rel="noreferrer">https://jsben.ch/HaHQt</a></p>
+<p><img src="https://i.sstatic.net/GjzNU.png" alt="Comparing key access in JS" />.</p>
+<h4>Using <em>in</em> operator</h4>
+<pre><code>var result = &quot;Impression&quot; in array;
+</code></pre>
+<p>The result was</p>
+<pre><code>12,931,832 ±0.21% ops/sec      92% slower 
+</code></pre>
+<h4>Using hasOwnProperty</h4>
+<pre><code>var result = array.hasOwnProperty(&quot;Impression&quot;)
+</code></pre>
+<p>The result was</p>
+<pre><code>16,021,758 ±0.45% ops/sec     91% slower
+</code></pre>
+<h4>Accessing elements directly (brackets style)</h4>
+<pre><code>var result = array[&quot;Impression&quot;] === undefined
+</code></pre>
+<p>The result was</p>
+<pre><code>168,270,439 ±0.13 ops/sec     0.02% slower 
+</code></pre>
+<h4>Accessing elements directly (object style)</h4>
+<pre><code>var result = array.Impression  === undefined;
+</code></pre>
+<p>The result was</p>
+<pre><code>168,303,172 ±0.20%     fastest
+</code></pre>
+<h2>EDIT: What is the reason to assign to a property the <code>undefined</code> value?</h2>
+<p>That question puzzles me. In Javascript, there are at least two references for absent objects to avoid problems like this: <code>null</code> and <code>undefined</code>.</p>
+<p><code>null</code> is the primitive value that represents the intentional absence of any object value, or in short terms, the <strong>confirmed</strong> lack of value. On the other hand, <code>undefined</code> is an unknown value (not defined). If there is a property that will be used later with a <em>proper</em> value consider use <code>null</code> reference instead of <code>undefined</code> because in the initial moment the property is <strong>confirmed</strong> to lack value.</p>
+<p>Compare:</p>
+<pre><code>var a = {1: null}; 
+console.log(a[1] === undefined); // output: false. I know the value at position 1 of a[] is absent and this was by design, i.e.:  the value is defined. 
+console.log(a[0] === undefined); // output: true. I cannot say anything about a[0] value. In this case, the key 0 was not in a[].
+</code></pre>
+<h2>Advice</h2>
+<p>Avoid objects with <code>undefined</code> values. Check directly whenever possible and use <code>null</code> to initialize property values. Otherwise, use the slow <code>in</code> operator or <code>hasOwnProperty()</code> method.</p>
+<h2>EDIT: 12/04/2018 - NOT RELEVANT ANYMORE</h2>
+<p>As people have commented, modern versions of the Javascript engines (with firefox exception) have changed the approach for access properties. The current implementation is slower than the previous one for this particular case but the difference between access key and object is neglectable.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="201 votes">201</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1694/eli-courtwright" rel="noopener">Eli Courtwright</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1098067" rel="noopener">原文 ↗</a></div><div class="prose"><p>It will return <code>undefined</code>.</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var aa = {hello: "world"};
+alert( aa["hello"] );      // popup box with "world"
+alert( aa["goodbye"] );    // popup box with "undefined"</code></pre>
+</div>
+</div>
+</p>
+
+<p><code>undefined</code> is a special constant value.  So you can say, e.g.</p>
+
+<pre><code>// note the three equal signs so that null won't be equal to undefined
+if( aa["goodbye"] === undefined ) {
+    // do something
+}
+</code></pre>
+
+<p>This is probably the best way to check for missing keys.  However, as is pointed out in a comment below, it's theoretically possible that you'd want to have the actual value be <code>undefined</code>.  I've never needed to do this and can't think of a reason offhand why I'd ever want to, but just for the sake of completeness, you can use the <code>in</code> operator</p>
+
+<pre><code>// this works even if you have {"goodbye": undefined}
+if( "goodbye" in aa ) {
+    // do something
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

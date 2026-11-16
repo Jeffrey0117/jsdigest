@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adding a table row in jQuery · jsdigest</title>
+<meta name="description" content="I&#39;m using jQuery to add an additional row to a table as the last row. I have done it this way: $(&#39;#myTable&#39;).append(&#39;&lt;tr&gt;&lt;td&gt;my data&lt;/td&gt;&lt;td&gt;more data&lt;/td&gt;&lt;/tr…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Adding a table row in jQuery</h1>
+    <div class="q-meta big"><span class="score hot" title="2675 votes">2.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/5441/darryl-hein" rel="noopener">Darryl Hein</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">html-table</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/171027/adding-a-table-row-in-jquery" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm using jQuery to add an additional row to a table as the last row.</p>
+<p>I have done it this way:</p>
+<pre><code>$('#myTable').append('&lt;tr&gt;&lt;td&gt;my data&lt;/td&gt;&lt;td&gt;more data&lt;/td&gt;&lt;/tr&gt;');
+</code></pre>
+<p>Are there limitations to what you can add to a table like this (such as inputs, selects, number of rows)? Is there a different way to do it?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2308 votes">2.3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/17602/luke-bennett" rel="noopener">Luke Bennett</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/171049" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>The approach you suggest is not guaranteed to give you the result you're looking for - what if you had a <code>tbody</code> for example:</p>
+
+<pre><code>&lt;table id="myTable"&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;...&lt;/tr&gt;
+    &lt;tr&gt;...&lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</code></pre>
+
+<p>You would end up with the following:</p>
+
+<pre><code>&lt;table id="myTable"&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;...&lt;/tr&gt;
+    &lt;tr&gt;...&lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tr&gt;...&lt;/tr&gt;
+&lt;/table&gt;
+</code></pre>
+
+<p>I would therefore recommend this approach instead:</p>
+
+<pre><code>$('#myTable tr:last').after('&lt;tr&gt;...&lt;/tr&gt;&lt;tr&gt;...&lt;/tr&gt;');
+</code></pre>
+
+<p>You can include anything within the <code>after()</code> method as long as it's valid HTML, including multiple rows as per the example above.</p>
+
+<p><strong>Update:</strong> Revisiting this answer following recent activity with this question. eyelidlessness makes a good comment that there will always be a <code>tbody</code> in the DOM; this is true, but only if there is at least one row. If you have no rows, there will be no <code>tbody</code> unless you have specified one yourself.</p>
+
+<p>DaRKoN_ <a href="https://stackoverflow.com/questions/171027/jquery-add-table-row/468240#468240">suggests</a> appending to the <code>tbody</code> rather than adding content after the last <code>tr</code>. This gets around the issue of having no rows, but still isn't bulletproof as you could theoretically have multiple <code>tbody</code> elements and the row would get added to each of them.</p>
+
+<p>Weighing everything up, I'm not sure there is a single one-line solution that accounts for every single possible scenario. You will need to make sure the jQuery code tallies with your markup.</p>
+
+<p>I think the safest solution is probably to ensure your <code>table</code> always includes at least one <code>tbody</code> in your markup, even if it has no rows. On this basis, you can use the following which will work however many rows you have (and also account for multiple <code>tbody</code> elements):</p>
+
+<pre><code>$('#myTable &gt; tbody:last-child').append('&lt;tr&gt;...&lt;/tr&gt;&lt;tr&gt;...&lt;/tr&gt;');
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="844 votes">844</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/14193/neil" rel="noopener">Neil</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1278557" rel="noopener">原文 ↗</a></div><div class="prose"><p>jQuery has a built-in facility to manipulate DOM elements on the fly.</p>
+
+<p><strong>You can add anything to your table like this:</strong></p>
+
+<pre><code>$("#tableID").find('tbody')
+    .append($('&lt;tr&gt;')
+        .append($('&lt;td&gt;')
+            .append($('&lt;img&gt;')
+                .attr('src', 'img.png')
+                .text('Image cell')
+            )
+        )
+    );
+</code></pre>
+
+<p>The <code>$('&lt;some-tag&gt;')</code> thing in jQuery is a tag object that can have several <code>attr</code> attributes that can be set and get, as well as <code>text</code>, which represents the text between the tag here: <code>&lt;tag&gt;text&lt;/tag&gt;</code>.</p>
+
+<p><em>This is some pretty weird indenting, but it's easier for you to see what's going on in this example.</em></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="338 votes">338</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/362006/celmaun" rel="noopener">Celmaun</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10904232" rel="noopener">原文 ↗</a></div><div class="prose"><p>So things have changed ever since <a href="https://stackoverflow.com/a/171049/362006">@Luke Bennett</a> answered this question. Here is an update.</p>
+
+<p>jQuery since version 1.4(?) automatically detects if the element you are trying to insert (using any of the <a href="http://api.jquery.com/append/" rel="noreferrer"><code>append()</code></a>, <a href="http://api.jquery.com/prepend/" rel="noreferrer"><code>prepend()</code></a>, <a href="http://api.jquery.com/before/" rel="noreferrer"><code>before()</code></a>, or <a href="http://api.jquery.com/after/" rel="noreferrer"><code>after()</code></a> methods) is a <code>&lt;tr&gt;</code> and inserts it into the first <code>&lt;tbody&gt;</code> in your table or wraps it into a new <code>&lt;tbody&gt;</code> if one doesn't exist. </p>
+
+<p>So yes your example code is acceptable and will work fine with jQuery 1.4+. ;)</p>
+
+<pre><code>$('#myTable').append('&lt;tr&gt;&lt;td&gt;my data&lt;/td&gt;&lt;td&gt;more data&lt;/td&gt;&lt;/tr&gt;');
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

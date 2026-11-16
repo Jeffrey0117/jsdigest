@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What does the !! (double exclamation mark) operator do in JavaScript? · jsdigest</title>
+<meta name="description" content="I saw this code: this.vertical = vertical !== undefined ? !!vertical : this.vertical; It seems to be using !! as an operator, which I don&#39;t recognize. What doe…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What does the !! (double exclamation mark) operator do in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="4218 votes">4.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/59107/hexagon-theory" rel="noopener">Hexagon Theory</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">operators</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/784929/what-does-the-double-exclamation-mark-operator-do-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I saw this code:</p>
+<pre class="lang-js prettyprint-override"><code>this.vertical = vertical !== undefined ? !!vertical : this.vertical;
+</code></pre>
+<p>It seems to be using <code>!!</code> as an operator, which I don't recognize. What does it do?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3748 votes">3.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/89075/stevehipwell" rel="noopener">stevehipwell</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/784946" rel="noopener">原文 ↗</a></div><div class="prose"><p>It converts <code>Object</code> to <code>boolean</code>. If it was falsy (e.g., <code>0</code>, <code>null</code>, <code>undefined</code>, etc.), it would be <code>false</code>, otherwise, <code>true</code>.</p>
+<pre><code>!object  // Inverted Boolean
+!!object // Noninverted Boolean, so true Boolean representation
+</code></pre>
+<p>So <code>!!</code> is not an operator; it's just the <code>!</code> operator twice.</p>
+<p><strong>It is generally simpler to do:</strong></p>
+<pre><code>Boolean(object) // Boolean
+</code></pre>
+<p>Real World Example &quot;Test IE version&quot;:</p>
+<pre><code>const isIE8 = !! navigator.userAgent.match(/MSIE 8.0/);
+console.log(isIE8); // Returns true or false
+</code></pre>
+<p>If you ⇒</p>
+<pre><code>console.log(navigator.userAgent.match(/MSIE 8.0/));
+// Returns either an Array or null
+</code></pre>
+<p>But if you ⇒</p>
+<pre><code>console.log(!!navigator.userAgent.match(/MSIE 8.0/));
+// Returns either true or false
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1030 votes">1k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/8435/tom-ritter" rel="noopener">Tom Ritter</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1406618" rel="noopener">原文 ↗</a></div><div class="prose"><p>It's a horribly obscure way to do a type conversion.</p>
+<p><code>!</code> means <em>NOT</em>.  So <code>!true</code> is <code>false</code>, and <code>!false</code> is <code>true</code>. <code>!0</code> is <code>true</code>, and <code>!1</code> is <code>false</code>.</p>
+<p>So you're converting a value to a <code>Boolean</code>, inverting it, and then inverting it again.</p>
+<pre class="lang-js prettyprint-override"><code>    // Maximum Obscurity:
+    val.enabled = !!userId;
+
+    // Partial Obscurity:
+    val.enabled = (userId != 0) ? true : false;
+
+    // And finally, much easier to understand:
+    val.enabled = (userId != 0);
+
+    // Or just
+    val.enabled = Boolean(userId);
+</code></pre>
+<p><strong>Note:</strong> the middle two expressions aren't <em>exactly</em> equivalent to the first expression when it comes to some edge cases (when <code>userId</code> is <code>[]</code>, for example) due to the way the <code>!=</code> operator works and what values are considered <em>truthy</em>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="605 votes">605</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/87015/salman-arshad" rel="noopener">Salman Arshad</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10597474" rel="noopener">原文 ↗</a></div><div class="prose"><p><code>!!expr</code> (two <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_NOT" rel="noreferrer"><code>!</code></a> operators followed by an expression) returns the primitive <code>true</code> or <code>false</code> depending on the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Truthy" rel="noreferrer">truthiness</a> of the expression.</p>
+<p>It makes sense when used on non-boolean expressions. Some examples:</p>
+<p><strong>Note: the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean/Boolean" rel="noreferrer"><code>Boolean</code></a> function produces the exact same results, and it is more readable.</strong></p>
+<pre class="lang-js prettyprint-override"><code>          !!false // false
+           !!true // true
+
+              !!0 // false
+!!parseInt(&quot;foo&quot;) // false — NaN is falsy
+              !!1 // true
+             !!-1 // true  — negative number is truthy
+          !!(1/0) // true  — Infinity is truthy
+
+             !!&quot;&quot; // false — empty string is falsy
+          !!&quot;foo&quot; // true  — non-empty string is truthy
+        !!&quot;false&quot; // true  — ...even if it contains a falsy value
+
+     !!window.foo // false — undefined value is falsy
+      !!undefined // false — undefined primitive is falsy
+           !!null // false — null is falsy
+
+             !!{} // true  — an (empty) object is truthy
+             !![] // true  — an (empty) array is truthy
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

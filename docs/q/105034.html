@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I create a GUID / UUID? · jsdigest</title>
+<meta name="description" content="How do I create GUIDs (globally-unique identifiers) in JavaScript? The GUID / UUID should be at least 32 characters and should stay in the ASCII range to avoid…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I create a GUID / UUID?</h1>
+    <div class="q-meta big"><span class="score hot" title="5503 votes">5.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/4926/jason-cohen" rel="noopener">Jason Cohen</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">guid</span><span class="tag">uuid</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I create GUIDs (globally-unique identifiers) in JavaScript? The GUID / UUID should be at least 32 characters and should stay in the ASCII range to avoid trouble when passing them around.</p>
+<p>I'm not sure what routines are available on all browsers, how &quot;random&quot; and seeded the built-in random number generator is, etc.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2643 votes">2.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3560/john-millikin" rel="noopener">John Millikin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/105074" rel="noopener">原文 ↗</a></div><div class="prose"><p>UUIDs (Universally Unique IDentifier), also known as GUIDs (Globally Unique IDentifier), according to <a href="https://www.ietf.org/rfc/rfc4122.txt" rel="noreferrer">RFC 4122</a>, are identifiers designed to provide certain uniqueness guarantees.</p>
+<p>While it is possible to implement RFC-compliant UUIDs in a few lines of JavaScript code (e.g., see <a href="https://stackoverflow.com/a/2117523/109538">@broofa's answer</a>, below) there are several common pitfalls:</p>
+<ul>
+<li>Invalid id format (UUIDs must be of the form &quot;<code>xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx</code>&quot;, where x is one of [0-9, a-f] <em>M</em> is one of [1-5], and <em>N</em> is [8, 9, a, or b]</li>
+<li>Use of a low-quality source of randomness (such as <code>Math.random</code>)</li>
+</ul>
+<p>Thus, developers writing code for production environments are encouraged to use a rigorous, well-maintained implementation such as the <a href="https://github.com/uuidjs/uuid" rel="noreferrer">uuid</a> module.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="5769 votes">5.8k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/109538/broofa" rel="noopener">broofa</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2117523" rel="noopener">原文 ↗</a></div><div class="prose"><p><em>[Edited 2023-03-05 to reflect latest best-practices for producing RFC4122-compliant UUIDs]</em></p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID" rel="noreferrer"><code>crypto.randomUUID()</code></a> is now standard on all modern browsers and JS runtimes.  However, because <a href="https://blog.mozilla.org/security/2018/01/15/secure-contexts-everywhere/" rel="noreferrer">new browser APIs are restricted to secure contexts</a>, this method is only available to pages served locally (<code>localhost</code> or <code>127.0.0.1</code>) or over HTTPS.</p>
+<p>For readers interested in other UUID versions, generating UUIDs on legacy platforms or in non-secure contexts, there is <a href="https://www.npmjs.com/package/uuid" rel="noreferrer">the <code>uuid</code> module</a>.  It is well-tested and supported.</p>
+<p>Failing the above, there is this method (based on the original answer to this question):
+<div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function uuidv4() {
+  return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =&gt;
+    (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] &amp; 15 &gt;&gt; +c / 4).toString(16)
+  );
+}
+
+console.log(uuidv4());</code></pre>
+</div>
+</div>
+</p>
+<p>Note: <strong>The use of <em>any</em> UUID generator that relies on <code>Math.random()</code> is strongly discouraged</strong> (including snippets featured in previous versions of this answer) for <a href="https://bocoup.com/blog/random-numbers" rel="noreferrer">reasons best explained here</a>. <em>TL;DR:</em> solutions based on <code>Math.random()</code> do not provide good uniqueness guarantees.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1033 votes">1k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/508537/briguy37" rel="noopener">Briguy37</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/8809472" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>I really like how clean <a href="https://stackoverflow.com/a/2117523/508537">Broofa's answer</a> is, but it's unfortunate that <a href="https://stackoverflow.com/q/6906916/508537">poor implementations of <code>Math.random</code></a> leave the chance for collision.</p>
+<p>Here's a similar <a href="http://www.ietf.org/rfc/rfc4122.txt" rel="noreferrer">RFC4122</a> version 4 compliant solution that solves that issue by offsetting the first 13 hex numbers by a hex portion of the timestamp, and once depleted offsets by a hex portion of the microseconds since pageload.  That way, even if <code>Math.random</code> is on the same seed, both clients would have to generate the UUID the exact same number of microseconds since pageload (if high-perfomance time is supported) AND at the exact same millisecond (or 10,000+ years later) to get the same UUID:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function generateUUID() { // Public Domain/MIT
+    var d = new Date().getTime();//Timestamp
+    var d2 = ((typeof performance !== 'undefined') &amp;&amp; performance.now &amp;&amp; (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16;//random number between 0 and 16
+        if(d &gt; 0){//Use timestamp until depleted
+            r = (d + r)%16 | 0;
+            d = Math.floor(d/16);
+        } else {//Use microseconds since page-load if supported
+            r = (d2 + r)%16 | 0;
+            d2 = Math.floor(d2/16);
+        }
+        return (c === 'x' ? r : (r &amp; 0x3 | 0x8)).toString(16);
+    });
+}
+
+var
+    document.getElementById('uuid').textContent = generateUUID();
+}
+onClick();</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>#uuid { font-family: monospace; font-size: 1.5em; }</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;p id="uuid"&gt;&lt;/p&gt;
+&lt;button id="generateUUID"&gt;Generate UUID&lt;/button&gt;</code></pre>
+</div>
+</div>
+</p>
+<p><a href="https://jsfiddle.net/briguy37/8eacgpnq/" rel="noreferrer">Here's a fiddle to test.</a></p>
+<hr />
+<h3>Modernized snippet for ES6</h3>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const generateUUID = () =&gt; {
+  let
+    d = new Date().getTime(),
+    d2 = ((typeof performance !== 'undefined') &amp;&amp; performance.now &amp;&amp; (performance.now() * 1000)) || 0;
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c =&gt; {
+    let r = Math.random() * 16;
+    if (d &gt; 0) {
+      r = (d + r) % 16 | 0;
+      d = Math.floor(d / 16);
+    } else {
+      r = (d2 + r) % 16 | 0;
+      d2 = Math.floor(d2 / 16);
+    }
+    return (c == 'x' ? r : (r &amp; 0x3 | 0x8)).toString(16);
+  });
+};
+
+const =&gt; document.getElementById('uuid').textContent = generateUUID();
+
+document.getElementById('generateUUID').addEventListener('click', onClick);
+
+onClick();</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>#uuid { font-family: monospace; font-size: 1.5em; }</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;p id="uuid"&gt;&lt;/p&gt;
+&lt;button id="generateUUID"&gt;Generate UUID&lt;/button&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

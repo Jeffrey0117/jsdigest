@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I chop/slice/trim off last character in string using Javascript? · jsdigest</title>
+<meta name="description" content="I have a string, 12345.00 , and I would like it to return 12345.0 . I have looked at trim , but it looks like it is only trimming whitespace and slice which I…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I chop/slice/trim off last character in string using Javascript?</h1>
+    <div class="q-meta big"><span class="score hot" title="2624 votes">2.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/93966/phill-pafford" rel="noopener">Phill Pafford</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">slice</span><span class="tag">trim</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/952924/how-do-i-chop-slice-trim-off-last-character-in-string-using-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have a string, <code>12345.00</code>, and I would like it to return <code>12345.0</code>.</p>
+
+<p>I have looked at <code>trim</code>, but it looks like it is only trimming whitespace and <code>slice</code> which I don't see how this would work. Any suggestions?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4056 votes">4.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1950/jon-erickson" rel="noopener">Jon Erickson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/952945" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring" rel="noreferrer">substring</a> function:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>let str = "12345.00";
+str = str.substring(0, str.length - 1);
+console.log(str);</code></pre>
+</div>
+</div>
+</p>
+<p>This is the accepted answer, but as per the conversations below, the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/slice" rel="noreferrer">slice</a> syntax is much clearer:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>let str = "12345.00";
+str = str.slice(0, -1); 
+console.log(str);</code></pre>
+</div>
+</div>
+</p>
+<p>Neither method mutates</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1558 votes">1.6k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/44330/jason-s" rel="noopener">Jason S</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/953274" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/slice" rel="noreferrer">slice</a>! You just have to make sure you know how to use it. Positive #s are relative to the beginning, negative numbers are relative to the end.</p>
+<pre><code>js&gt;&quot;12345.00&quot;.slice(0,-1)
+12345.0
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="281 votes">281</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/95810/alex-martelli" rel="noopener">Alex Martelli</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3597626" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use the <a href="https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/String/substring" rel="noreferrer">substring</a> method of JavaScript string objects:</p>
+
+<pre><code>s = s.substring(0, s.length - 4)
+</code></pre>
+
+<p>It unconditionally removes the last four characters from string <code>s</code>.</p>
+
+<p>However, if you want to <em>conditionally</em> remove the last four characters, only if they are <em>exactly</em> <code>_bar</code>:</p>
+
+<pre><code>var re = /_bar$/;
+s.replace(re, "");
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

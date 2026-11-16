@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I check if an element is hidden in jQuery? · jsdigest</title>
+<meta name="description" content="How do I toggle the visibility of an element using .hide() , .show() , or .toggle() ? How do I test if an element is visible or hidden ?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I check if an element is hidden in jQuery?</h1>
+    <div class="q-meta big"><span class="score hot" title="8740 votes">8.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/21709/philip-morton" rel="noopener">Philip Morton</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">dom</span><span class="tag">visibility</span><span class="tag">display</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/178325/how-do-i-check-if-an-element-is-hidden-in-jquery" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I toggle the visibility of an element using  <code>.hide()</code>, <code>.show()</code>, or <code>.toggle()</code>?</p>
+<p>How do I test if an element is <code>visible</code> or <code>hidden</code>?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="10304 votes">10k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/25449/tsvetomir-tsonev" rel="noopener">Tsvetomir Tsonev</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/178450" rel="noopener">原文 ↗</a></div><div class="prose"><p>Since the question refers to a single element, this code might be more suitable:</p>
+<pre><code>// Checks CSS content for display:[none|block], ignores visibility:[true|false]
+$(element).is(&quot;:visible&quot;);
+
+// The same works with hidden
+$(element).is(&quot;:hidden&quot;);
+</code></pre>
+<p>It is the same as <a href="https://stackoverflow.com/questions/178325/how-do-you-test-if-something-is-hidden-in-jquery/178386#178386">twernt's suggestion</a>, but applied to a single element; and it <a href="https://stackoverflow.com/questions/178325/how-do-i-check-if-an-element-is-hidden-in-jquery/4685330#4685330">matches the algorithm recommended in the jQuery FAQ</a>.</p>
+<p>We use jQuery's <a href="https://api.jquery.com/is/" rel="noreferrer">is()</a> to check the selected element with another element, selector or any jQuery object. This method traverses along the DOM elements to find a match, which satisfies the passed parameter. It will return true if there is a match, otherwise return false.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1641 votes">1.6k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/18846/twernt" rel="noopener">twernt</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/178386" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use the <a href="http://docs.jquery.com/Selectors/hidden" rel="noreferrer"><code>hidden</code></a> selector:</p>
+
+<pre><code>// Matches all elements that are hidden
+$('element:hidden')
+</code></pre>
+
+<p>And the <a href="http://docs.jquery.com/Selectors/visible" rel="noreferrer"><code>visible</code></a> selector:</p>
+
+<pre><code>// Matches all elements that are visible
+$('element:visible')
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1119 votes">1.1k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/24789/mote" rel="noopener">Mote</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/178344" rel="noopener">原文 ↗</a></div><div class="prose"><pre class="lang-js prettyprint-override"><code>if ( $(element).css('display') == 'none' || $(element).css(&quot;visibility&quot;) == &quot;hidden&quot;){
+    // 'element' is hidden
+}
+</code></pre>
+<p>The above method does not consider the visibility of the parent. To consider the parent as well, you should use <code>.is(&quot;:hidden&quot;)</code> or <code>.is(&quot;:visible&quot;)</code>.</p>
+<p>For example,</p>
+<pre class="lang-html prettyprint-override"><code>&lt;div id=&quot;div1&quot; style=&quot;display:none&quot;&gt;
+  &lt;div id=&quot;div2&quot; style=&quot;display:block&quot;&gt;Div2&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<blockquote>
+<p>The above method will consider <code>div2</code> visible while <code>:visible</code> not. But the above might be useful in many cases, especially when you need to find if there is any error divs visible in the hidden parent because in such conditions <code>:visible</code> will not work.</p>
+</blockquote>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

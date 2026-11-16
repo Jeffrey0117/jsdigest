@@ -1,0 +1,12 @@
+{
+  "repo": 1,
+  "name": "jsdigest",
+  "what": "可以逛的濃縮版 StackOverflow（只收 JavaScript）：真實高票題 + 重點答案，產成公開靜態站。",
+  "kind": "site",
+  "work": {
+    "guide": "README.md",
+    "run": "npm run fetch && npm run build && npm run serve",
+    "test": "npm test"
+  },
+  "offers": []
+}

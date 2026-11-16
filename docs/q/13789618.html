@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Differences between Lodash and Underscore.js · jsdigest</title>
+<meta name="description" content="Why would someone prefer either the Lodash or Underscore.js utility library over the other? Lodash seems to be a drop-in replacement for underscore, the latter…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Differences between Lodash and Underscore.js</h1>
+    <div class="q-meta big"><span class="score hot" title="1727 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/19212/brian-m-hunt" rel="noopener">Brian M. Hunt</a></span>
+      <span class="dot">·</span><span class="tag">underscore.js</span><span class="tag">javascript</span><span class="tag">lodash</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/13789618/differences-between-lodash-and-underscore-js" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Why would someone prefer either the <a href="http://lodash.com/" rel="noreferrer">Lodash</a> or <a href="http://underscorejs.org/" rel="noreferrer">Underscore.js</a> utility library over the other?</p>
+<p>Lodash seems to be a drop-in replacement for underscore, the latter having been around longer.</p>
+<p>I think both are brilliant, but I do not know enough about how they work to make an educated comparison, and I would like to know more about the differences.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2172 votes">2.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/166625/john-david-dalton" rel="noopener">John-David Dalton</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/13898916" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>I created Lodash to provide more consistent cross-environment iteration support for arrays, strings, objects, and <code>arguments</code> objects<sup>1</sup>. It has since become a superset of Underscore.js, providing more consistent API behavior, more <a href="http://lodash.com" rel="noreferrer">features</a> (like AMD support, deep clone, and deep merge), more thorough <a href="http://lodash.com/docs" rel="noreferrer">documentation</a> and unit tests (tests which run in <a href="https://en.wikipedia.org/wiki/Node.js" rel="noreferrer">Node.js</a>, <a href="https://github.com/ringo/ringojs" rel="noreferrer">RingoJS</a>, <a href="https://en.wikipedia.org/wiki/Rhino_%28JavaScript_engine%29" rel="noreferrer">Rhino</a>, <a href="https://github.com/tlrobinson/narwhal" rel="noreferrer">Narwhal</a>, <a href="https://en.wikipedia.org/wiki/PhantomJS" rel="noreferrer">PhantomJS</a>, and browsers), better overall performance and optimizations for large arrays/object iteration, and more flexibility with <a href="http://lodash.com/" rel="noreferrer">custom builds</a> and template pre-compilation utilities.</p>
+<p>Because Lodash is updated more frequently than Underscore.js, a <code>lodash underscore</code> build <a href="http://lodash.com/" rel="noreferrer">is provided</a> to ensure compatibility with the latest stable version of Underscore.js.</p>
+<p>At one point I was even given <a href="https://s3.amazonaws.com/f.cl.ly/items/2e0O0S010f2A3s1W283U/push_access.png?v=ba693725" rel="noreferrer">push access</a> to Underscore.js, in part because Lodash is responsible for raising more than 30 issues; landing bug fixes, new features, and performance gains in Underscore.js v1.4.x+.</p>
+<p>In addition, there are at least three <a href="https://en.wikipedia.org/wiki/Backbone.js" rel="noreferrer">Backbone.js</a> boilerplates that include Lodash by default and Lodash is now mentioned in Backbone.js’s official <a href="http://backbonejs.org/#downloads" rel="noreferrer">documentation</a>.</p>
+<p>Check out Kit Cambridge's post, <em><a href="https://web.archive.org/web/20180101093627/http://kitcambridge.be/blog/say-hello-to-lo-dash/" rel="noreferrer">Say &quot;Hello&quot; to Lo-Dash</a></em>, for a deeper breakdown on the differences between Lodash and Underscore.js.</p>
+<p>Footnotes:</p>
+<ol>
+<li>Underscore.js has inconsistent support for arrays, strings, objects, and <code>arguments</code> objects. In newer browsers, Underscore.js methods ignore <a href="http://www.2ality.com/2012/06/dense-arrays.html" rel="noreferrer">holes in arrays</a>, &quot;Objects&quot; methods iterate <code>arguments</code> objects, strings are treated as array-like, and methods correctly iterate functions (ignoring their &quot;prototype&quot; property) and objects (iterating shadowed properties like &quot;toString&quot; and &quot;valueOf&quot;), while in older browsers they will not. Also, Underscore.js methods, like <code>_.clone</code>, preserve holes in arrays, while others like <code>_.flatten</code> don't.</li>
+</ol>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="205 votes">205</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1028304/neiker" rel="noopener">neiker</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/13869090" rel="noopener">原文 ↗</a></div><div class="prose"><p>Lodash is inspired by Underscore.js, but nowadays it is a superior solution. You can make your <a href="http://lodash.com/custom-builds" rel="noreferrer">custom builds</a>, have a <a href="http://lodash.com/benchmarks" rel="noreferrer">higher performance</a>, support AMD and have <a href="http://lodash.com/#features" rel="noreferrer">great extra features</a>. Check this <a href="http://jsperf.com/lodash-underscore" rel="noreferrer">Lodash vs. Underscore.js benchmarks</a> on jsperf and... this <a href="https://web.archive.org/web/20180311051822/http://kitcambridge.be/blog/say-hello-to-lo-dash/" rel="noreferrer">awesome post about Lodash</a>:</p>
+<p>One of the most useful features, when you work with collections, is the shorthand syntax:<br />
+(although Underscore now also supports this syntax)</p>
+<pre class="lang-js prettyprint-override"><code>var characters = [
+  { 'name': 'barney', 'age': 36, 'blocked': false },
+  { 'name': 'fred',   'age': 40, 'blocked': true }
+];
+
+// Using &quot;_.filter&quot; callback shorthand
+_.filter(characters, { 'age': 36 });
+
+// Using Underscore.js
+_.filter(characters, character =&gt; character.age === 36);
+
+// → [{ 'name': 'barney', 'age': 36, 'blocked': false }]
+</code></pre>
+<p>(taken from <a href="http://lodash.com/docs#filter" rel="noreferrer">Lodash documentation</a>)</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="113 votes">113</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2111850/iest" rel="noopener">Iest</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/38500450" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>If, like me, you were expecting a list of usage differences between Underscore.js and Lodash, there's a <a href="https://github.com/lodash/lodash/wiki/Migrating" rel="noreferrer">guide for migrating from Underscore.js to Lodash</a>.</p>
+<p>Here's the current state of it for posterity:</p>
+<blockquote>
+<ul>
+<li>Underscore <code>_.any</code> is Lodash <code>_.some</code></li>
+<li>Underscore <code>_.all</code> is Lodash <code>_.every</code></li>
+<li>Underscore <code>_.compose</code> is Lodash <code>_.flowRight</code></li>
+<li>Underscore <code>_.contains</code> is Lodash <code>_.includes</code></li>
+<li>Underscore <code>_.each</code> doesn’t allow exiting by returning <code>false</code></li>
+<li>Underscore <code>_.findWhere</code> is Lodash <code>_.find</code></li>
+<li>Underscore <code>_.flatten</code> is deep by default while Lodash is shallow</li>
+<li>Underscore <code>_.groupBy</code> supports an iteratee that is passed the parameters <code>(value, index, originalArray)</code>,
+while in Lodash, the iteratee for <code>_.groupBy</code> is only passed a single parameter: <code>(value)</code>.</li>
+<li>Underscore.js <code>_.indexOf</code> with third parameter <code>undefined</code> is Lodash <code>_.indexOf</code></li>
+<li>Underscore.js <code>_.indexOf</code> with third parameter <code>true</code> is Lodash <code>_.sortedIndexOf</code></li>
+<li>Underscore <code>_.indexBy</code> is Lodash <code>_.keyBy</code></li>
+<li>Underscore <code>_.invoke</code> is Lodash <code>_.invokeMap</code></li>
+<li>Underscore <code>_.mapObject</code> is Lodash <code>_.mapValues</code></li>
+<li>Underscore <code>_.max</code> combines Lodash <code>_.max</code> &amp; <code>_.maxBy</code></li>
+<li>Underscore <code>_.min</code> combines Lodash <code>_.min</code> &amp; <code>_.minBy</code></li>
+<li>Underscore <code>_.sample</code> combines Lodash <code>_.sample</code> &amp; <code>_.sampleSize</code></li>
+<li>Underscore <code>_.object</code> combines Lodash <code>_.fromPairs</code> and <code>_.zipObject</code></li>
+<li>Underscore <code>_.omit</code> by a predicate is Lodash <code>_.omitBy</code></li>
+<li>Underscore <code>_.pairs</code> is Lodash <code>_.toPairs</code></li>
+<li>Underscore <code>_.pick</code> by a predicate is Lodash <code>_.pickBy</code></li>
+<li>Underscore <code>_.pluck</code> is Lodash <code>_.map</code></li>
+<li>Underscore <code>_.sortedIndex</code> combines Lodash <code>_.sortedIndex</code> &amp; <code>_.sortedIndexOf</code></li>
+<li>Underscore <code>_.uniq</code> by an <code>iteratee</code> is Lodash <code>_.uniqBy</code></li>
+<li>Underscore <code>_.where</code> is Lodash <code>_.filter</code></li>
+<li>Underscore <code>_.isFinite</code> doesn’t align with <code>Number.isFinite</code><br>
+(e.g. <code>_.isFinite('1')</code> returns <code>true</code> in Underscore.js, but <code>false</code> in Lodash)</li>
+<li>Underscore <code>_.matches</code> shorthand doesn’t support deep comparisons<br>
+(e.g., <code>_.filter(objects, { 'a': { 'b': 'c' } })</code>)</li>
+<li>Underscore ≥ 1.7 &amp; Lodash <code>_.template</code> syntax is<br><code>_.template(string, option)(data)</code></li>
+<li>Lodash <code>_.memoize</code> caches are <code>Map</code> like objects</li>
+<li>Lodash doesn’t support a <code>context</code> argument for many methods in favor of <code>_.bind</code></li>
+<li>Lodash supports <a href="https://lodash.com/docs#_" rel="noreferrer">implicit chaining</a>, <a href="http://filimanjaro.com/blog/2014/introducing-lazy-evaluation/" rel="noreferrer">lazy chaining, &amp; shortcut fusion</a></li>
+<li>Lodash split its overloaded <code>_.head</code>, <code>_.last</code>, <code>_.rest</code>, &amp; <code>_.initial</code> out into<br>
+<code>_.take</code>, <code>_.takeRight</code>, <code>_.drop</code>, &amp; <code>_.dropRight</code><br>
+(i.e. <code>_.head(array, 2)</code> in Underscore.js is <code>_.take(array, 2)</code> in Lodash)</li>
+</ul>
+</blockquote>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

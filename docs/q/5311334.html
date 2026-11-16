@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is the purpose of Node.js module.exports and how do you use it? · jsdigest</title>
+<meta name="description" content="What is the purpose of Node.js module.exports and how do you use it? I can&#39;t seem to find any information on this, but it appears to be a rather important part…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What is the purpose of Node.js module.exports and how do you use it?</h1>
+    <div class="q-meta big"><span class="score hot" title="1561 votes">1.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/527749/mrwooster" rel="noopener">mrwooster</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">node.js</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/5311334/what-is-the-purpose-of-node-js-module-exports-and-how-do-you-use-it" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What is the purpose of Node.js <code>module.exports</code> and how do you use it?</p>
+<p>I can't seem to find any information on this, but it appears to be a rather important part of Node.js as I often see it in source code.</p>
+<p>According to the <a href="http://nodejs.org/docs/v0.4.2/api/globals.html#module" rel="noreferrer">Node.js documentation</a>:</p>
+<blockquote>
+<p><strong>module</strong></p>
+<p>A reference to the current
+<code>module</code>. In particular <code>module.exports</code>
+is the same as the exports object. See
+<code>src/node.js</code> for more information.</p>
+</blockquote>
+<p>But this doesn't really help.</p>
+<p>What exactly does <code>module.exports</code> do, and what would a simple example be?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1685 votes">1.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/6782/alnitak" rel="noopener">Alnitak</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5311377" rel="noopener">原文 ↗</a></div><div class="prose"><p><a href="http://nodejs.org/api/modules.html#modules_module_exports" rel="noreferrer"><code>module.exports</code></a> is the object that's actually returned as the result of a <code>require</code> call.</p>
+
+<p>The <code>exports</code> variable is initially set to that same object (i.e. it's a shorthand "alias"), so in the module code you would usually write something like this:</p>
+
+<pre><code>let myFunc1 = function() { ... };
+let myFunc2 = function() { ... };
+exports.myFunc1 = myFunc1;
+exports.myFunc2 = myFunc2;
+</code></pre>
+
+<p>to export (or "expose") the internally scoped functions <code>myFunc1</code> and <code>myFunc2</code>.</p>
+
+<p>And in the calling code you would use:</p>
+
+<pre><code>const m = require('./mymodule');
+m.myFunc1();
+</code></pre>
+
+<p>where the last line shows how the result of <code>require</code> is (usually) just a plain object whose properties may be accessed.</p>
+
+<p>NB: if you overwrite <code>exports</code> then it will no longer refer to <code>module.exports</code>.  So if you wish to assign a new object (or a function reference) to <code>exports</code> then you should also assign that new object to <code>module.exports</code></p>
+
+<hr>
+
+<p>It's worth noting that the name added to the <code>exports</code> object does not have to be the same as the module's internally scoped name for the value that you're adding, so you could have:</p>
+
+<pre><code>let myVeryLongInternalName = function() { ... };
+exports.shortName = myVeryLongInternalName;
+// add other objects, functions, as required
+</code></pre>
+
+<p>followed by:</p>
+
+<pre><code>const m = require('./mymodule');
+m.shortName(); // invokes module.myVeryLongInternalName
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="233 votes">233</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1744579/jed-watson" rel="noopener">Jed Watson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/12907839" rel="noopener">原文 ↗</a></div><div class="prose"><p>This has already been answered but I wanted to add some clarification...</p>
+
+<p>You can use both <code>exports</code> and <code>module.exports</code> to import code into your application like this:</p>
+
+<p><code>var mycode = require('./path/to/mycode');</code></p>
+
+<p>The basic use case you'll see (e.g. in ExpressJS example code) is that you set properties on the <code>exports</code> object in a .js file that you then import using <code>require()</code></p>
+
+<p>So in a simple counting example, you could have:</p>
+
+<p>(counter.js):</p>
+
+<pre><code>var count = 1;
+
+exports.increment = function() {
+    count++;
+};
+
+exports.getCount = function() {
+    return count;
+};
+</code></pre>
+
+<p>... then in your application (web.js, or really any other .js file):</p>
+
+<pre><code>var counting = require('./counter.js');
+
+console.log(counting.getCount()); // 1
+counting.increment();
+console.log(counting.getCount()); // 2
+</code></pre>
+
+<p>In simple terms, you can think of required files as functions that return a single object, and you can add properties (strings, numbers, arrays, functions, anything) to the object that's returned by setting them on <code>exports</code>.</p>
+
+<p>Sometimes you'll want the object returned from a <code>require()</code> call to be a function you can call, rather than just an object with properties. In that case you need to also set <code>module.exports</code>, like this:</p>
+
+<p>(sayhello.js):</p>
+
+<pre><code>module.exports = exports = function() {
+    console.log("Hello World!");
+};
+</code></pre>
+
+<p>(app.js):</p>
+
+<pre><code>var sayHello = require('./sayhello.js');
+sayHello(); // "Hello World!"
+</code></pre>
+
+<p>The difference between exports and module.exports is explained better in <a href="https://stackoverflow.com/questions/7137397/module-exports-vs-exports-in-nodejs">this answer here</a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="65 votes">65</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/673416/alexandre-morgaut" rel="noopener">Alexandre Morgaut</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/14424583" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Note that the NodeJS module mechanism is based on <a href="http://en.wikipedia.org/wiki/CommonJS" rel="noreferrer"><strong>CommonJS</strong></a> modules which are supported in many other implementations like <strong>RequireJS</strong>, but also <strong>SproutCore</strong>, <strong>CouchDB</strong>, <strong>Wakanda</strong>, <strong>OrientDB</strong>, <strong>ArangoDB</strong>, <strong>RingoJS</strong>, <strong>TeaJS</strong>, <strong>SilkJS</strong>, <strong>curl.js</strong>, or even <strong>Adobe Photoshop</strong> (via <a href="https://github.com/theiviaxx/PSLib" rel="noreferrer">PSLib</a>).
+You can find the full list of known implementations <a href="https://web.archive.org/web/20140803042801/http://www.commonjs.org/impl/" rel="noreferrer">here</a>.</p>
+
+<p>Unless your module use node specific features or module, I highly encourage you then using <code>exports</code> instead of <code>module.exports</code> <strong>which is not part of the CommonJS standard</strong>, and then mostly not supported by other implementations.</p>
+
+<p>Another NodeJS specific feature is when you assign a reference to a new object to <code>exports</code> instead of just adding properties and methods to it like in the last example provided by Jed Watson in this thread. I would personally discourage this practice as this <strong>breaks the circular reference support</strong> of the CommonJS modules mechanism. It is then not supported by all implementations and Jed example should then be written this way (or a similar one) to provide a more universal module:</p>
+
+<p>(sayhello.js):</p>
+
+<pre><code>exports.run = function() {
+    console.log("Hello World!");
+}
+</code></pre>
+
+<p>(app.js):</p>
+
+<pre><code>var sayHello = require('./sayhello');
+sayHello.run(); // "Hello World!"
+</code></pre>
+
+<p>Or using ES6 features</p>
+
+<p>(sayhello.js):</p>
+
+<pre><code>Object.assign(exports, {
+    // Put all your public API here
+    sayhello() {
+        console.log("Hello World!");
+    }
+});
+</code></pre>
+
+<p>(app.js):</p>
+
+<pre><code>const { sayHello } = require('./sayhello');
+sayHello(); // "Hello World!"
+</code></pre>
+
+<p>PS: It looks like Appcelerator also implements CommonJS modules, but without the circular reference support (see: <a href="https://stackoverflow.com/questions/10859630/appcelerator-and-commonjs-modules-caching-and-circular-references">Appcelerator and CommonJS modules (caching and circular references)</a>)</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

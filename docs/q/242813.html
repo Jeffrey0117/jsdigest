@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Are double quotes and single quotes interchangeable for string literals in JavaScript? · jsdigest</title>
+<meta name="description" content="Consider the following two alternatives: console.log(&quot;double&quot;); console.log(&#39;single&#39;); The former uses double quotes around the string, whereas the latter uses…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Are double quotes and single quotes interchangeable for string literals in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="2332 votes">2.3k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/28150/aemkei" rel="noopener">aemkei</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">string</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/242813/are-double-quotes-and-single-quotes-interchangeable-for-string-literals-in-javas" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Consider the following two alternatives:</p>
+<ul>
+<li><code>console.log(&quot;double&quot;);</code></li>
+<li><code>console.log('single');</code></li>
+</ul>
+<p>The former uses double quotes around the string, whereas the latter uses single quotes around the string.</p>
+<p>I see more and more JavaScript libraries out there using single quotes when handling strings.</p>
+<p>Are these two usages interchangeable? If not, is there an advantage in using one over the other?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1445 votes">1.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/31395/ady" rel="noopener">Ady</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/242833" rel="noopener">原文 ↗</a></div><div class="prose"><p>The most likely reason for use of single vs. double quote in different libraries is programmer preference and/or API consistency. Other than being consistent, use whichever best suits the string.</p>
+<p>Using the other type of quote as a literal:</p>
+<pre><code>alert('Say &quot;Hello&quot;');
+alert(&quot;Say 'Hello'&quot;);
+</code></pre>
+<p>This can get complicated:</p>
+<pre><code>alert(&quot;It's \&quot;game\&quot; time.&quot;);
+alert('It\'s &quot;game&quot; time.');
+</code></pre>
+<p>Another option, new in ECMAScript 6, is <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals" rel="nofollow noreferrer">template literals</a> which use the <em>backtick</em> character:</p>
+<pre><code>alert(`Use &quot;double&quot; and 'single' quotes in the same string`);
+alert(`Escape the \` back-tick character and the \${ dollar-brace sequence in a string`);
+</code></pre>
+<p>Template literals offer a clean syntax for variable interpolation, multi-line strings, and more.</p>
+<p>Note that <a href="https://jsonlint.com/" rel="nofollow noreferrer">JSON</a> is formally specified to use double quotes, which may be worth considering depending on system requirements.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="701 votes">701</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/565153/arne" rel="noopener">Arne</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4612914" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you're dealing with JSON, it should be noted that strictly speaking, JSON strings must be double quoted. Sure, many libraries support single quotes as well, but I had great problems in one of my projects before realizing that single quoting a string is in fact not according to JSON standards.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="410 votes">410</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1429980/user1429980" rel="noopener">user1429980</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/18041188" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>There is no one better solution</strong>; however, I would like to argue that double quotes may be more desirable at times:</p>
+<ul>
+<li><p><strong>Newcomers will already be familiar with double quotes from their language</strong>.  In English, we must use double quotes <code>&quot;</code> to identify a passage of quoted text.  If we were to use a single quote <code>'</code>, the reader may misinterpret it as a contraction.  The other meaning of a passage of text surrounded by the <code>'</code> indicates the 'colloquial' meaning.  It makes sense to stay consistent with pre-existing languages, and this may likely ease the learning and interpretation of code.</p>
+</li>
+<li><p><strong>Double quotes eliminate the need to escape apostrophes</strong> (as in contractions).  Consider the string: <code>&quot;I'm going to the mall&quot;</code>, vs. the otherwise escaped version: <code>'I\'m going to the mall'</code>.</p>
+</li>
+<li><p><strong>Double quotes mean a string in many other languages</strong>.  When you learn a new language like Java or C, double quotes are always used. In C single quotes are reserved for something <em>different</em> (<code>char</code>). In Ruby, PHP and Perl, single-quoted strings imply no backslash escapes while double quotes support them.</p>
+</li>
+<li><p><strong>JSON notation is written with double quotes.</strong></p>
+</li>
+</ul>
+<p>Nonetheless, as others have stated, it is most important to remain consistent.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

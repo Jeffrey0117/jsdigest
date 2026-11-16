@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vanilla JavaScript equivalent of jQuery&#39;s $.ready() - how to call a function when the page/DOM is ready for it · jsdigest</title>
+<meta name="description" content="With jQuery, we all know the wonderful .ready() function: $(&#39;document&#39;).ready(function(){}); However, let&#39;s say I want to run a function that is written in sta…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Vanilla JavaScript equivalent of jQuery&#39;s $.ready() - how to call a function when the page/DOM is ready for it</h1>
+    <div class="q-meta big"><span class="score hot" title="1923 votes">1.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/768392/chris" rel="noopener">chris</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">html</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/9899372/vanilla-javascript-equivalent-of-jquerys-ready-how-to-call-a-function-whe" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>With jQuery, we all know the wonderful <code>.ready()</code> function:</p>
+
+<pre><code>$('document').ready(function(){});
+</code></pre>
+
+<p>However, let's say I want to run a function that is written in standard JavaScript with no library backing it, and that I want to launch a function as soon as the page is ready to handle it. What's the proper way to approach this?</p>
+
+<p>I know I can do:</p>
+
+<pre class="lang-js prettyprint-override"><code>window.onload="myFunction()";
+</code></pre>
+
+<p>Or I can use the <code>body</code> tag:</p>
+
+<pre class="lang-html prettyprint-override"><code>&lt;body&gt;
+</code></pre>
+
+<p>Or I can even try at the bottom of the page after everything, but the end <code>body</code> or <code>html</code> tag like:</p>
+
+<pre class="lang-html prettyprint-override"><code>&lt;script type="text/javascript"&gt;
+    myFunction();
+&lt;/script&gt;
+</code></pre>
+
+<p>What is a cross-browser(old/new)-compliant method of issuing one or more functions in a manner like jQuery's <code>$.ready()</code>?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2679 votes">2.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/816620/jfriend00" rel="noopener">jfriend00</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/9899701" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>The simplest thing to do in the absence of a framework that does all the cross-browser compatibility for you is to just put a call to your code at the end of the body.  This is faster to execute than an <code>onload</code> handler because this waits only for the DOM to be ready, not for all images to load.  And, this works in every browser.</p>
+
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+Your HTML here
+
+&lt;script&gt;
+// self executing function here
+(function() {
+   // your page initialization code here
+   // the DOM will be available here
+
+})();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<hr>
+
+<p>For modern browsers (anything from IE9 and newer and any version of Chrome, Firefox or Safari), if you want to be able to implement a jQuery like <code>$(document).ready()</code> method that you can call from anywhere (without worrying about where the calling script is positioned), you can just use something like this:</p>
+
+<pre><code>function docReady(fn) {
+    // see if DOM is already available
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+        // call on next available tick
+        setTimeout(fn, 1);
+    } else {
+        document.addEventListener("DOMContentLoaded", fn);
+    }
+}    
+</code></pre>
+
+<p>Usage:</p>
+
+<pre><code>docReady(function() {
+    // DOM is loaded and ready for manipulation here
+});
+</code></pre>
+
+<hr>
+
+<p>If you need full cross browser compatibility (including old versions of IE) and you don't want to wait for <code>window.onload</code>, then you probably should go look at how a framework like jQuery implements its <code>$(document).ready()</code> method.  It's fairly involved depending upon the capabilities of the browser.</p>
+
+<p>To give you a little idea what jQuery does (which will work wherever the script tag is placed).</p>
+
+<p>If supported, it tries the standard:</p>
+
+<pre><code>document.addEventListener('DOMContentLoaded', fn, false);
+</code></pre>
+
+<p>with a fallback to:</p>
+
+<pre><code>window.addEventListener('load', fn, false )
+</code></pre>
+
+<p>or for older versions of IE, it uses:</p>
+
+<pre><code>document.attachEvent("onreadystatechange", fn);
+</code></pre>
+
+<p>with a fallback to:</p>
+
+<pre><code>window.attachEvent("onload", fn);
+</code></pre>
+
+<p>And, there are some work-arounds in the IE code path that I don't quite follow, but it looks like it has something to do with frames.</p>
+
+<hr>
+
+<p>Here is a full substitute for jQuery's <code>.ready()</code> written in plain javascript:</p>
+
+<pre><code>(function(funcName, baseObj) {
+    // The public function name defaults to window.docReady
+    // but you can pass in your own object and own function name and those will be used
+    // if you want to put them in a different namespace
+    funcName = funcName || "docReady";
+    baseObj = baseObj || window;
+    var readyList = [];
+    var readyFired = false;
+    var readyEventHandlersInstalled = false;
+
+    // call this when the document is ready
+    // this function protects itself against being called more than once
+    function ready() {
+        if (!readyFired) {
+            // this must be set to true before we start calling callbacks
+            readyFired = true;
+            for (var i = 0; i &lt; readyList.length; i++) {
+                // if a callback here happens to add new ready handlers,
+                // the docReady() function will see that it already fired
+                // and will schedule the callback to run right after
+                // this event loop finishes so all handlers will still execute
+                // in order and no new ones will be added to the readyList
+                // while we are processing the list
+                readyList[i].fn.call(window, readyList[i].ctx);
+            }
+            // allow any closures held by these functions to free
+            readyList = [];
+        }
+    }
+
+    function readyStateChange() {
+        if ( document.readyState === "complete" ) {
+            ready();
+        }
+    }
+
+    // This is the one public interface
+    // docReady(fn, context);
+    // the context argument is optional - if present, it will be passed
+    // as an argument to the callback
+    baseObj[funcName] = function(callback, context) {
+        if (typeof callback !== "function") {
+            throw new TypeError("callback for docReady(fn) must be a function");
+        }
+        // if ready has already fired, then just schedule the callback
+        // to fire asynchronously, but right away
+        if (readyFired) {
+            setTimeout(function() {callback(context);}, 1);
+            return;
+        } else {
+            // add the function and context to the list
+            readyList.push({fn: callback, ctx: context});
+        }
+        // if document already ready to go, schedule the ready function to run
+        if (document.readyState === "complete") {
+            setTimeout(ready, 1);
+        } else if (!readyEventHandlersInstalled) {
+            // otherwise if we don't have event handlers installed, install them
+            if (document.addEventListener) {
+                // first choice is DOMContentLoaded event
+                document.addEventListener("DOMContentLoaded", ready, false);
+                // backup is window load event
+                window.addEventListener("load", ready, false);
+            } else {
+                // must be IE
+                document.attachEvent("onreadystatechange", readyStateChange);
+                window.attachEvent("onload", ready);
+            }
+            readyEventHandlersInstalled = true;
+        }
+    }
+})("docReady", window);
+</code></pre>
+
+<p>The latest version of the code is shared publicly on GitHub at <a href="https://github.com/jfriend00/docReady" rel="noreferrer">https://github.com/jfriend00/docReady</a></p>
+
+<p>Usage:</p>
+
+<pre><code>// pass a function reference
+docReady(fn);
+
+// use an anonymous function
+docReady(function() {
+    // code here
+});
+
+// pass a function reference and a context
+// the context will be passed to the function as the first argument
+docReady(fn, context);
+
+// use an anonymous function with a context
+docReady(function(context) {
+    // code here that can use the context argument that was passed to docReady
+}, ctx);
+</code></pre>
+
+<hr>
+
+<p>This has been tested in:</p>
+
+<pre class="lang-none prettyprint-override"><code>IE6 and up
+Firefox 3.6 and up
+Chrome 14 and up
+Safari 5.1 and up
+Opera 11.6 and up
+Multiple iOS devices
+Multiple Android devices
+</code></pre>
+
+<p>Working implementation and test bed: <a href="http://jsfiddle.net/jfriend00/YfD3C/" rel="noreferrer">http://jsfiddle.net/jfriend00/YfD3C/</a></p>
+
+<hr>
+
+<p>Here's a summary of how it works:</p>
+
+<ol>
+<li>Create an <a href="http://benalman.com/news/2010/11/immediately-invoked-function-expression/" rel="noreferrer">IIFE</a> (immediately invoked function expression) so we can have non-public state variables.</li>
+<li>Declare a public function <code>docReady(fn, context)</code></li>
+<li>When <code>docReady(fn, context)</code> is called, check if the ready handler has already fired.  If so, just schedule the newly added callback to fire right after this thread of JS finishes with <code>setTimeout(fn, 1)</code>.</li>
+<li>If the ready handler has not already fired, then add this new callback to the list of callbacks to be called later.</li>
+<li>Check if the document is already ready.  If so, execute all ready handlers.</li>
+<li>If we haven't installed event listeners yet to know when the document becomes ready, then install them now.</li>
+<li>If <code>document.addEventListener</code> exists, then install event handlers using <code>.addEventListener()</code> for both <code>"DOMContentLoaded"</code> and <code>"load"</code> events.  The "load" is a backup event for safety and should not be needed.</li>
+<li>If <code>document.addEventListener</code> doesn't exist, then install event handlers using <code>.attachEvent()</code> for <code>"onreadystatechange"</code> and <code>"onload"</code> events.</li>
+<li>In the <code>onreadystatechange</code> event, check to see if the <code>document.readyState === "complete"</code> and if so, call a function to fire all the ready handlers.</li>
+<li>In all the other event handlers, call a function to fire all the ready handlers.</li>
+<li>In the function to call all the ready handlers, check a state variable to see if we've already fired.  If we have, do nothing.  If we haven't yet been called, then loop through the array of ready functions and call each one in the order they were added.  Set a flag to indicate these have all been called so they are never executed more than once.</li>
+<li>Clear the function array so any closures they might be using can be freed.</li>
+</ol>
+
+<p>Handlers registered with <code>docReady()</code> are guaranteed to be fired in the order they were registered.</p>
+
+<p>If you call <code>docReady(fn)</code> after the document is already ready, the callback will be scheduled to execute as soon as the current thread of execution completes using <code>setTimeout(fn, 1)</code>.  This allows the calling code to always assume they are async callbacks that will be called later, even if later is as soon as the current thread of JS finishes and it preserves calling order.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="393 votes">393</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/756246/tom-stickel" rel="noopener">Tom Stickel</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/31171096" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you are doing <strong>VANILLA</strong> plain <strong>JavaScript</strong> without jQuery, then you must use (Internet&nbsp;Explorer&nbsp;9 or later):</p>
+
+<pre><code>document.addEventListener("DOMContentLoaded", function(event) {
+    // Your code to run since DOM is loaded and ready
+});
+</code></pre>
+
+<p>Above is the equivalent of jQuery <code>.ready</code>:</p>
+
+<pre><code>$(document).ready(function() {
+    console.log("Ready!");
+});
+</code></pre>
+
+<p>Which ALSO could be written SHORTHAND like this, which jQuery will run after the ready even <a href="https://stackoverflow.com/q/7614574/32453">occurs</a>.</p>
+
+<pre><code>$(function() {
+    console.log("ready!");
+});
+</code></pre>
+
+<p><strong>NOT TO BE CONFUSED with BELOW</strong> (which is not meant to be DOM ready):</p>
+
+<p>DO NOT use an <a href="https://developer.mozilla.org/en-US/docs/Glossary/IIFE" rel="noreferrer">IIFE</a> like this that is self executing:</p>
+
+<pre><code> Example:
+
+(function() {
+   // Your page initialization code here  - WRONG
+   // The DOM will be available here   - WRONG
+})();
+</code></pre>
+
+<p>This IIFE will NOT wait for your DOM to load. (I'm even talking about latest version of Chrome browser!)</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="191 votes">191</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1385441/ram-patra" rel="noopener">Ram Patra</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/30319853" rel="noopener">原文 ↗</a></div><div class="prose"><p>I would like to mention some of the possible ways here together with a <strong>pure javascript trick which works across all browsers</strong>:</p>
+
+<pre><code>// with jQuery 
+$(document).ready(function(){ /* ... */ });
+
+// shorter jQuery version 
+$(function(){ /* ... */ });
+
+// without jQuery (doesn't work in older IEs)
+document.addEventListener('DOMContentLoaded', function(){ 
+    // your code goes here
+}, false);
+
+// and here's the trick (works everywhere)
+function r(f){/in/.test(document.readyState)?setTimeout('r('+f+')',9):f()}
+// use like
+r(function(){
+    alert('DOM Ready!');
+});
+</code></pre>
+
+<p>The trick here, as explained by the <a href="http://www.dustindiaz.com/smallest-domready-ever" rel="noreferrer">original author</a>, is that we are checking the <strong>document.readyState</strong> property. If it contains the string <code>in</code> (as in <code>uninitialized</code> and <code>loading</code>, the first two <a href="http://www.w3schools.com/jsref/prop_doc_readystate.asp" rel="noreferrer">DOM ready states</a> out of 5) we set a timeout and check again. Otherwise, we execute the passed function.</p>
+
+<p>And here's the <a href="http://jsfiddle.net/ramswaroop/br21uzk7/" rel="noreferrer">jsFiddle</a> for the trick which <strong>works across all browsers.</strong> </p>
+
+<p>Thanks to <a href="http://tutorialzine.com/" rel="noreferrer">Tutorialzine</a> for including this in their book.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

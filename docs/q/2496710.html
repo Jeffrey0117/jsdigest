@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writing to files in Node.js · jsdigest</title>
+<meta name="description" content="I&#39;ve been trying to find a way to write to a file when using Node.js, but with no success. How can I do that?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Writing to files in Node.js</h1>
+    <div class="q-meta big"><span class="score hot" title="2128 votes">2.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/282329/gjorgji" rel="noopener">Gjorgji</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">node.js</span><span class="tag">file</span><span class="tag">express</span><span class="tag">fs</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/2496710/writing-to-files-in-node-js" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I've been trying to find a way to write to a file when using Node.js, but with no success. How can I do that?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3031 votes">3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/108359/brian-mckenna" rel="noopener">Brian McKenna</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2497040" rel="noopener">原文 ↗</a></div><div class="prose"><p>There are a lot of details in the <a href="http://nodejs.org/docs/latest/api/fs.html" rel="noreferrer">File System API</a>. The most common way is:</p>
+
+<pre class="lang-js prettyprint-override"><code>const fs = require('fs');
+
+fs.writeFile("/tmp/test", "Hey there!", function(err) {
+    if(err) {
+        return console.log(err);
+    }
+    console.log("The file was saved!");
+}); 
+
+// Or
+fs.writeFileSync('/tmp/test-sync', 'Hey there!');
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="628 votes">628</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/458093/gabriel-llamas" rel="noopener">Gabriel Llamas</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10368255" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Currently there are three ways to write a file:</p>
+<ol>
+<li><p><a href="http://nodejs.org/api/fs.html#fs_fs_write_fd_buffer_offset_length_position_callback" rel="noreferrer"><code>fs.write(fd, buffer, offset, length, position, callback</code>)</a></p>
+<p>You need to wait for the callback to ensure that the buffer is written to disk. It's not buffered.</p>
+</li>
+<li><p><a href="https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback" rel="noreferrer"><code>fs.writeFile(filename, data, [encoding], callback)</code></a></p>
+<p>All data must be stored at the same time; you cannot perform sequential writes.</p>
+</li>
+<li><p><a href="http://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options" rel="noreferrer"><code>fs.createWriteStream(path, [options]</code>)</a></p>
+<p>Creates a <a href="https://github.com/joyent/node/blob/master/lib/fs.js#L1623" rel="noreferrer"><code>WriteStream</code></a>, which is convenient because you don't need to wait for a callback. But again, it's not buffered.</p>
+</li>
+</ol>
+<p>A <a href="https://github.com/joyent/node/blob/master/lib/fs.js#L1623" rel="noreferrer"><code>WriteStream</code></a>, as the name says, is a stream. A stream by definition is “a buffer” containing data which moves in one direction (source ► destination). But a writable stream is not necessarily “buffered”. A stream is “buffered” when you write <code>n</code> times, and at time <code>n+1</code>, the stream sends the buffer to the kernel (because it's full and needs to be flushed).</p>
+<p><strong>In other words:</strong> “A buffer” is the object. Whether or not it “is buffered” is a property of that object.</p>
+<p>If you look at the code, the <code>WriteStream</code> inherits from a writable <code>Stream</code> object. If you pay attention, you’ll see how they flush the content; they don't have any buffering system.</p>
+<p>If you write a string, it’s converted to a buffer, and then sent to the native layer and written to disk. When writing strings, they're not filling up any buffer. So, if you do:</p>
+
+<pre class="lang-js prettyprint-override"><code>write(&quot;a&quot;)
+write(&quot;b&quot;)
+write(&quot;c&quot;)
+</code></pre>
+<p>You're doing:</p>
+<pre class="lang-js prettyprint-override"><code>fs.write(new Buffer(&quot;a&quot;))
+fs.write(new Buffer(&quot;b&quot;))
+fs.write(new Buffer(&quot;c&quot;))
+</code></pre>
+<p>That’s <em>three</em> calls to the I/O layer. Although you're using “buffers”, the data is not buffered. A buffered stream would do: <code>fs.write(new Buffer (&quot;abc&quot;))</code>, one call to the I/O layer.</p>
+<p>As of now, in Node.js v0.12 (stable version announced 02/06/2015) now supports two functions:
+<a href="http://nodejs.org/docs/v0.11.5/api/stream.html#stream_writable_cork" rel="noreferrer"><code>cork()</code></a> and
+<a href="http://nodejs.org/docs/v0.11.5/api/stream.html#stream_writable_uncork" rel="noreferrer"><code>uncork()</code></a>. It seems that these functions will finally allow you to buffer/flush the write calls.</p>
+<p>For example, in Java there are some classes that provide buffered streams (<code>BufferedOutputStream</code>, <code>BufferedWriter</code>...). If you write three bytes, these bytes will be stored in the buffer (memory) instead of doing an I/O call just for three bytes. When the buffer is full the content is flushed and saved to disk. This improves performance.</p>
+<p>I'm not discovering anything, just remembering how a disk access should be done.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="318 votes">318</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/568413/fredrik-andersson" rel="noopener">Fredrik Andersson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6958773" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can of course make it a little more advanced. Non-blocking, writing bits and pieces, not writing the whole file at once:</p>
+
+<pre><code>var fs = require('fs');
+var stream = fs.createWriteStream("my_file.txt");
+stream.once('open', function(fd) {
+  stream.write("My first row\n");
+  stream.write("My second row\n");
+  stream.end();
+});
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

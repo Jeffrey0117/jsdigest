@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I get the current date in JavaScript? · jsdigest</title>
+<meta name="description" content="How do I get the current date in JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I get the current date in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="3049 votes">3k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/96180/suresh" rel="noopener">Suresh</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">date</span><span class="tag">date-formatting</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1531093/how-do-i-get-the-current-date-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I get the current date in JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3472 votes">3.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/525895/samuel-meddows" rel="noopener">Samuel Meddows</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4929629" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use <code>new Date()</code> to generate a new <code>Date</code> object containing the current date and time.</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var today = new Date();
+var dd = String(today.getDate()).padStart(2, '0');
+var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+var yyyy = today.getFullYear();
+
+today = mm + '/' + dd + '/' + yyyy;
+document.write(today);</code></pre>
+</div>
+</div>
+</p>
+
+<p>This will give you today's date in the format of mm/dd/yyyy.</p>
+
+<p>Simply change <code>today = mm +'/'+ dd +'/'+ yyyy;</code> to whatever format you wish.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="548 votes">548</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2160475/varun-natraaj" rel="noopener">Varun Natraaj</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/19079030" rel="noopener">原文 ↗</a></div><div class="prose"><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var utc = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+document.write(utc);</code></pre>
+</div>
+</div>
+</p>
+
+<p>Use the <code>replace</code> option if you're going to reuse the <code>utc</code> variable, such as <code>new Date(utc)</code>, as Firefox and Safari don't recognize a date with dashes.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="481 votes">481</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3576214/damjan-pavlica" rel="noopener">Damjan Pavlica</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/35922073" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>The shortest possible.</strong> </p>
+
+<p>To get format like "2018-08-03":</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>let today = new Date().toISOString().slice(0, 10)
+
+console.log(today)</code></pre>
+</div>
+</div>
+</p>
+
+<p>To get format like "8/3/2018":</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>let today = new Date().toLocaleDateString()
+
+console.log(today)</code></pre>
+</div>
+</div>
+</p>
+
+<p>Also, you can pass <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString#Using_locales" rel="noreferrer">locale</a> as argument, for example <code>toLocaleDateString("sr")</code>, etc.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parse JSON in JavaScript? · jsdigest</title>
+<meta name="description" content="I want to parse a JSON string in JavaScript. The response is something like var response = &#39;{&quot;result&quot;:true,&quot;count&quot;:1}&#39;; How can I get the values result and cou…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Parse JSON in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="1763 votes">1.8k</span><span class="q-by">asked by user605334</span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">json</span><span class="tag">parsing</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/4935632/parse-json-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I want to parse a JSON string in JavaScript. The response is something like</p>
+
+<pre><code>var response = '{"result":true,"count":1}';
+</code></pre>
+
+<p>How can I get the values <code>result</code> and <code>count</code> from this?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2044 votes">2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/94197/andy-e" rel="noopener">Andy E</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4935684" rel="noopener">原文 ↗</a></div><div class="prose"><p>The standard way to parse JSON in JavaScript is <a href="http://msdn.microsoft.com/en-us/library/cc836466(v=vs.85).aspx" rel="noreferrer"><strong><code>JSON.parse()</code></strong></a></p>
+<p>The <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON" rel="noreferrer"><code>JSON</code></a> API was introduced with <a href="https://en.wikipedia.org/wiki/ECMAScript#5th_Edition" rel="noreferrer">ES5</a> (2011) and has since been implemented in &gt;99% of browsers by market share, and Node.js. Its usage is simple:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const json = '{ "fruit": "pineapple", "fingers": 10 }';
+const obj = JSON.parse(json);
+console.log(obj.fruit, obj.fingers);</code></pre>
+</div>
+</div>
+</p>
+<hr />
+<p>The only time you won't be able to use <code>JSON.parse()</code> is if you are programming for an ancient browser, such as IE 7 (2006), IE 6 (2001), Firefox 3 (2008), Safari 3.x (2009), etc. Alternatively, you may be in an esoteric JavaScript environment that doesn't include the standard APIs. In these cases, use <a href="https://github.com/douglascrockford/JSON-js/blob/master/json2.js" rel="noreferrer">json2.js</a>, the reference implementation of JSON written by <a href="https://en.wikipedia.org/wiki/Douglas_Crockford" rel="noreferrer">Douglas Crockford</a>, the inventor of JSON. That library will provide an implementation of <code>JSON.parse()</code>.</p>
+<p>When processing extremely large JSON files, <code>JSON.parse()</code> may choke because of its synchronous nature and design. To resolve this, the JSON website recommends third-party libraries such as <a href="http://oboejs.com/" rel="noreferrer">Oboe.js</a> and <a href="https://github.com/dscape/clarinet" rel="noreferrer">clarinet</a>, which provide streaming JSON parsing.</p>
+<p>jQuery once had a <a href="https://api.jquery.com/jQuery.parseJSON/" rel="noreferrer"><code>$.parseJSON()</code></a> function, but it was deprecated with jQuery 3.0. In any case, for a long time, it was nothing more than a wrapper around <code>JSON.parse()</code>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="107 votes">107</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/606743/clarence-fredericks" rel="noopener">Clarence Fredericks</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4935780" rel="noopener">原文 ↗</a></div><div class="prose"><blockquote>
+<p><strong>WARNING!</strong></p>
+<p>This answer stems from an ancient era of JavaScript programming during which there was no builtin way to parse JSON. The advice given here is no longer applicable and probably dangerous. From a modern perspective, parsing JSON by involving jQuery or calling eval() is nonsense. Unless you need to support IE 7 or Firefox 3.0, the correct way to parse JSON is <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse" rel="noreferrer">JSON.parse()</a>.</p>
+</blockquote>
+<p>First of all, you have to make sure that the JSON code is valid.</p>
+<p>After that, I would recommend using a JavaScript library such as jQuery or Prototype if you can because these things are handled well in those libraries.</p>
+<p>On the other hand, if you don't want to use a library and you can vouch for the validity of the JSON object, I would simply wrap the string in an anonymous function and use the eval function.</p>
+<p>This is not recommended if you are getting the JSON object from another source that isn't absolutely trusted because the eval function allows for renegade code if you will.</p>
+<p>Here is an example of using the eval function:</p>
+<pre><code>var strJSON = '{&quot;result&quot;:true,&quot;count&quot;:1}';
+var objJSON = eval(&quot;(function(){return &quot; + strJSON + &quot;;})()&quot;);
+alert(objJSON.result);
+alert(objJSON.count);
+</code></pre>
+<p>If you control what browser is being used or you are not worried people with an older browser, you can always use the JSON.parse method.</p>
+<p>This is really the ideal solution for the future.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="63 votes">63</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1467019/milestyle" rel="noopener">milestyle</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11550982" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you are getting this from an outside site it might be helpful to use jQuery's getJSON. If it's a list you can iterate through it with $.each</p>
+
+<pre><code>$.getJSON(url, function (json) {
+    alert(json.result);
+    $.each(json.list, function (i, fb) {
+        alert(fb.result);
+    });
+});
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

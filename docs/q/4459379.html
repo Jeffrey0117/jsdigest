@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview an image before it is uploaded · jsdigest</title>
+<meta name="description" content="I want to be able to preview a file (image) before it is uploaded. The preview action should be executed all in the browser without using Ajax to upload the im…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Preview an image before it is uploaded</h1>
+    <div class="q-meta big"><span class="score hot" title="2175 votes">2.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/518838/simbian" rel="noopener">Simbian</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">file-upload</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/4459379/preview-an-image-before-it-is-uploaded" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I want to be able to preview a file (image) before it is uploaded.  The preview action should be executed all in the browser without using Ajax to upload the image.</p>
+
+<p>How can I do this?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3374 votes">3.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/344437/ivan-baev" rel="noopener">Ivan Baev</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4459419" rel="noopener">原文 ↗</a></div><div class="prose"><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>imgInp.onchange = evt =&gt; {
+  const [file] = imgInp.files
+  if (file) {
+    blah.src = URL.createObjectURL(file)
+  }
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;form runat="server"&gt;
+  &lt;input accept="image/*" type='file' id="imgInp" /&gt;
+  &lt;img id="blah" src="#" alt="your image" /&gt;
+&lt;/form&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="545 votes">545</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/977809/nkron" rel="noopener">nkron</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/27165977" rel="noopener">原文 ↗</a></div><div class="prose"><p>There are a couple ways you can do this. The most efficient way would be to use <a href="https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL" rel="noreferrer">URL.createObjectURL()</a> on the <a href="http://www.javascripture.com/File" rel="noreferrer">File</a> from your <a href="http://www.javascripture.com/HTMLInputElement#files" rel="noreferrer">&lt;input&gt;</a>.  Pass this URL to <a href="http://www.javascripture.com/HTMLImageElement#src" rel="noreferrer">img.src</a> to tell the browser to load the provided image. </p>
+
+<p>Here's an example:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;input type="file" accept="image/*"&gt;
+&lt;img id="output"/&gt;
+&lt;script&gt;
+  var loadFile = function(event) {
+    var output = document.getElementById('output');
+    output.src = URL.createObjectURL(event.target.files[0]);
+    output.onload = function() {
+      URL.revokeObjectURL(output.src) // free memory
+    }
+  };
+&lt;/script&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>You can also use <a href="http://www.javascripture.com/FileReader#readAsDataURL" rel="noreferrer">FileReader.readAsDataURL()</a> to parse the file from your &lt;input&gt;.  This will create a string in memory containing a base64 representation of the image.</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;input type="file" accept="image/*"&gt;
+&lt;img id="output"/&gt;
+&lt;script&gt;
+  var loadFile = function(event) {
+    var reader = new FileReader();
+    reader.onload = function(){
+      var output = document.getElementById('output');
+      output.src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  };
+&lt;/script&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="306 votes">306</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1317040/cnlevy" rel="noopener">cnlevy</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/27002935" rel="noopener">原文 ↗</a></div><div class="prose"><p>One-liner solution:</p>
+
+<p>The following code uses object URLs, which is much more efficient than data URL for viewing large images (A data URL is a huge string containing all of the file data, whereas an object URL, is just a short string referencing the file data in-memory):</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;img id="blah" alt="your image" width="100" height="100" /&gt;
+
+&lt;input type="file" 
+   &gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>Generated URL will be like:</p>
+
+<pre><code>blob:http%3A//localhost/7514bc74-65d4-4cf0-a0df-3de016824345
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

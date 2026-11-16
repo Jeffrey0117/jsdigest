@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iterate through object properties · jsdigest</title>
+<meta name="description" content="var obj = { name: &quot;Simon&quot;, age: &quot;20&quot;, clothing: { style: &quot;simple&quot;, hipster: false } } for(var propt in obj){ console.log(propt + &#39;: &#39; + obj[propt]); } How does…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Iterate through object properties</h1>
+    <div class="q-meta big"><span class="score hot" title="2400 votes">2.4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1048252/rafay" rel="noopener">Rafay</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">loops</span><span class="tag">object</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/8312459/iterate-through-object-properties" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var obj = {
+    name: "Simon",
+    age: "20",
+    clothing: {
+        style: "simple",
+        hipster: false
+    }
+}
+
+for(var propt in obj){
+    console.log(propt + ': ' + obj[propt]);
+}</code></pre>
+</div>
+</div>
+</p>
+
+<p>How does the variable <code>propt</code> represent the properties of the object? It's not a built-in method or property. Why does it come up with every property in the object?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2609 votes">2.6k</span>
+    <span class="a-by">by user2417527</span>
+    <a class="a-src" href="https://stackoverflow.com/a/16735184" rel="noopener">原文 ↗</a></div><div class="prose"><p>Iterating over properties requires this additional <code>hasOwnProperty</code> check: </p>
+
+<pre><code>for (var prop in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+        // do stuff
+    }
+}
+</code></pre>
+
+<p>It's necessary because an object's prototype contains additional properties for the object which are technically part of the object. These additional properties are inherited from the base object class, but are still properties of <code>obj</code>.</p>
+
+<p><a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwnProperty" rel="noreferrer"><code>hasOwnProperty</code></a> simply checks to see if this is a property specific to this class, and not one inherited from the base class.</p>
+
+<hr>
+
+<p>It's also possible to call <code>hasOwnProperty</code> through the object itself:</p>
+
+<pre><code>if (obj.hasOwnProperty(prop)) {
+    // do stuff
+}
+</code></pre>
+
+<p>But this will fail if the object has an unrelated field with the same name:</p>
+
+<pre><code>var obj = { foo: 42, hasOwnProperty: 'lol' };
+obj.hasOwnProperty('foo');  // TypeError: hasOwnProperty is not a function
+</code></pre>
+
+<p>That's why it's safer to call it through <code>Object.prototype</code> instead:</p>
+
+<pre><code>var obj = { foo: 42, hasOwnProperty: 'lol' };
+Object.prototype.hasOwnProperty.call(obj, 'foo');  // true
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1346 votes">1.3k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1351261/danny-r" rel="noopener">Danny R</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/18202926" rel="noopener">原文 ↗</a></div><div class="prose"><p>As of JavaScript 1.8.5 you can use <code>Object.keys(obj)</code> to get an Array of properties defined on the object itself (the ones that return true for <code>obj.hasOwnProperty(key)</code>).</p>
+
+<pre><code>Object.keys(obj).forEach(function(key,index) {
+    // key: the name of the object key
+    // index: the ordinal position of the key within the object 
+});
+</code></pre>
+
+<p>This is better (and more readable) than using a for-in loop.</p>
+
+<p>Its supported on these browsers: </p>
+
+<ul>
+<li>Firefox (Gecko): 4 (2.0)</li>
+<li>Chrome: 5</li>
+<li>Internet Explorer: 9</li>
+</ul>
+
+<p>See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys" rel="noreferrer">the Mozilla Developer Network <strong>Object.keys()</strong>'s reference</a> for futher information.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="389 votes">389</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1073330/frank-roth" rel="noopener">Frank Roth</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/40737306" rel="noopener">原文 ↗</a></div><div class="prose"><p>Girls and guys we are in 2019 and we do not have that much time for typing... So lets do this cool new fancy ECMAScript 2016:</p>
+
+<pre><code>Object.keys(obj).forEach(e =&gt; console.log(`key=${e}  value=${obj[e]}`));
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

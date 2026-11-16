@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Using async/await with a forEach loop · jsdigest</title>
+<meta name="description" content="Are there any issues with using async / await in a forEach loop? I&#39;m trying to loop through an array of files and await on the contents of each file. import fs…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Using async/await with a forEach loop</h1>
+    <div class="q-meta big"><span class="score hot" title="3353 votes">3.4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/3533365/saad" rel="noopener">Saad</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">node.js</span><span class="tag">promise</span><span class="tag">async-await</span><span class="tag">ecmascript-2017</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Are there any issues with using <code>async</code>/<code>await</code> in a <code>forEach</code> loop? I'm trying to loop through an array of files and <code>await</code> on the contents of each file.</p>
+<pre><code>import fs from 'fs-promise'
+
+async function printFiles () {
+  const files = await getFilePaths() // Assume this works fine
+
+  files.forEach(async (file) =&gt; {
+    const contents = await fs.readFile(file, 'utf8')
+    console.log(contents)
+  })
+}
+
+printFiles()
+</code></pre>
+<p>This code does work, but could something go wrong with this? I had someone tell me that you're not supposed to use <code>async</code>/<code>await</code> in a higher-order function like this, so I just wanted to ask if there was any issue with this.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5809 votes">5.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1048572/bergi" rel="noopener">Bergi</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/37576787" rel="noopener">原文 ↗</a></div><div class="prose"><p>Sure the code does work, but I'm pretty sure it doesn't do what you expect it to do. It just fires off multiple asynchronous calls, but the <code>printFiles</code> function does immediately return after that.</p>
+
+<h3>Reading in sequence</h3>
+
+<p>If you want to read the files in sequence, <strong>you cannot use <code>forEach</code></strong> indeed. Just use a modern <code>for … of</code> loop instead, in which <code>await</code> will work as expected:</p>
+
+<pre><code>async function printFiles () {
+  const files = await getFilePaths();
+
+  for (const file of files) {
+    const contents = await fs.readFile(file, 'utf8');
+    console.log(contents);
+  }
+}
+</code></pre>
+
+<h3>Reading in parallel</h3>
+
+<p>If you want to read the files in parallel, <strong>you cannot use <code>forEach</code></strong> indeed. Each of the <code>async</code> callback function calls does return a promise, but you're throwing them away instead of awaiting them. Just use <code>map</code> instead, and you can await the array of promises that you'll get with <code>Promise.all</code>:</p>
+
+<pre><code>async function printFiles () {
+  const files = await getFilePaths();
+
+  await Promise.all(files.map(async (file) =&gt; {
+    const contents = await fs.readFile(file, 'utf8')
+    console.log(contents)
+  }));
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="691 votes">691</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2382650/cisco" rel="noopener">Cisco</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/50874507" rel="noopener">原文 ↗</a></div><div class="prose"><p>With ES2018, you are able to greatly simplify all of the above answers to:</p>
+<pre><code>async function printFiles () {
+  const files = await getFilePaths()
+
+  for await (const contents of files.map(file =&gt; fs.readFile(file, 'utf8'))) {
+    console.log(contents)
+  }
+}
+</code></pre>
+<p>See spec: <a href="https://github.com/tc39/proposal-async-iteration" rel="nofollow noreferrer">proposal-async-iteration</a></p>
+<p><strong>Simplified:</strong></p>
+<pre><code>  for await (const results of array) {
+    await longRunningTask()
+  }
+  console.log('I will wait')
+</code></pre>
+<hr />
+<p>2018-09-10: This answer has been getting a lot of attention recently, please see <a href="https://web.archive.org/web/20260425121831/https://2ality.com/2016/10/asynchronous-iteration.html" rel="nofollow noreferrer">Axel Rauschmayer's blog post</a> for further information about asynchronous iteration.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="218 votes">218</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2537258/timothy-zorn" rel="noopener">Timothy Zorn</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/49499491" rel="noopener">原文 ↗</a></div><div class="prose">
+
+<p>Instead of <code>Promise.all</code> in conjunction with <code>Array.prototype.map</code> (which does not guarantee the order in which the <code>Promise</code>s are resolved), I use <code>Array.prototype.reduce</code>, starting with a resolved <code>Promise</code>:</p>
+
+<pre class="lang-js prettyprint-override"><code>async function printFiles () {
+  const files = await getFilePaths();
+
+  await files.reduce(async (promise, file) =&gt; {
+    // This line will wait for the last async function to finish.
+    // The first iteration uses an already resolved Promise
+    // so, it will immediately continue.
+    await promise;
+    const contents = await fs.readFile(file, 'utf8');
+    console.log(contents);
+  }, Promise.resolve());
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

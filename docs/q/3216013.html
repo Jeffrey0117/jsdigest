@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get the last item in an array · jsdigest</title>
+<meta name="description" content="Here is my JavaScript code so far: var linkElement = document.getElementById(&quot;BackButton&quot;); var loc_array = document.location.href.split(&#39;/&#39;); var newT = docum…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Get the last item in an array</h1>
+    <div class="q-meta big"><span class="score hot" title="2186 votes">2.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/316429/balexander" rel="noopener">balexander</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/3216013/get-the-last-item-in-an-array" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Here is my JavaScript code so far:</p>
+
+<pre><code>var linkElement = document.getElementById("BackButton");
+var loc_array = document.location.href.split('/');
+var newT = document.createTextNode(unescape(capWords(loc_array[loc_array.length-2]))); 
+linkElement.appendChild(newT);
+</code></pre>
+
+<p>Currently it takes the second to last item in the array from the URL. However, I want to do a check for the last item in the array to be <code>"index.html"</code> and if so, grab the third to last item instead.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2590 votes">2.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/365695/aaron-butacov" rel="noopener">Aaron Butacov</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3216041" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>if (loc_array[loc_array.length - 1] === 'index.html') {
+   // do something
+} else {
+   // something else
+}
+</code></pre>
+<p>In the event that your server serves the same file for &quot;index.html&quot; and &quot;inDEX.htML&quot; you can also use: <code>.toLowerCase()</code>.</p>
+<p>Though, you might want to consider doing this server-side if possible: it will be cleaner and work for people without JS.</p>
+
+<hr />
+<p><strong>EDIT - ES-2022</strong></p>
+<p>Using ES-2022 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/at" rel="noreferrer"><code>Array.at()</code></a>, the above may be written like this:</p>
+<pre><code>if (loc_array.at(-1) === 'index.html') {
+   // do something
+} else {
+   // something else
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1671 votes">1.7k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/347508/kritzikratzi" rel="noopener">kritzikratzi</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/12099341" rel="noopener">原文 ↗</a></div><div class="prose"><p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice" rel="noreferrer">Reference</a>
+The slice() method of Array instances returns a shallow copy of a portion of an array into a new array object selected from start to end (end not included) where start and end represent the index of items in that array. The original array will not be modified.</p>
+<pre><code>arr.slice(-1)[0] 
+</code></pre>
+<p>or</p>
+<pre><code>arr.slice(-1).pop()
+</code></pre>
+<p>Both will return <code>undefined</code> if the array is empty.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="436 votes">436</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1456444/mohawke" rel="noopener">mohawke</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11034866" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use <a href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/pop">Array.pop</a>:</p>
+
+<pre><code>var lastItem = anArray.pop();
+</code></pre>
+
+<p><strong>Important</strong> : This returns the last element <em>and</em> <strong><em>removes</em></strong> it from the array</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

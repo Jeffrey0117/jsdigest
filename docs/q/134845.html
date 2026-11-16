@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which &quot;href&quot; value should I use for JavaScript links, &quot;#&quot; or &quot;javascript:void(0)&quot;? · jsdigest</title>
+<meta name="description" content="The following are two methods of building a link that has the sole purpose of running JavaScript code. Which is better, in terms of functionality, page load sp…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Which &quot;href&quot; value should I use for JavaScript links, &quot;#&quot; or &quot;javascript:void(0)&quot;?</h1>
+    <div class="q-meta big"><span class="score hot" title="4457 votes">4.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/8018/2cbgj7vsfp" rel="noopener">2cBGj7vsfp</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">html</span><span class="tag">performance</span><span class="tag">optimization</span><span class="tag">href</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/134845/which-href-value-should-i-use-for-javascript-links-or-javascriptvoid0" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>The following are two methods of building a link that has the sole purpose of running JavaScript code. Which is better, in terms of functionality, page load speed, validation purposes, etc.?</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function myJsFunc() {
+    alert("myJsFunc");
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;a href="#"&gt;Run JavaScript Code&lt;/a&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>or</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function myJsFunc() {
+    alert("myJsFunc");
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code> &lt;a href="#"&gt;Run JavaScript Code&lt;/a&gt;</code></pre>
+</div>
+</div>
+</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2319 votes">2.3k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/17516/anthonywjones" rel="noopener">AnthonyWJones</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/138233" rel="noopener">原文 ↗</a></div><div class="prose"><p>I use <code>javascript:void(0)</code>.</p>
+
+<p>Three reasons. Encouraging the use of <code>#</code> amongst a team of developers inevitably leads to some using the return value of the function called like this:</p>
+
+<pre><code>function doSomething() {
+    //Some code
+    return false;
+}
+</code></pre>
+
+<p>But then they forget to use <code>return doSomething()</code> in the onclick and just use <code>doSomething()</code>.</p>
+
+<p>A second reason for avoiding <code>#</code> is that the final <code>return false;</code> will not execute if the called function throws an error. Hence the developers have to also remember to handle any error appropriately in the called function.</p>
+
+<p>A third reason is that there are cases where the <code>onclick</code> event property is assigned dynamically.  I prefer to be able to call a function or assign it dynamically without having to code the function specifically for one method of attachment or another. Hence my <code>onclick</code> (or on anything) in HTML markup look like this:</p>
+
+<pre><code>onclick="someFunc.call(this)"
+</code></pre>
+
+<p>OR</p>
+
+<pre><code>onclick="someFunc.apply(this, arguments)"
+</code></pre>
+
+<p>Using <code>javascript:void(0)</code> avoids all of the above headaches, and I haven't found any examples of a downside.</p>
+
+<p>So if you're a lone developer then you can clearly make your own choice, but if you work as a team you have to either state:</p>
+
+<p>Use <code>href="#"</code>, make sure <code>onclick</code> always contains <code>return false;</code> at the end, that any called function does not throw an error and if you attach a function dynamically to the <code>onclick</code> property make sure that as well as not throwing an error it returns <code>false</code>.</p>
+
+<p>OR</p>
+
+<p>Use <code>href="#"</code></p>
+
+<p>The second is clearly much easier to communicate.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1419 votes">1.4k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3909/aaron-wagner" rel="noopener">Aaron Wagner</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/134957" rel="noopener">原文 ↗</a></div><div class="prose"><p>Neither.  </p>
+
+<p>If you can have an actual URL that makes sense use that as the HREF.  The onclick won't fire if someone middle-clicks on your link to open a new tab or if they have JavaScript disabled.</p>
+
+<p>If that is not possible, then you should at least inject the anchor tag into the document with JavaScript and the appropriate click event handlers.  </p>
+
+<p>I realize this isn't always possible, but in my opinion it should be striven for in developing any public website.</p>
+
+<p>Check out <em><a href="http://en.wikipedia.org/wiki/Unobtrusive_JavaScript" rel="noreferrer">Unobtrusive JavaScript</a></em> and <em><a href="http://en.wikipedia.org/wiki/Progressive_enhancement" rel="noreferrer">Progressive enhancement</a></em> (both Wikipedia).</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="809 votes">809</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/130638/balupton" rel="noopener">balupton</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/9440536" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Doing <code>&lt;a href="#"&gt;Link&lt;/a&gt;</code> or <code>&lt;a href="#"&gt;Link&lt;/a&gt;</code> or whatever else that contains an <code>onclick</code> attribute - was okay back five years ago, though now it can be a bad practice. Here's why:</p>
+
+<ol>
+<li><p>It promotes the practice of obtrusive JavaScript - which has turned out to be difficult to maintain and difficult to scale. More on this in <em><a href="http://en.wikipedia.org/wiki/Unobtrusive_JavaScript" rel="noreferrer">Unobtrusive JavaScript</a></em>.</p></li>
+<li><p>You're spending your time writing incredibly overly verbose code - which has very little (if any) benefit to your codebase.</p></li>
+<li><p>There are now better, easier, and more maintainable and scalable ways of accomplishing the desired result.</p></li>
+</ol>
+
+<h2>The unobtrusive JavaScript way</h2>
+
+<p>Just don't have a <code>href</code> attribute at all! Any good CSS reset would take care of the missing default cursor style, so that is a non-issue. Then attach your JavaScript functionality using graceful and unobtrusive  best practices - which are more maintainable as your JavaScript logic stays in JavaScript, instead of in your markup - which is essential when you start developing large scale JavaScript applications which require your logic to be split up into blackboxed components and templates. More on this in <em><a href="http://speakerdeck.com/u/addyosmani/p/large-scale-javascript-application-architecture" rel="noreferrer">Large-scale JavaScript Application Architecture</a></em></p>
+
+<h2>Simple code example</h2>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// Cancel click event
+$('.cancel-action').click(function(){
+    alert('Cancel action occurs!');
+});
+
+// Hover shim for Internet Explorer 6 and Internet Explorer 7.
+$(document.body).on('hover','a',function(){
+    $(this).toggleClass('hover');
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>a { cursor: pointer; color: blue; }
+a:hover,a.hover { text-decoration: underline; }</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;a class="cancel-action"&gt;Cancel this action&lt;/a&gt;</code></pre>
+</div>
+</div>
+    </p>
+
+<h2>A blackboxed <em><a href="http://documentcloud.github.com/backbone/" rel="noreferrer">Backbone.js</a></em> example</h2>
+
+<p>For a scalable, blackboxed, Backbone.js component example - <em><a href="http://jsfiddle.net/balupton/sTzdD/" rel="noreferrer">see this working jsfiddle example here</a></em>. Notice how we utilize unobtrusive JavaScript practices, and in a tiny amount of code have a component that can be repeated across the page multiple times without side-effects or conflicts between the different component instances. Amazing!</p>
+
+<h2>Notes</h2>
+
+<ul>
+<li><p>Omitting the <code>href</code> attribute on the <code>a</code> element will cause the element to not be accessible using <code>tab</code> key navigation. If you wish for those elements to be accessible via the <code>tab</code> key, you can set the <code>tabindex</code> attribute, or use <code>button</code> elements instead. You can easily style button elements to look like normal links as mentioned in <em><a href="https://stackoverflow.com/a/8525002/130638">Tracker1's answer</a></em>.</p></li>
+<li><p>Omitting the <code>href</code> attribute on the <code>a</code> element will cause <a href="http://en.wikipedia.org/wiki/Internet_Explorer_6" rel="noreferrer">Internet&nbsp;Explorer&nbsp;6</a> and <a href="http://en.wikipedia.org/wiki/Internet_Explorer_7" rel="noreferrer">Internet&nbsp;Explorer&nbsp;7</a> to not take on the <code>a:hover</code> styling, which is why we have added a simple JavaScript shim to accomplish this via <code>a.hover</code> instead. Which is perfectly okay, as if you don't have a href attribute and no graceful degradation then your link won't work anyway - and you'll have bigger issues to worry about.</p></li>
+<li><p>If you want your action to still work with JavaScript disabled, then using an <code>a</code> element with a <code>href</code> attribute that goes to some URL that will perform the action manually instead of via an Ajax request or whatever should be the way to go. If you are doing this, then you want to ensure you do an <code>event.preventDefault()</code> on your click call to make sure when the button is clicked it does not follow the link. This option is called graceful degradation.</p></li>
+</ul>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

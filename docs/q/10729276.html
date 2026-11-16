@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I get the full object in Node.js&#39;s console.log(), rather than &#39;[Object]&#39;? · jsdigest</title>
+<meta name="description" content="I have this object: const myObject = { &quot;a&quot;:&quot;a&quot;, &quot;b&quot;:{ &quot;c&quot;:&quot;c&quot;, &quot;d&quot;:{ &quot;e&quot;:&quot;e&quot;, &quot;f&quot;:{ &quot;g&quot;:&quot;g&quot;, &quot;h&quot;:{ &quot;i&quot;:&quot;i&quot; } } } } }; But when I try to show it using console.l…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I get the full object in Node.js&#39;s console.log(), rather than &#39;[Object]&#39;?</h1>
+    <div class="q-meta big"><span class="score hot" title="1562 votes">1.6k</span><span class="q-by">asked by user1372449</span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">node.js</span><span class="tag">debugging</span><span class="tag">console.log</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/10729276/how-can-i-get-the-full-object-in-node-jss-console-log-rather-than-object" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have this object:</p>
+<pre><code>const myObject = {
+   &quot;a&quot;:&quot;a&quot;,
+   &quot;b&quot;:{
+      &quot;c&quot;:&quot;c&quot;,
+      &quot;d&quot;:{
+         &quot;e&quot;:&quot;e&quot;,
+         &quot;f&quot;:{
+            &quot;g&quot;:&quot;g&quot;,
+            &quot;h&quot;:{
+               &quot;i&quot;:&quot;i&quot;
+            }
+         }
+      }
+   }
+};
+</code></pre>
+<p>But when I try to show it using <code>console.log(myObject)</code>, I receive this output:</p>
+<pre><code>{ a: 'a', b: { c: 'c', d: { e: 'e', f: [Object] } } }
+</code></pre>
+<p>How can I get the full object, including the content of property <code>f</code>?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2269 votes">2.3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/555899/250r" rel="noopener">250R</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10729284" rel="noopener">原文 ↗</a></div><div class="prose"><p>You need to use <a href="http://nodejs.org/api/util.html#util_util_inspect_object_options" rel="noreferrer"><code>util.inspect()</code></a>:</p>
+<pre><code>const util = require('util')
+
+console.log(util.inspect(myObject, {showHidden: false, depth: null, colors: true}))
+
+// alternative shortcut
+console.log(util.inspect(myObject, false, null, true /* enable colors */))
+</code></pre>
+<p>Outputs</p>
+<pre><code>{ a: 'a',  b: { c: 'c', d: { e: 'e', f: { g: 'g', h: { i: 'i' } } } } }
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1013 votes">1k</span>
+    <span class="a-by">by user1106925</span>
+    <a class="a-src" href="https://stackoverflow.com/a/10729391" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify" rel="noreferrer"><code>JSON.stringify</code></a>, and get some nice indentation as well as perhaps easier to remember syntax.</p>
+<pre><code>console.log(JSON.stringify(myObject, null, 4));
+</code></pre>
+<hr />
+<pre><code>{
+    &quot;a&quot;: &quot;a&quot;,
+    &quot;b&quot;: {
+        &quot;c&quot;: &quot;c&quot;,
+        &quot;d&quot;: {
+            &quot;e&quot;: &quot;e&quot;,
+            &quot;f&quot;: {
+                &quot;g&quot;: &quot;g&quot;,
+                &quot;h&quot;: {
+                    &quot;i&quot;: &quot;i&quot;
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<p>The third argument sets the indentation level, so you can adjust that as desired.</p>
+<p>More detail here in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify" rel="noreferrer">JSON stringify MDN docs</a> if needed.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="904 votes">904</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/45375/mklement0" rel="noopener">mklement0</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/27534731" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><sup>This answer draws on preexisting ones in an effort to provide a systematic overview.<br />
+Tip of the hat to <a href="https://stackoverflow.com/users/578288/rory-okane">Rory O'Kane</a> and <a href="https://stackoverflow.com/users/740553/mike-pomax-kamermans">Mike 'Pomax' Kamermans</a> for their help.</sup></p>
+<p><strong>tl;dr</strong></p>
+<p>To <strong>get the desired output</strong> for the example in the question <strong><em>ad hoc</em></strong>, use <a href="https://nodejs.org/api/console.html#console_console_dir_obj_options" rel="noreferrer"><code>console.dir()</code></a>:</p>
+<pre><code>console.dir(myObject, { depth: null }) // `depth: null` ensures unlimited recursion
+</code></pre>
+<p>Why not <code>util.inspect()</code>? Because it’s already at the heart of diagnostic output: <strong><code>console.log()</code></strong> and <strong><code>console.dir()</code></strong> as well as the Node.js REPL <strong>use <code>util.inspect()</code> <em>implicitly</em></strong>. It’s generally <strong><em>not</em> necessary to <code>require('util')</code></strong> and call <code>util.inspect()</code> directly - <em>unless</em> you want to capture the object visualization <em>in a variable</em> rather than printing to the console (e.g., <code>let s = util.inspect(myObject, { depth: null })</code>)</p>
+<p><strong>Alternatively, set the <em>default</em> depth to <code>null</code>:</strong></p>
+<pre><code>const util = require('util') // or: import util from 'util'
+
+// Set the default depth to null to remove the recursion limit.
+// All  subsequent console.log() and console.dir() calls will use this default.
+util.inspect.defaultOptions.depth = null
+
+console.log(myObject) // or: console.dir(myObject)
+</code></pre>
+<p><sup>Note: At least in recent Node.js versions, <code>Infinity</code> works in lieu of <code>null</code> too.</sup></p>
+<p>Details below.</p>
+<hr />
+<ul>
+<li><p><a href="https://nodejs.org/api/console.html#console_console_log_data_args" rel="noreferrer"><strong><code>console.log()</code></strong></a> (and its alias, <a href="https://nodejs.org/api/console.html#console_console_info_data_args" rel="noreferrer"><code>console.info()</code></a>):</p>
+<ul>
+<li><strong>If the 1st argument is NOT a format string</strong>: <a href="https://nodejs.org/api/util.html#util_util_inspect_object_options" rel="noreferrer"><code>util.inspect()</code></a> is automatically applied to every argument:
+<ul>
+<li><code>o = { one: 1, two: 'deux', foo: function(){} }; console.log(o, [1,2,3]) // -&gt;  '{ one: 1, two: 'deux', foo: [Function] } [ 1, 2, 3 ]'</code></li>
+<li>Note that you <strong>cannot pass options</strong> through <code>util.inspect()</code> in this case, which implies 2 notable limitations:
+<ul>
+<li>Structural <strong>depth</strong> of the output is <strong>limited to <em>2</em> levels</strong> (the default).
+<ul>
+<li>Since you cannot change this with <code>console.log()</code>, you must instead use <code>console.dir()</code>: <strong><code>console.dir(myObject, { depth: null }</code> prints with <em>unlimited</em> depth</strong>; see below.</li>
+</ul>
+</li>
+<li>You can’t turn syntax coloring on.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>If the 1st argument IS a format string</strong> (see below): uses <a href="https://nodejs.org/api/util.html#util_util_format_format_args" rel="noreferrer"><code>util.format()</code></a> to print the remaining arguments based on the format string (see below); e.g.:
+<ul>
+<li><code>o = { one: 1, two: 'deux', foo: function(){} }; console.log('o as JSON: %j', o) // -&gt;  'o as JSON: {&quot;one&quot;:1,&quot;two&quot;:&quot;deux&quot;}'</code></li>
+<li>Note:
+<ul>
+<li>There is NO placeholder for representing <em>objects</em> <code>util.inspect()</code>-style.</li>
+<li>JSON generated with <code>%j</code> is NOT pretty-printed.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a href="https://nodejs.org/api/console.html#console_console_dir_obj_options" rel="noreferrer"><strong><code>console.dir()</code></strong></a>:</p>
+<ul>
+<li><strong>Accepts only <em>1</em> argument to inspect</strong>, and always applies <a href="https://nodejs.org/api/util.html#util_util_inspect_object_options" rel="noreferrer"><code>util.inspect()</code></a> – essentially, a wrapper for <code>util.inspect()</code> without options by default; e.g.:
+<ul>
+<li><code>o = { one: 1, two: 'deux', foo: function(){} }; console.dir(o); // Effectively the same as console.log(o) in this case.</code></li>
+</ul>
+</li>
+<li><strong>Node.js v0.11.14+</strong>: The optional 2nd argument specifies <strong>options for <code>util.inspect()</code></strong> – see below; e.g.:
+<ul>
+<li><code>console.dir({ one: 1, two: 'deux'}, { colors: true }); // Node 0.11+: Prints object representation with syntax coloring.</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<ul>
+<li><strong>The REPL</strong>: <strong>implicitly prints any expression's return value with <code>util.inspect()</code> <em>with</em>  syntax coloring</strong>;<br />
+i.e., just typing a variable's name and hitting Enter will print an inspected version of its value; e.g.:
+<ul>
+<li><code>o = { one: 1, two: 'deux', foo: function(){} }  // The REPL echoes the object definition with syntax coloring.</code></li>
+</ul>
+</li>
+</ul>
+<p><strong><a href="https://nodejs.org/api/util.html#util_util_inspect_object_options" rel="noreferrer"><code>util.inspect()</code></a> automatically pretty-prints <em>object</em> and <em>array</em> representations</strong>, but produces <strong><em>multiline</em> output only when needed</strong>.</p>
+<ul>
+<li><p>The pretty-printing behavior can be controlled by the <code>compact</code> property in the optional <code>options</code> argument; <code>false</code> uses multi-line output <em>unconditionally</em>, whereas <code>true</code> disables pretty-printing altogether; it can also be set to a <em>number</em> (the default is <code>3</code>) to control the conditional multi-line behavior – see <a href="https://nodejs.org/api/util.html#util_util_inspect_object_options" rel="noreferrer">the docs</a>.</p>
+</li>
+<li><p>By default, output is wrapped <a href="https://github.com/nodejs/node/blob/master/lib/util.js#L815" rel="noreferrer">at around 60 characters</a><sup> thanks, <a href="https://stackoverflow.com/users/2248009/shrey">Shrey</a></sup>
+, regardless of whether the output is sent to a file or a terminal. In practice, since <em>line breaks only happen at property boundaries</em>, you will often end up with shorter lines, but they can also be longer (e.g., with long property values).</p>
+</li>
+<li><p>In v6.3.0+ you can use the <code>breakLength</code> option to override the 60-character limit; if you set it to <code>Infinity</code>, everything is output on a <em>single</em> line.</p>
+</li>
+</ul>
+<p><strong>If you want more control over pretty-printing, consider using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify" rel="noreferrer"><code>JSON.stringify()</code></a> with a 3rd argument</strong>, but note the following:</p>
+<ul>
+<li><em>Fails</em> with objects that have <em>circular references</em>, such as <code>module</code> in the global context.</li>
+<li><em>Methods</em> (functions) will by design NOT be included.</li>
+<li>You can't opt into showing hidden (non-enumerable) properties.</li>
+<li>Example call:
+<ul>
+<li><code>JSON.stringify({ one: 1, two: 'deux', three: true}, undefined, 2); // creates a pretty-printed multiline JSON representation indented with 2 spaces</code></li>
+</ul>
+</li>
+</ul>
+<hr />
+<p><strong><a href="https://nodejs.org/api/util.html#util_util_inspect_object_options" rel="noreferrer"><code>util.inspect()</code></a> options object</strong> (2nd argument):</p>
+<p>An optional <em>options</em> object may be passed that alters certain aspects of the formatted string; <em>some</em> of the properties supported are:</p>
+<p><sup>See <a href="https://nodejs.org/api/util.html#util_util_inspect_object_options" rel="noreferrer">the latest Node.js docs</a> for the current, full list.</sup></p>
+<ul>
+<li><p><code>showHidden</code></p>
+<ul>
+<li>if <code>true</code>,  then the object's non-enumerable properties [those designated not to show up when you use <code>for keys in obj</code> or <code>Object.keys(obj)</code>] will be shown too. Defaults to <code>false</code>.</li>
+</ul>
+</li>
+<li><p><code>depth</code></p>
+<ul>
+<li>tells inspect how many times to recurse while formatting the object. This is useful for inspecting large complicated objects. Defaults to 2. To make it recurse indefinitely, pass <code>null</code>.</li>
+</ul>
+</li>
+<li><p><code>colors</code></p>
+<ul>
+<li>if true, then the output will be styled with ANSI color codes. Defaults to <code>false</code>. Colors are customizable [… – see link].</li>
+</ul>
+</li>
+<li><p><code>customInspect</code></p>
+<ul>
+<li>if <code>false</code>, then custom <code>inspect()</code> functions defined on the objects being inspected won't be called. Defaults to <code>true</code>.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<p><strong><a href="https://nodejs.org/api/util.html#util_util_format_format_args" rel="noreferrer"><code>util.format()</code></a> format-string placeholders</strong> (1st argument)</p>
+<p><em>Some</em> of the supported placeholders are:</p>
+<p><sup>See <a href="https://nodejs.org/api/util.html#util_util_format_format_args" rel="noreferrer">the latest Node.js docs</a> for the current, full list.</sup></p>
+<ul>
+<li><code>%s</code> – String.</li>
+<li><code>%d</code> – Number (both integer and float).</li>
+<li><code>%j</code> – JSON.</li>
+<li><code>%%</code> – single percent sign (‘%’). This does not consume an argument.</li>
+</ul>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From an array of objects, extract value of a property as array · jsdigest</title>
+<meta name="description" content="I have JavaScript object array with the following structure: objArray = [ { foo: 1, bar: 2}, { foo: 3, bar: 4}, { foo: 5, bar: 6} ]; I want to extract a field…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>From an array of objects, extract value of a property as array</h1>
+    <div class="q-meta big"><span class="score hot" title="1975 votes">2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1717300/hyde" rel="noopener">hyde</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">javascript-objects</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/19590865/from-an-array-of-objects-extract-value-of-a-property-as-array" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have JavaScript object array with the following structure:</p>
+
+<pre><code>objArray = [ { foo: 1, bar: 2}, { foo: 3, bar: 4}, { foo: 5, bar: 6} ];
+</code></pre>
+
+<p>I want to extract a field from each object, and get an array containing the values, for example field <code>foo</code> would give array <code>[ 1, 3, 5 ]</code>.</p>
+
+<p>I can do this with this trivial approach:</p>
+
+<pre><code>function getFields(input, field) {
+    var output = [];
+    for (var i=0; i &lt; input.length ; ++i)
+        output.push(input[i][field]);
+    return output;
+}
+
+var result = getFields(objArray, "foo"); // returns [ 1, 3, 5 ]
+</code></pre>
+
+<p>Is there a more elegant or idiomatic way to do this, so that a custom utility function would be unnecessary?</p>
+
+<hr>
+
+<p>Note about <a href="https://stackoverflow.com/questions/6857468">suggested duplicate</a>, it covers how to convert a single <em>object</em> to an array.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2663 votes">2.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3848424/jalasem" rel="noopener">Jalasem</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/46694321" rel="noopener">原文 ↗</a></div><div class="prose"><p>Here is a shorter way of achieving it:</p>
+
+<pre><code>let result = objArray.map(a =&gt; a.foo);
+</code></pre>
+
+<p>OR</p>
+
+<pre><code>let result = objArray.map(({ foo }) =&gt; foo)
+</code></pre>
+
+<p>You can also check <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map" rel="noreferrer"><code>Array.prototype.map()</code></a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="745 votes">745</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/507674/niet-the-dark-absol" rel="noopener">Niet the Dark Absol</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/19590901" rel="noopener">原文 ↗</a></div><div class="prose"><p>Yes, but it relies on an ES5 feature of JavaScript. This means it will not work in IE8 or older.</p>
+
+<pre><code>var result = objArray.map(function(a) {return a.foo;});
+</code></pre>
+
+<p>On ES6 compatible JS interpreters you can use an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions" rel="noreferrer"><em>arrow function</em></a> for brevity:</p>
+
+<pre><code>var result = objArray.map(a =&gt; a.foo);
+</code></pre>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map" rel="noreferrer">Array.prototype.map documentation</a></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="78 votes">78</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1628461/pscl" rel="noopener">pscl</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/42059484" rel="noopener">原文 ↗</a></div><div class="prose"><p>Speaking for the JS only solutions, I've found that, inelegant as it may be, a simple indexed <code>for</code> loop is more performant than its alternatives.</p>
+
+<p>Extracting single property from a 100000 element array (via jsPerf)</p>
+
+<p><strong>Traditional for loop</strong> 368 Ops/sec</p>
+
+<pre><code>var vals=[];
+for(var i=0;i&lt;testArray.length;i++){
+   vals.push(testArray[i].val);
+}
+</code></pre>
+
+<p><strong>ES6 for..of loop</strong> 303 Ops/sec</p>
+
+<pre><code>var vals=[];
+for(var item of testArray){
+   vals.push(item.val); 
+}
+</code></pre>
+
+<p><strong>Array.prototype.map</strong> 19 Ops/sec</p>
+
+<pre><code>var vals = testArray.map(function(a) {return a.val;});
+</code></pre>
+
+<p>TL;DR - .map() is slow, but feel free to use it if you feel readability is worth more than performance.</p>
+
+<p>Edit #2: 6/2019 - jsPerf link broken, removed.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

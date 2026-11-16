@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>&#39;map&#39; function for objects (instead of arrays) · jsdigest</title>
+<meta name="description" content="I have an object: myObject = { &#39;a&#39;: 1, &#39;b&#39;: 2, &#39;c&#39;: 3 } I am looking for a native method, similar to Array.prototype.map that would be used as follows: newObje…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>&#39;map&#39; function for objects (instead of arrays)</h1>
+    <div class="q-meta big"><span class="score hot" title="1877 votes">1.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/707381/randomblue" rel="noopener">Randomblue</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">node.js</span><span class="tag">functional-programming</span><span class="tag">map-function</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/14810506/map-function-for-objects-instead-of-arrays" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have an object:</p>
+
+<pre><code>myObject = { 'a': 1, 'b': 2, 'c': 3 }
+</code></pre>
+
+<p>I am looking for a native method, similar to <code>Array.prototype.map</code> that would be used as follows:</p>
+
+<pre><code>newObject = myObject.map(function (value, label) {
+    return value * value;
+});
+
+// newObject is now { 'a': 1, 'b': 4, 'c': 9 }
+</code></pre>
+
+<p>Does JavaScript have such a <code>map</code> function for objects? (I want this for Node.JS, so I don't care about cross-browser issues.)</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2605 votes">2.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1191261/amberlamps" rel="noopener">Amberlamps</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/14810722" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>There is no native <code>map</code> to the <code>Object</code> object, but how about this:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var myObject = { 'a': 1, 'b': 2, 'c': 3 };
+
+Object.keys(myObject).forEach(function(key, index) {
+  myObject[key] *= 2;
+});
+
+console.log(myObject);
+// =&gt; { 'a': 2, 'b': 4, 'c': 6 }</code></pre>
+</div>
+</div>
+</p>
+<p>But you could easily iterate over an object using <code>for ... in</code>:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var myObject = { 'a': 1, 'b': 2, 'c': 3 };
+
+for (var key in myObject) {
+  if (myObject.hasOwnProperty(key)) {
+    myObject[key] *= 2;
+  }
+}
+
+console.log(myObject);
+// { 'a': 2, 'b': 4, 'c': 6 }</code></pre>
+</div>
+</div>
+</p>
+<h1>Update</h1>
+<p>A lot of people are mentioning that the previous methods do not return a new object, but rather operate on the object itself. For that matter I wanted to add another solution that returns a new object and leaves the original object as it is:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var myObject = { 'a': 1, 'b': 2, 'c': 3 };
+
+// returns a new object with the values at each key mapped using mapFn(value)
+function objectMap(object, mapFn) {
+  return Object.keys(object).reduce(function(result, key) {
+    result[key] = mapFn(object[key])
+    return result
+  }, {})
+}
+
+var newObject = objectMap(myObject, function(value) {
+  return value * 2
+})
+
+console.log(newObject);
+// =&gt; { 'a': 2, 'b': 4, 'c': 6 }
+
+console.log(myObject);
+// =&gt; { 'a': 1, 'b': 2, 'c': 3 }</code></pre>
+</div>
+</div>
+</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce" rel="noreferrer"><code>Array.prototype.reduce</code></a> reduces an array to a single value by somewhat merging the previous value with the current. The chain is initialized by an empty object <code>{}</code>. On every iteration a new key of <code>myObject</code> is added with twice the key as the value.</p>
+<h1>Update</h1>
+<p>With new ES6 features, there is a more elegant way to express <code>objectMap</code>.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const objectMap = (obj, fn) =&gt;
+  Object.fromEntries(
+    Object.entries(obj).map(
+      ([k, v], i) =&gt; [k, fn(v, k, i)]
+    )
+  )
+  
+const myObject = { a: 1, b: 2, c: 3 }
+
+console.log(objectMap(myObject, v =&gt; 2 * v)) </code></pre>
+</div>
+</div>
+</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="619 votes">619</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1612318/rotareti" rel="noopener">Rotareti</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/38829074" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>How about a one-liner in JS <strong>ES10 / ES2019</strong> ?</p>
+<p>Making use of <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/entries" rel="noreferrer"><code>Object.entries()</code></a> and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/fromEntries" rel="noreferrer"><code>Object.fromEntries()</code></a>:</p>
+<pre class="lang-js prettyprint-override"><code>let newObj = Object.fromEntries(Object.entries(obj).map(([k, v]) =&gt; [k, v * v]));
+</code></pre>
+<p>The same thing written as a function:</p>
+<pre class="lang-js prettyprint-override"><code>function objMap(obj, func) {
+  return Object.fromEntries(Object.entries(obj).map(([k, v]) =&gt; [k, func(v)]));
+}
+
+// To square each value you can call it like this:
+let mappedObj = objMap(obj, (x) =&gt; x * x);
+</code></pre>
+<p>This function uses <em>recursion</em> to square nested objects as well:</p>
+<pre class="lang-js prettyprint-override"><code>function objMap(obj, func) {
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) =&gt; 
+      [k, v === Object(v) ? objMap(v, func) : func(v)]
+    )
+  );
+}
+
+// To square each value you can call it like this:
+let mappedObj = objMap(obj, (x) =&gt; x * x);
+</code></pre>
+<p>With <strong>ES7 / ES2016</strong> you can't use <code>Objects.fromEntries</code>, but you can achieve the same using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign" rel="noreferrer"><code>Object.assign</code></a> in combination with <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Operators/Spread_operator" rel="noreferrer">spread operators</a> and <a href="http://es6-features.org/#ComputedPropertyNames" rel="noreferrer">computed key names</a> syntax:</p>
+<pre class="lang-js prettyprint-override"><code>let newObj = Object.assign({}, ...Object.entries(obj).map(([k, v]) =&gt; ({[k]: v * v})));
+</code></pre>
+<p><strong>ES6 / ES2015</strong> Doesn't allow <code>Object.entries</code>, but you could use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys" rel="noreferrer"><code>Object.keys</code></a> instead:</p>
+<pre class="lang-js prettyprint-override"><code>let newObj = Object.assign({}, ...Object.keys(obj).map(k =&gt; ({[k]: obj[k] * obj[k]})));
+</code></pre>
+<p>ES6 also introduced <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of" rel="noreferrer"><code>for...of</code></a> loops, which allow a more <em>imperative</em> style:</p>
+<pre class="lang-js prettyprint-override"><code>let newObj = {}
+
+for (let [k, v] of Object.entries(obj)) {
+  newObj[k] = v * v;
+}
+</code></pre>
+<hr />
+<br>
+<h3>array.reduce()</h3>
+<p>Instead of <code>Object.fromEntries</code> and <code>Object.assign</code> you can also use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce" rel="noreferrer">reduce</a> for this:</p>
+<pre class="lang-js prettyprint-override"><code>let newObj = Object.entries(obj).reduce((p, [k, v]) =&gt; ({ ...p, [k]: v * v }), {});
+</code></pre>
+<hr />
+<br>
+<h3>Inherited properties and the prototype chain:</h3>
+<p>In some rare situation you may need to map a <em>class-like</em> object which holds properties of an inherited object on its <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Inheritance_and_the_prototype_chain" rel="noreferrer">prototype-chain</a>. In such cases <code>Object.keys()</code> and <code>Object.entries()</code> won't work, because these functions do not include the prototype chain.</p>
+<p>If you need to map <em>inherited</em> properties, you can use <code>for (key in myObj) {...}</code>.</p>
+<p>Here is an example of such situation:</p>
+<pre class="lang-js prettyprint-override"><code>const obj1 = { 'a': 1, 'b': 2, 'c': 3}
+const obj2 = Object.create(obj1);  // One of multiple ways to inherit an object in JS.
+
+// Here you see how the properties of obj1 sit on the 'prototype' of obj2
+console.log(obj2)  // Prints: obj2.__proto__ = { 'a': 1, 'b': 2, 'c': 3}
+
+console.log(Object.keys(obj2));  // Prints: an empty Array.
+console.log(Object.entries(obj2));  // Prints: an empty Array.
+
+for (let key in obj2) {
+  console.log(key);              // Prints: 'a', 'b', 'c'
+}
+</code></pre>
+<p>However, please do me a favor and avoid <em>inheritance</em>. :-)</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="154 votes">154</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1234037/mario" rel="noopener">Mario</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/20663757" rel="noopener">原文 ↗</a></div><div class="prose"><p>No native methods, but <a href="http://lodash.com/docs#mapValues" rel="noreferrer">lodash#mapValues</a> will do the job brilliantly</p>
+
+<pre><code>_.mapValues({ 'a': 1, 'b': 2, 'c': 3} , function(num) { return num * 3; });
+// → { 'a': 3, 'b': 6, 'c': 9 }
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

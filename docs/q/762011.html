@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is the difference between &quot;let&quot; and &quot;var&quot;? · jsdigest</title>
+<meta name="description" content="ECMAScript 6 introduced the let declaration keyword . I&#39;ve heard that it&#39;s described as a local variable, but I&#39;m still not quite sure how it behaves different…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What is the difference between &quot;let&quot; and &quot;var&quot;?</h1>
+    <div class="q-meta big"><span class="score hot" title="6416 votes">6.4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/12983/tm" rel="noopener">TM.</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">scope</span><span class="tag">ecmascript-6</span><span class="tag">var</span><span class="tag">let</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/762011/what-is-the-difference-between-let-and-var" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>ECMAScript 6 introduced <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let" rel="noreferrer">the <code>let</code> declaration keyword</a>.</p>
+<p>I've heard that it's described as a local variable, but I'm still not quite sure how it behaves differently than the <code>var</code> keyword.</p>
+<p>What are the differences? When should <code>let</code> be used instead of <code>var</code>?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="8404 votes">8.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/918414/thinkingstiff" rel="noopener">ThinkingStiff</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11444416" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h1>Scoping rules</h1>
+<p>The main difference is scoping rules. Variables declared by <code>var</code> keyword are scoped to the immediate function body (hence the function scope) while <code>let</code> variables are scoped to the immediate <em>enclosing</em> block denoted by <code>{ }</code> (hence the block scope).</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function run() {
+  var foo = "Foo";
+  let bar = "Bar";
+
+  console.log(foo, bar); // Foo Bar
+
+  {
+    var moo = "Mooo"
+    let baz = "Bazz";
+    console.log(moo, baz); // Mooo Bazz
+  }
+
+  console.log(moo); // Mooo
+  console.log(baz); // ReferenceError
+}
+
+run();</code></pre>
+</div>
+</div>
+</p>
+<p>The reason why <code>let</code> keyword was introduced to the language was function scope is confusing and was one of the main sources of bugs in JavaScript.</p>
+<p>Take a look at this example from <a href="https://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example">another Stack Overflow question</a>:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var funcs = [];
+// let's create 3 functions
+for (var i = 0; i &lt; 3; i++) {
+  // and store them in funcs
+  funcs[i] = function() {
+    // each should log its value.
+    console.log("My value: " + i);
+  };
+}
+for (var j = 0; j &lt; 3; j++) {
+  // and now let's run each one to see
+  funcs[j]();
+}</code></pre>
+</div>
+</div>
+</p>
+<p><code>My value: 3</code> was output to console each time <code>funcs[j]();</code> was invoked since anonymous functions were bound to the same variable.</p>
+<p>People had to create immediately invoked functions to capture correct values from the loops but that was also hairy.</p>
+<h1>Hoisting</h1>
+<p>Variables declared with <code>var</code> keyword are <a href="https://dev.to/godcrampy/the-secret-of-hoisting-in-javascript-egi" rel="noreferrer">hoisted and <em>initialized</em></a> which means they are accessible in their enclosing scope even before they are declared, however their value is <code>undefined</code> before the declaration statement is reached:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function checkHoisting() {
+  console.log(foo); // undefined
+  var foo = "Foo";
+  console.log(foo); // Foo
+}
+
+checkHoisting();</code></pre>
+</div>
+</div>
+</p>
+<p><code>let</code> variables are <a href="https://stackoverflow.com/questions/31219420/are-variables-declared-with-let-or-const-hoisted">hoisted but <em>not initialized</em></a> until their definition is evaluated. Accessing them before the initialization results in a <code>ReferenceError</code>. The variable is said to be in <a href="https://stackoverflow.com/questions/33198849/what-is-the-temporal-dead-zone">the temporal dead zone</a> from the start of the block until the declaration statement is processed.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function checkHoisting() {
+  console.log(foo); // ReferenceError
+  let foo = "Foo";
+  console.log(foo); // Foo
+}
+
+checkHoisting();</code></pre>
+</div>
+</div>
+</p>
+<h1>Creating global object property</h1>
+<p>At the top level, <code>let</code>, unlike <code>var</code>, does not create a property on the global object:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var foo = "Foo"; // globally scoped
+let bar = "Bar"; // globally scoped but not part of the global object
+
+console.log(window.foo); // Foo
+console.log(window.bar); // undefined</code></pre>
+</div>
+</div>
+</p>
+<h1>Redeclaration</h1>
+<p>In strict mode, <code>var</code> will let you re-declare the same variable in the same scope while <code>let</code> raises a SyntaxError.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>'use strict';
+var foo = "foo1";
+var foo = "foo2"; // No problem, 'foo1' is replaced with 'foo2'.
+
+let bar = "bar1"; 
+let bar = "bar2"; // SyntaxError: Identifier 'bar' has already been declared</code></pre>
+</div>
+</div>
+</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="851 votes">851</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1750604/gurpreet-singh" rel="noopener">Gurpreet Singh</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/30479554" rel="noopener">原文 ↗</a></div><div class="prose"><p><code>let</code> can also be used to avoid problems with closures. It binds fresh value rather than keeping an old reference as shown in examples below.</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>for(var i=1; i&lt;6; i++) {
+  $("#div" + i).click(function () { console.log(i); });
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;p&gt;Clicking on each number will log to console:&lt;/p&gt; 
+&lt;div id="div1"&gt;1&lt;/div&gt;
+&lt;div id="div2"&gt;2&lt;/div&gt;
+&lt;div id="div3"&gt;3&lt;/div&gt;
+&lt;div id="div4"&gt;4&lt;/div&gt;
+&lt;div id="div5"&gt;5&lt;/div&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>Code above demonstrates a classic JavaScript closure problem. Reference to the <code>i</code> variable is being stored in the click handler closure, rather than the actual value of <code>i</code>.</p>
+
+<p>Every single click handler will refer to the same object because there’s only one counter object which holds 6 so you get six on each click.</p>
+
+<p>A general workaround is to wrap this in an anonymous function and pass <code>i</code> as an argument. Such issues can also be avoided now by using <code>let</code> instead <code>var</code> as shown in the code below.</p>
+
+<p><sub>(Tested in Chrome and Firefox 50)</sub></p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>for(let i=1; i&lt;6; i++) {
+  $("#div" + i).click(function () { console.log(i); });
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;p&gt;Clicking on each number will log to console:&lt;/p&gt; 
+&lt;div id="div1"&gt;1&lt;/div&gt;
+&lt;div id="div2"&gt;2&lt;/div&gt;
+&lt;div id="div3"&gt;3&lt;/div&gt;
+&lt;div id="div4"&gt;4&lt;/div&gt;
+&lt;div id="div5"&gt;5&lt;/div&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="342 votes">342</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1946501/john-slegers" rel="noopener">John Slegers</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/35585468" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h3>What's the difference between <code>let</code> and <code>var</code>?</h3>
+<ul>
+<li>A variable defined using a <code>var</code> statement is known throughout <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Statements/function" rel="noreferrer"><strong>the function</strong></a> it is defined in, from the start of the function. <em>(*)</em></li>
+<li>A variable defined using a <code>let</code> statement is only known in <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Statements/block" rel="noreferrer"><strong>the block</strong></a> it is defined in, from the moment it is defined onward. <em>(**)</em></li>
+</ul>
+<p>To understand the difference, consider the following code:</p>
+<pre><code>// i IS NOT known here
+// j IS NOT known here
+// k IS known here, but undefined
+// l IS NOT known here
+
+function loop(arr) {
+    // i IS known here, but undefined
+    // j IS NOT known here
+    // k IS known here, but has a value only the second time loop is called
+    // l IS NOT known here
+
+    for( var i = 0; i &lt; arr.length; i++ ) {
+        // i IS known here, and has a value
+        // j IS NOT known here
+        // k IS known here, but has a value only the second time loop is called
+        // l IS NOT known here
+    };
+
+    // i IS known here, and has a value
+    // j IS NOT known here
+    // k IS known here, but has a value only the second time loop is called
+    // l IS NOT known here
+
+    for( let j = 0; j &lt; arr.length; j++ ) {
+        // i IS known here, and has a value
+        // j IS known here, and has a value
+        // k IS known here, but has a value only the second time loop is called
+        // l IS NOT known here
+    };
+
+    // i IS known here, and has a value
+    // j IS NOT known here
+    // k IS known here, but has a value only the second time loop is called
+    // l IS NOT known here
+}
+
+loop([1,2,3,4]);
+
+for( var k = 0; k &lt; arr.length; k++ ) {
+    // i IS NOT known here
+    // j IS NOT known here
+    // k IS known here, and has a value
+    // l IS NOT known here
+};
+
+for( let l = 0; l &lt; arr.length; l++ ) {
+    // i IS NOT known here
+    // j IS NOT known here
+    // k IS known here, and has a value
+    // l IS known here, and has a value
+};
+
+loop([1,2,3,4]);
+
+// i IS NOT known here
+// j IS NOT known here
+// k IS known here, and has a value
+// l IS NOT known here
+</code></pre>
+<p>Here, we can see that our variable <code>j</code> is only known in the first for loop, but not before and after. Yet, our variable <code>i</code> is known in the entire function.</p>
+<p>Also, consider that block scoped variables are not known before they are declared because they are not hoisted. You're also not allowed to redeclare the same block scoped variable within the same block. This makes block scoped variables less error prone than globally or functionally scoped variables, which are hoisted and which do not produce any errors in case of multiple declarations.</p>
+<hr />
+<h3>Is it safe to use <code>let</code> today?</h3>
+<p>Some people would argue that in the future we'll ONLY use let statements and that var statements will become obsolete. JavaScript guru <a href="https://twitter.com/getify" rel="noreferrer"><strong>Kyle Simpson</strong></a> wrote <a href="https://davidwalsh.name/for-and-against-let" rel="noreferrer"><strong>a very elaborate article on why he believes that won't be the case</strong></a>.</p>
+<p>Today, however, that is definitely not the case. In fact, we need actually to ask ourselves whether it's safe to use the <code>let</code> statement. The answer to that question depends on your environment:</p>
+<ul>
+<li><p>If you're writing server-side JavaScript code (<a href="https://nodejs.org/en/" rel="noreferrer"><strong>Node.js</strong></a>), you can safely use the <code>let</code> statement.</p>
+</li>
+<li><p>If you're writing client-side JavaScript code and use a browser based transpiler (like <a href="https://github.com/google/traceur-compiler" rel="noreferrer"><strong>Traceur</strong></a> or <a href="https://github.com/babel/babel-standalone" rel="noreferrer"><strong>babel-standalone</strong></a>), you can safely use the <code>let</code> statement, however your code is likely to be anything but optimal with respect to performance.</p>
+</li>
+<li><p>If you're writing client-side JavaScript code and use a Node based transpiler (like the <a href="https://github.com/google/traceur-compiler/wiki/Compiling-Offline" rel="noreferrer"><strong>traceur shell script</strong></a> or <a href="https://babeljs.io/" rel="noreferrer"><strong>Babel</strong></a>), you can safely use the <code>let</code> statement. And, because your browser will only know about the transpiled code, performance drawbacks should be limited.</p>
+</li>
+<li><p>If you're writing client-side JavaScript code and don't use a transpiler, you need to consider browser support.</p>
+<p>There are still some browsers that don't support <code>let</code> at all :</p>
+</li>
+</ul>
+<p><a href="https://i.sstatic.net/J9kEC.png" rel="noreferrer"><img src="https://i.sstatic.net/J9kEC.png" alt="enter image description here" /></a></p>
+<hr />
+<h3>How to keep track of browser support</h3>
+<p>For an up-to-date overview of which browsers support the <code>let</code> statement at the time of your reading this answer, see <a href="http://caniuse.com/#search=let" rel="noreferrer"><strong>this <code>Can I Use</code> page</strong></a>.</p>
+<hr />
+<p><em>(*) Globally and functionally scoped variables can be initialized and used before they are declared because JavaScript variables are <a href="https://developer.mozilla.org/en-US/docs/Glossary/Hoisting" rel="noreferrer"><strong>hoisted</strong></a>.</em> This means that declarations are always moved to the top of the scope.</p>
+<p><em>(**) Block scoped variables are not hoisted</em></p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

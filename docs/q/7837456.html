@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to compare arrays in JavaScript? · jsdigest</title>
+<meta name="description" content="I&#39;d like to compare two arrays... ideally, efficiently. Nothing fancy, just true if they are identical, and false if not. Not surprisingly, the comparison oper…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to compare arrays in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="1580 votes">1.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/122353/julian-h-lam" rel="noopener">Julian H. Lam</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">json</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/7837456/how-to-compare-arrays-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'd like to compare two arrays... ideally, efficiently. Nothing fancy, just <code>true</code> if they are identical, and <code>false</code> if not. Not surprisingly, the comparison operator doesn't seem to work.</p>
+
+<pre><code>var a1 = [1,2,3];
+var a2 = [1,2,3];
+console.log(a1==a2);    // Returns false
+console.log(JSON.stringify(a1)==JSON.stringify(a2));    // Returns true
+</code></pre>
+
+<p>JSON encoding each array does, but is there a faster or "better" way to simply compare arrays without having to iterate through each value?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1084 votes">1.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/607407/tom%c3%a1%c5%a1-zato" rel="noopener">Tom&amp;#225;š Zato</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/14853974" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>To compare arrays, loop through them and compare every value:</p>
+<h2>Comparing arrays:</h2>
+<pre><code>// Warn if overriding existing method
+if(Array.prototype.equals)
+    console.warn(&quot;Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.&quot;);
+// attach the .equals method to Array's prototype to call it on any array
+Array.prototype.equals = function (array) {
+    // if the other array is a falsy value, return
+    if (!array)
+        return false;
+    // if the argument is the same array, we can be sure the contents are same as well
+    if(array === this)
+        return true;
+    // compare lengths - can save a lot of time 
+    if (this.length != array.length)
+        return false;
+
+    for (var i = 0, l=this.length; i &lt; l; i++) {
+        // Check if we have nested arrays
+        if (this[i] instanceof Array &amp;&amp; array[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!this[i].equals(array[i]))
+                return false;       
+        }           
+        else if (this[i] != array[i]) { 
+            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;   
+        }           
+    }       
+    return true;
+}
+// Hide method from for-in loops
+Object.defineProperty(Array.prototype, &quot;equals&quot;, {enumerable: false});
+</code></pre>
+<h3>Usage:</h3>
+<pre><code>[1, 2, [3, 4]].equals([1, 2, [3, 2]]) === false;
+[1, &quot;2,3&quot;].equals([1, 2, 3]) === false;
+[1, 2, [3, 4]].equals([1, 2, [3, 4]]) === true;
+[1, 2, 1, 2].equals([1, 2, 1, 2]) === true;
+</code></pre>
+<p>You may say &quot;<em>But it is much faster to compare strings - no loops...</em>&quot; well, then you should note there ARE loops. First recursive loop that converts Array to string and second, that compares two strings. So this method <strong>is faster than use of string</strong>.</p>
+<p><sub>I believe that larger amounts of data should be always stored in arrays, not in objects. However if you use objects, they can be partially compared too.<br />
+<strong>Here's how:</strong></sub></p>
+<h2>Comparing objects:</h2>
+<p>I've stated above, that two object <strong>instances</strong> will never be equal, even if they contain same data at the moment:</p>
+<pre><code>({a:1, foo:&quot;bar&quot;, numberOfTheBeast: 666}) == ({a:1, foo:&quot;bar&quot;, numberOfTheBeast: 666})  //false
+</code></pre>
+<p>This has a reason, since there may be, for example <a href="https://stackoverflow.com/a/201471/607407">private variables within objects.</a></p>
+<p>However, if you just use object structure to contain data, comparing is still possible:</p>
+<pre><code>Object.prototype.equals = function(object2) {
+    //For the first loop, we only check for types
+    for (propName in this) {
+        //Check for inherited methods and properties - like .equals itself
+        //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwnProperty
+        //Return false if the return value is different
+        if (this.hasOwnProperty(propName) != object2.hasOwnProperty(propName)) {
+            return false;
+        }
+        //Check instance type
+        else if (typeof this[propName] != typeof object2[propName]) {
+            //Different types =&gt; not equal
+            return false;
+        }
+    }
+    //Now a deeper check using other objects property names
+    for(propName in object2) {
+        //We must check instances anyway, there may be a property that only exists in object2
+            //I wonder, if remembering the checked values from the first loop would be faster or not 
+        if (this.hasOwnProperty(propName) != object2.hasOwnProperty(propName)) {
+            return false;
+        }
+        else if (typeof this[propName] != typeof object2[propName]) {
+            return false;
+        }
+        //If the property is inherited, do not check any more (it must be equa if both objects inherit it)
+        if(!this.hasOwnProperty(propName))
+          continue;
+        
+        //Now the detail check and recursion
+        
+        //This returns the script back to the array comparing
+        /**REQUIRES Array.equals**/
+        if (this[propName] instanceof Array &amp;&amp; object2[propName] instanceof Array) {
+                   // recurse into the nested arrays
+           if (!this[propName].equals(object2[propName]))
+                        return false;
+        }
+        else if (this[propName] instanceof Object &amp;&amp; object2[propName] instanceof Object) {
+                   // recurse into another objects
+                   //console.log(&quot;Recursing to compare &quot;, this[propName],&quot;with&quot;,object2[propName], &quot; both named \&quot;&quot;+propName+&quot;\&quot;&quot;);
+           if (!this[propName].equals(object2[propName]))
+                        return false;
+        }
+        //Normal value comparison for strings and numbers
+        else if(this[propName] != object2[propName]) {
+           return false;
+        }
+    }
+    //If everything passed, let's say YES
+    return true;
+}  
+</code></pre>
+<p>However, remember that this one is to serve in comparing JSON like data, not class instances and other stuff. If you want to compare more complicated objects, look at <a href="https://stackoverflow.com/a/1144249/607407">this answer and it's super long function</a>.<br />
+To make this work with <code>Array.equals</code> you must edit the original function a little bit:</p>
+<pre><code>...
+    // Check if we have nested arrays
+    if (this[i] instanceof Array &amp;&amp; array[i] instanceof Array) {
+        // recurse into the nested arrays
+        if (!this[i].equals(array[i]))
+            return false;
+    }
+    /**REQUIRES OBJECT COMPARE**/
+    else if (this[i] instanceof Object &amp;&amp; array[i] instanceof Object) {
+        // recurse into another objects
+        //console.log(&quot;Recursing to compare &quot;, this[propName],&quot;with&quot;,object2[propName], &quot; both named \&quot;&quot;+propName+&quot;\&quot;&quot;);
+        if (!this[i].equals(array[i]))
+            return false;
+        }
+    else if (this[i] != array[i]) {
+...
+</code></pre>
+<p>I made a <a href="http://jsfiddle.net/Darker/SBtu2/" rel="noreferrer">little test tool for both of the functions</a>.</p>
+<h2>Bonus: Nested arrays with <code>indexOf</code> and <code>contains</code></h2>
+<p><a href="https://stackoverflow.com/questions/7837456/how-to-compare-arrays-in-javascript/14853974?noredirect=1#comment59337127_14853974">Samy Bencherif has prepared</a> useful functions for the case you're searching for a specific object in nested arrays, which are available here: <a href="https://jsfiddle.net/SamyBencherif/8352y6yw/" rel="noreferrer">https://jsfiddle.net/SamyBencherif/8352y6yw/</a></p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="655 votes">655</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2782196/user2782196" rel="noopener">user2782196</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/19746771" rel="noopener">原文 ↗</a></div><div class="prose"><p>While this only works for scalar arrays (shallow comparison, see note below), it is short code:</p>
+<pre><code>array1.length === array2.length &amp;&amp; array1.every(function(value, index) { return value === array2[index]})
+</code></pre>
+<p>Same as above but in ECMAScript 6 / CoffeeScript / TypeScript with Arrow Functions:</p>
+<pre><code>array1.length === array2.length &amp;&amp; array1.every((value, index) =&gt; value === array2[index])
+</code></pre>
+<p>(Note: 'scalar' here means values that can be compared directly using <code>===</code> . So: numbers, strings, objects by reference, functions by reference. See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators" rel="noreferrer">the MDN reference</a> for more info about the comparison operators).</p>
+<p><strong>UPDATE</strong></p>
+<p>From what I read in the comments, sorting the array and comparing may give accurate result:</p>
+<pre><code>const array2Sorted = array2.slice().sort();
+array1.length === array2.length &amp;&amp; array1.slice().sort().every(function(value, index) {
+    return value === array2Sorted[index];
+});
+</code></pre>
+<p>Eg:</p>
+<pre><code>array1 = [2,3,1,4];
+array2 = [1,2,3,4];
+</code></pre>
+<p>Then the above code would return <code>true</code></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="307 votes">307</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2751854/jason-boerner" rel="noopener">Jason Boerner</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/21529742" rel="noopener">原文 ↗</a></div><div class="prose"><p>I like to use the Underscore library for array/object heavy coding projects ... in Underscore and Lodash whether you're comparing arrays or objects it just looks like this:</p>
+
+<pre><code>_.isEqual(array1, array2)   // returns a boolean
+_.isEqual(object1, object2) // returns a boolean
+</code></pre>
+
+<ul>
+<li><a href="http://underscorejs.org/#isEqual" rel="noreferrer">Underscore isEqual docs</a></li>
+<li><a href="https://lodash.com/docs/#isEqual" rel="noreferrer">Lodash isEqual docs</a></li>
+</ul>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

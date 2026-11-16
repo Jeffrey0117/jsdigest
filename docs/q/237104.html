@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I check if an array includes a value in JavaScript? · jsdigest</title>
+<meta name="description" content="What is the most concise and efficient way to find out if a JavaScript array contains a value? This is the only way I know to do it: function contains(a, obj)…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I check if an array includes a value in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="5010 votes">5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/208/brad" rel="noopener">brad</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">algorithm</span><span class="tag">time-complexity</span><span class="tag">javascript-objects</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/237104/how-do-i-check-if-an-array-includes-a-value-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What is the most concise and efficient way to find out if a JavaScript array contains a value?</p>
+<p>This is the only way I know to do it:</p>
+<pre><code>function contains(a, obj) {
+    for (var i = 0; i &lt; a.length; i++) {
+        if (a[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
+</code></pre>
+<p>Is there a better and more concise way to accomplish this?</p>
+<p>This is very closely related to Stack Overflow question <em><a href="https://stackoverflow.com/questions/143847/best-way-to-find-an-item-in-a-javascript-array">Best way to find an item in a JavaScript Array?</a></em> which addresses finding objects in an array using <code>indexOf</code>.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5537 votes">5.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3571/codeape" rel="noopener">codeape</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1473742" rel="noopener">原文 ↗</a></div><div class="prose"><p>Modern browsers have <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes#browser_compatibility" rel="noreferrer"><code>Array#includes</code></a>, which does <em>exactly</em> that and <a href="https://kangax.github.io/compat-table/es2016plus/#test-Array.prototype.includes" rel="noreferrer">is widely supported</a> by everyone except IE:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>console.log(['joe', 'jane', 'mary'].includes('jane')); // true</code></pre>
+</div>
+</div>
+</p>
+<p>You can also use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf" rel="noreferrer"><code>Array#indexOf</code></a>, which is less direct, but doesn't require polyfills for outdated browsers.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>console.log(['joe', 'jane', 'mary'].indexOf('jane') &gt;= 0); // true</code></pre>
+</div>
+</div>
+</p>
+<hr />
+<p>Many frameworks also offer similar methods:</p>
+<ul>
+<li>jQuery: <a href="https://api.jquery.com/jquery.inarray/" rel="noreferrer"><code>$.inArray(value, array, [fromIndex])</code></a></li>
+<li>Underscore.js: <a href="https://underscorejs.org/#contains" rel="noreferrer"><code>_.contains(array, value)</code></a> (also aliased as <code>_.include</code> and <code>_.includes</code>)</li>
+<li>Dojo Toolkit: <a href="https://dojotoolkit.org/reference-guide/1.10/dojo/indexOf.html" rel="noreferrer"><code>dojo.indexOf(array, value, [fromIndex, findLast])</code></a></li>
+<li>Prototype: <a href="http://api.prototypejs.org/language/Array/prototype/indexOf/" rel="noreferrer"><code>array.indexOf(value)</code></a></li>
+<li>MooTools: <a href="https://mootools.net/core/docs/1.6.0/Types/Array#Array:indexOf" rel="noreferrer"><code>array.indexOf(value)</code></a></li>
+<li>MochiKit: <a href="http://mochi.github.io/mochikit/doc/html/MochiKit/Base.html#fn-findvalue" rel="noreferrer"><code>findValue(array, value)</code></a></li>
+<li>MS Ajax: <a href="https://web.archive.org/web/20140819232945/http://www.asp.net/ajaxlibrary/Reference.Array-indexOf-Function.ashx" rel="noreferrer"><code>array.indexOf(value)</code></a></li>
+<li>Ext: <a href="https://docs.sencha.com/extjs/7.5.1/modern/Ext.Array.html#method-contains" rel="noreferrer"><code>Ext.Array.contains(array, value)</code></a></li>
+<li>Lodash: <a href="https://lodash.com/docs#includes" rel="noreferrer"><code>_.includes(array, value, [from])</code></a> (is <code>_.contains</code> prior 4.0.0)</li>
+<li>Ramda: <a href="https://ramdajs.com/docs/#includes" rel="noreferrer"><code>R.includes(value, array)</code></a></li>
+</ul>
+<p>Notice that some frameworks implement this as a function, while others add the function to the array prototype.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="511 votes">511</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/401510/damir-zeki%c4%87" rel="noopener">Damir Zekić</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/237176" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>Update from 2019: This answer is from 2008 (11 years old!) and is not relevant for modern JS usage. The promised performance improvement was based on a benchmark done in browsers of that time. It might not be relevant to modern JS execution contexts. If you need an easy solution, look for other answers. If you need the best performance, benchmark for yourself in the relevant execution environments.</strong></p>
+<p>As others have said, the iteration through the array is probably the best way, but it <a href="https://web.archive.org/web/20170403221045/https://blogs.oracle.com/greimer/entry/best_way_to_code_a" rel="noreferrer">has been proven</a> that a decreasing <code>while</code> loop is the fastest way to iterate in JavaScript. So you may want to rewrite your code as follows:</p>
+<pre><code>function contains(a, obj) {
+    var i = a.length;
+    while (i--) {
+       if (a[i] === obj) {
+           return true;
+       }
+    }
+    return false;
+}
+</code></pre>
+<p>Of course, you may as well extend Array prototype:</p>
+<pre><code>Array.prototype.contains = function(obj) {
+    var i = this.length;
+    while (i--) {
+        if (this[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
+</code></pre>
+<p>And now you can simply use the following:</p>
+<pre><code>alert([1, 2, 3].contains(2)); // =&gt; true
+alert([1, 2, 3].contains('2')); // =&gt; false
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="270 votes">270</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/599912/michael" rel="noopener">Michael</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/24827594" rel="noopener">原文 ↗</a></div><div class="prose"><p>The top answers assume primitive types but if you want to find out if an array contains an <strong>object</strong> with some trait, <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/some" rel="noreferrer">Array.prototype.some()</a> is an elegant solution:</p>
+<pre><code>const items = [ {a: '1'}, {a: '2'}, {a: '3'} ]
+
+items.some(item =&gt; item.a === '3')  // returns true
+items.some(item =&gt; item.a === '4')  // returns false
+</code></pre>
+<p>The nice thing about it is that the iteration is aborted once the element is found so unnecessary iteration cycles are spared.</p>
+<p>Also, it fits nicely in an <code>if</code> statement since it returns a boolean:</p>
+<pre><code>if (items.some(item =&gt; item.a === '3')) {
+  // do something
+}
+</code></pre>
+<p>* As jamess pointed out in the comment, at the time of this answer, September 2018, <code>Array.prototype.some()</code> is fully supported: <a href="http://kangax.github.io/compat-table/es5/#test-Array_methods_Array.prototype.some_a_href=_https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some_title=_MDN_documentation_img_src=_../mdn.png_alt=_MDN_(Mozilla_Development_Network)_logo_width=_15_height=_13_/_/a_nbsp;" rel="noreferrer">caniuse.com support table</a></p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

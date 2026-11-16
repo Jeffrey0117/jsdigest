@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What are these three dots in React doing? · jsdigest</title>
+<meta name="description" content="What does the ... do in this React (using JSX) code and what is it called? &lt;Modal {...this.props} title=&#39;Modal heading&#39; animation={false}&gt;">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What are these three dots in React doing?</h1>
+    <div class="q-meta big"><span class="score hot" title="1501 votes">1.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/5038178/thomas-johansen" rel="noopener">Thomas Johansen</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">reactjs</span><span class="tag">spread-syntax</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/31048953/what-are-these-three-dots-in-react-doing" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What does the <code>...</code> do in this React (using JSX) code and what is it called?</p>
+
+<pre><code>&lt;Modal {...this.props} title='Modal heading' animation={false}&gt;
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1637 votes">1.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/157247/t-j-crowder" rel="noopener">T.J. Crowder</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/31049016" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>That's <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax" rel="noreferrer"><em>property spread notation</em></a>. It was added in ES2018 (spread for arrays/iterables was earlier, ES2015), but it's been supported in React projects for a long time via transpilation (as "<a href="https://reactjs.org/docs/jsx-in-depth.html#spread-attributes" rel="noreferrer">JSX spread attributes</a>" even though you could do it elsewhere, too, not just attributes).</p>
+
+<p><code>{...this.props}</code> <em>spreads out</em> the "own" enumerable properties in <code>props</code> as discrete properties on the <code>Modal</code> element you're creating. For instance, if <code>this.props</code> contained <code>a: 1</code> and <code>b: 2</code>, then</p>
+
+<pre><code>&lt;Modal {...this.props} title='Modal heading' animation={false}&gt;
+</code></pre>
+
+<p>would be the same as</p>
+
+<pre><code>&lt;Modal a={this.props.a} b={this.props.b} title='Modal heading' animation={false}&gt;
+</code></pre>
+
+<p>But it's dynamic, so whatever "own" properties are in <code>props</code> are included.</p>
+
+<p>Since <code>children</code> is an "own" property in <code>props</code>, spread will include it. So if the component where this appears had child elements, they'll be passed on to <code>Modal</code>. Putting child elements between the opening tag and closing tags is just syntactic sugar&nbsp;&mdash; the good kind&nbsp;&mdash; for putting a <code>children</code> property in the opening tag. Example:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="true">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>class Example extends React.Component {
+  render() {
+    const { className, children } = this.props;
+    return (
+      &lt;div className={className}&gt;
+      {children}
+      &lt;/div&gt;
+    );
+  }
+}
+ReactDOM.render(
+  [
+    &lt;Example className="first"&gt;
+      &lt;span&gt;Child in first&lt;/span&gt;
+    &lt;/Example&gt;,
+    &lt;Example className="second" children={&lt;span&gt;Child in second&lt;/span&gt;} /&gt;
+  ],
+  document.getElementById("root")
+);</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.first {
+  color: green;
+}
+.second {
+  color: blue;
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;div id="root"&gt;&lt;/div&gt;
+
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.6.3/umd/react.production.min.js"&gt;&lt;/script&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.6.3/umd/react-dom.production.min.js"&gt;&lt;/script&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>Spread notation is handy not only for that use case, but for creating a new object with most (or all) of the properties of an existing object&nbsp;&mdash; which comes up a lot when you're updating state, since you can't modify state directly:</p>
+
+<pre><code>this.setState(prevState =&gt; {
+    return {foo: {...prevState.foo, a: "updated"}};
+});
+</code></pre>
+
+<p>That replaces <code>this.state.foo</code> with a new object with all the same properties as <code>foo</code> except the <code>a</code> property, which becomes <code>"updated"</code>:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const obj = {
+  foo: {
+    a: 1,
+    b: 2,
+    c: 3
+  }
+};
+console.log("original", obj.foo);
+// Creates a NEW object and assigns it to `obj.foo`
+obj.foo = {...obj.foo, a: "updated"};
+console.log("updated", obj.foo);</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.as-console-wrapper {
+  max-height: 100% !important;
+}</code></pre>
+</div>
+</div>
+</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="547 votes">547</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1254256/mehdi-raash" rel="noopener">Mehdi Raash</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/41640566" rel="noopener">原文 ↗</a></div><div class="prose"><p><code>...</code> are called <strong>spread attributes</strong> which, as the name represents, it allows an expression to be expanded.</p>
+<pre><code>var parts = ['two', 'three'];
+var numbers = ['one', ...parts, 'four', 'five']; // [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;, &quot;four&quot;, &quot;five&quot;]
+</code></pre>
+<p>And in this case (I'm going to simplify it).</p>
+<pre><code>// Just assume we have an object like this:
+var person= {
+    name: 'Alex',
+    age: 35 
+}
+</code></pre>
+<p>This:</p>
+<pre><code>&lt;Modal {...person} title='Modal heading' animation={false} /&gt;
+</code></pre>
+<p>is equal to</p>
+<pre><code>&lt;Modal name={person.name} age={person.age} title='Modal heading' animation={false} /&gt;
+</code></pre>
+<p>So in short, it's a <strong>neat</strong> short-cut, <em>we can say</em>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="361 votes">361</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3247914/thetypan" rel="noopener">theTypan</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/50729063" rel="noopener">原文 ↗</a></div><div class="prose"><p>The three dots represent the <strong>spread syntax</strong> in <a href="https://en.wikipedia.org/wiki/ECMAScript#6th_Edition_%E2%80%93_ECMAScript_2015" rel="nofollow noreferrer">ES6</a>. It allows us to do quite a few things in JavaScript:</p>
+<ol>
+<li><p><strong>Concatenate arrays</strong></p>
+<pre><code> var shooterGames = ['Call of Duty', 'Far Cry', 'Resident Evil'];
+ var racingGames = ['Need For Speed', 'Gran Turismo', 'Burnout'];
+ var games = [...shooterGames, ...racingGames];
+
+ console.log(games)  // ['Call of Duty', 'Far Cry', 'Resident Evil',  'Need For Speed', 'Gran Turismo', 'Burnout']
+</code></pre>
+</li>
+<li><p><strong>Destructuring an array</strong></p>
+<pre><code>   var shooterGames = ['Call of Duty', 'Far Cry', 'Resident Evil'];
+   var [first, ...remaining] = shooterGames;
+   console.log(first); //Call of Duty
+   console.log(remaining); //['Far Cry', 'Resident Evil']
+</code></pre>
+</li>
+<li><p><strong>Combining two objects</strong></p>
+<pre><code> var myCrush = {
+   firstname: 'Selena',
+   middlename: 'Marie'
+ };
+
+ var lastname = 'my last name';
+
+ var myWife = {
+   ...myCrush,
+   lastname
+ }
+
+ console.log(myWife); // {firstname: 'Selena',
+                      //   middlename: 'Marie',
+                      //   lastname: 'my last name'}
+</code></pre>
+</li>
+</ol>
+<p>There's another use for the three dots which is known as <strong>Rest Parameters</strong> and it makes it possible to take all of the arguments to a function in as one array.</p>
+<ol start="4">
+<li><p><strong>Function arguments as array</strong></p>
+<pre><code>  function fun1(...params) {
+
+  }
+</code></pre>
+</li>
+</ol>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

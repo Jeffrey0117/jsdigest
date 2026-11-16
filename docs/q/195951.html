@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I change an element&#39;s class with JavaScript? · jsdigest</title>
+<meta name="description" content="How can I change the class of an HTML element in response to an onclick or any other events using JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I change an element&#39;s class with JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="3457 votes">3.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/4998/nathan-smith" rel="noopener">Nathan Smith</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">html</span><span class="tag">dom</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/195951/how-can-i-change-an-elements-class-with-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How can I change the class of an HTML element in response to an <code>onclick</code> or any other events using JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4679 votes">4.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/9360/peter-boughton" rel="noopener">Peter Boughton</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/196038" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h2>Modern HTML5 Techniques for changing classes</h2>
+<p>Modern browsers have added <a href="https://developer.mozilla.org/en-US/docs/DOM/element.classList" rel="noreferrer"><strong>classList</strong></a> which provides methods to make it easier to manipulate classes without needing a library:</p>
+<pre><code>document.getElementById(&quot;MyElement&quot;).classList.add('MyClass');
+
+document.getElementById(&quot;MyElement&quot;).classList.remove('MyClass');
+
+if ( document.getElementById(&quot;MyElement&quot;).classList.contains('MyClass') )
+
+document.getElementById(&quot;MyElement&quot;).classList.toggle('MyClass');
+</code></pre>
+<p>Unfortunately, these do not work in Internet Explorer prior to v10, though there is a <a href="http://en.wikipedia.org/wiki/Shim_(computing)" rel="noreferrer">shim</a> to add support for it to IE8 and IE9, available from <a href="https://developer.mozilla.org/en-US/docs/DOM/element.classList" rel="noreferrer">this page</a>. It is, though, getting more and more <a href="http://caniuse.com/#feat=classlist" rel="noreferrer">supported</a>.</p>
+<h2>Simple cross-browser solution</h2>
+<p>The standard JavaScript way to select an element is using <a href="https://developer.mozilla.org/en-US/docs/DOM/document.getElementById" rel="noreferrer"><code>document.getElementById(&quot;Id&quot;)</code></a>, which is what the following examples use - you can of course obtain elements in other ways, and in the right situation may simply use <code>this</code> instead - however, going into detail on this is beyond the scope of the answer.</p>
+<h3>To change all classes for an element:</h3>
+<p>To replace all existing classes with one or more new classes, set the className attribute:</p>
+<pre><code>document.getElementById(&quot;MyElement&quot;).className = &quot;MyClass&quot;;
+</code></pre>
+<p>(You can use a space-delimited list to apply multiple classes.)</p>
+<h3>To add an additional class to an element:</h3>
+<p>To add a class to an element, without removing/affecting existing values, append a space and the new classname, like so:</p>
+<pre><code>document.getElementById(&quot;MyElement&quot;).className += &quot; MyClass&quot;;
+</code></pre>
+<h3>To remove a class from an element:</h3>
+<p>To remove a single class to an element, without affecting other potential classes, a simple regex replace is required:</p>
+<pre><code>document.getElementById(&quot;MyElement&quot;).className =
+   document.getElementById(&quot;MyElement&quot;).className.replace
+      ( /(?:^|\s)MyClass(?!\S)/g , '' )
+/* Code wrapped for readability - above is all one statement */
+</code></pre>
+<p>An explanation of this regex is as follows:</p>
+<pre><code>(?:^|\s) # Match the start of the string or any single whitespace character
+
+MyClass  # The literal text for the classname to remove
+
+(?!\S)   # Negative lookahead to verify the above is the whole classname
+         # Ensures there is no non-space character following
+         # (i.e. must be the end of the string or space)
+</code></pre>
+<p>The <code>g</code> flag tells the replace to repeat as required, in case the class name has been added multiple times.</p>
+<h3>To check if a class is already applied to an element:</h3>
+<p>The same regex used above for removing a class can also be used as a check as to whether a particular class exists:</p>
+<pre><code>if ( document.getElementById(&quot;MyElement&quot;).className.match(/(?:^|\s)MyClass(?!\S)/) )
+</code></pre>
+<h3>Assigning these actions to onClick events:</h3>
+<p>Whilst it is possible to write JavaScript directly inside the HTML event attributes (such as <code>onClick=&quot;this.className+=' MyClass'&quot;</code>) this is not recommended behavior. Especially on larger applications, more maintainable code is achieved by separating HTML markup from JavaScript interaction logic.</p>
+<p>The first step to achieving this is by creating a function, and calling the function in the onClick attribute, for example:</p>
+<pre><code>&lt;script type=&quot;text/javascript&quot;&gt;
+    function changeClass(){
+        // Code examples from above
+    }
+&lt;/script&gt;
+...
+&lt;button Button&lt;/button&gt;
+</code></pre>
+<p><sub><em>(It is not required to have this code in script tags, this is simply for the brevity of example, and including the JavaScript in a distinct file may be more appropriate.)</em></sub></p>
+<p>The second step is to move the onClick event out of the HTML and into JavaScript, for example using <a href="https://developer.mozilla.org/en-US/docs/DOM/element.addEventListener" rel="noreferrer">addEventListener</a></p>
+<pre><code>&lt;script type=&quot;text/javascript&quot;&gt;
+    function changeClass(){
+        // Code examples from above
+    }
+
+    window.onload = function(){
+        document.getElementById(&quot;MyElement&quot;).addEventListener( 'click', changeClass);
+    }
+&lt;/script&gt;
+...
+&lt;button id=&quot;MyElement&quot;&gt;My Button&lt;/button&gt;
+</code></pre>
+<p>(Note that the window.onload part is required so that the contents of that function are executed <em>after</em> the HTML has finished loading - without this, the MyElement might not exist when the JavaScript code is called, so that line would fail.)</p>
+<br/>
+<h2>JavaScript Frameworks and Libraries</h2>
+<p>The above code is all in standard JavaScript, however, it is common practice to use either a framework or a library to simplify common tasks, as well as benefit from fixed bugs and edge cases that you might not think of when writing your code.</p>
+<p>Whilst some people consider it overkill to add a ~50  KB framework for simply changing a class, if you are doing any substantial amount of JavaScript work or anything that might have unusual cross-browser behavior, it is well worth considering.</p>
+<p><em>(Very roughly, a library is a set of tools designed for a specific task, whilst a framework generally contains multiple libraries and performs a complete set of duties.)</em></p>
+<p>The examples above have been reproduced below using <a href="http://jquery.com" rel="noreferrer">jQuery</a>, probably the most commonly used JavaScript library (though there are others worth investigating too).</p>
+<p>(Note that <code>$</code> here is the jQuery object.)</p>
+<h3>Changing Classes with jQuery:</h3>
+<pre><code>$('#MyElement').addClass('MyClass');
+
+$('#MyElement').removeClass('MyClass');
+
+if ( $('#MyElement').hasClass('MyClass') )
+</code></pre>
+<p>In addition, jQuery provides a shortcut for adding a class if it doesn't apply, or removing a class that does:</p>
+<pre><code>$('#MyElement').toggleClass('MyClass');
+</code></pre>
+<br/>
+### Assigning a function to a click event with jQuery:
+<pre><code>$('#MyElement').click(changeClass);
+</code></pre>
+<p>or, without needing an id:</p>
+<pre><code>$(':button:contains(My Button)').click(changeClass);
+</code></pre>
+<br/>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="494 votes">494</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/640584/tyilo" rel="noopener">Tyilo</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6960449" rel="noopener">原文 ↗</a></div><div class="prose"><p>You could also just do:</p>
+
+<pre class="lang-js prettyprint-override"><code>document.getElementById('id').classList.add('class');
+document.getElementById('id').classList.remove('class');
+</code></pre>
+
+<p>And to toggle a class (remove if exists else add it):</p>
+
+<pre class="lang-js prettyprint-override"><code>document.getElementById('id').classList.toggle('class');
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="149 votes">149</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/508601/andrew-orsich" rel="noopener">Andrew Orsich</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6160317" rel="noopener">原文 ↗</a></div><div class="prose"><p>In one of my old projects that did not use jQuery, I built the following functions for adding, removing and checking if an element has a class:</p>
+<pre><code>function hasClass(ele, cls) {
+    return ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));
+}
+
+function addClass(ele, cls) {
+    if (!hasClass(ele, cls))
+        ele.className += &quot; &quot; + cls;
+}
+
+function removeClass(ele, cls) {
+    if (hasClass(ele, cls)) {
+        var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
+        ele.className = ele.className.replace(reg, ' ');
+    }
+}
+</code></pre>
+<p>So, for example, if I want <code>onclick</code> to add some class to the button I can use this:</p>
+<pre><code>&lt;script type=&quot;text/javascript&quot;&gt;
+    function changeClass(btn, cls) {
+        if(!hasClass(btn, cls)) {
+            addClass(btn, cls);
+        }
+    }
+&lt;/script&gt;
+...
+&lt;button &quot;someClass&quot;)&quot;&gt;My Button&lt;/button&gt;
+</code></pre>
+<p>By now for sure it would just be better to use jQuery.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

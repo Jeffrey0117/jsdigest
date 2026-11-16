@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I validate an email address in JavaScript? · jsdigest</title>
+<meta name="description" content="I&#39;d like to check if the user input is an email address in JavaScript, before sending it to a server or attempting to send an email to it, to prevent the most…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I validate an email address in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="5466 votes">5.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/72/pix0r" rel="noopener">pix0r</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">html</span><span class="tag">regex</span><span class="tag">email-validation</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'd like to check if the user input is an email address in JavaScript, before sending it to a server or attempting to send an email to it, to prevent the most basic mistyping. How could I achieve this?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="6668 votes">6.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3880/john-rutherford" rel="noopener">John Rutherford</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/46181" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Using <a href="http://en.wikipedia.org/wiki/Regular_expression" rel="noreferrer">regular expressions</a> is probably the best way of validating an email address in JavaScript. <a href="http://jsfiddle.net/ghvj4gy9/embedded/result.js" rel="noreferrer">View a bunch of tests on JSFiddle</a> taken from <a href="https://cs.chromium.org/chromium/src/third_party/blink/web_tests/fast/forms/resources/ValidityState-typeMismatch-email.js?q=ValidityState-typeMismatch-email.js&amp;sq=package:chromium&amp;dr" rel="noreferrer">Chromium</a>.</p>
+<pre class="lang-js prettyprint-override"><code>const validateEmail = (email) =&gt; {
+  return String(email)
+    .toLowerCase()
+    .match(
+      /^(([^&lt;&gt;()[\]\\.,;:\s@&quot;]+(\.[^&lt;&gt;()[\]\\.,;:\s@&quot;]+)*)|.(&quot;.+&quot;))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
+};
+</code></pre>
+<p>The following is an example of a regular expression that accepts unicode.</p>
+<pre class="lang-js prettyprint-override"><code>const re =
+  /^(([^&lt;&gt;()[\]\.,;:\s@\&quot;]+(\.[^&lt;&gt;()[\]\.,;:\s@\&quot;]+)*)|(\&quot;.+\&quot;))@(([^&lt;&gt;()[\]\.,;:\s@\&quot;]+\.)+[^&lt;&gt;()[\]\.,;:\s@\&quot;]{2,})$/i;
+</code></pre>
+<p>Keep in mind that one should not rely on JavaScript validation alone, as JavaScript can be easily disabled by the client. Furthermore, it is important to validate on the server side.</p>
+<p>The following snippet of code is an example of JavaScript validating an email address on the client side.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const validateEmail = (email) =&gt; {
+  return email.match(
+    /^(([^&lt;&gt;()[\]\\.,;:\s@\"]+(\.[^&lt;&gt;()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  );
+};
+
+const validate = () =&gt; {
+  const $result = $('#result');
+  const email = $('#email').val();
+  $result.text('');
+
+  if(validateEmail(email)){
+    $result.text(email + ' is valid.');
+    $result.css('color', 'green');
+  } else{
+    $result.text(email + ' is invalid.');
+    $result.css('color', 'red');
+  }
+  return false;
+}
+
+$('#email').on('input', validate);</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"&gt;&lt;/script&gt;
+
+&lt;label for="email"&gt;Enter email address&lt;/label&gt;
+&lt;input id="email" type="email"&gt;
+
+&lt;p id="result"&gt;&lt;/p&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1385 votes">1.4k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/270821/c-lee" rel="noopener">C. Lee</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/9204568" rel="noopener">原文 ↗</a></div><div class="prose"><p>I've slightly modified <a href="https://stackoverflow.com/a/48800/4832311">Jaymon's answer</a> for people who want really simple validation in the form of:</p>
+<pre><code>anystring@anystring.anystring
+</code></pre>
+<p>The regular expression:</p>
+<pre><code>/^\S+@\S+\.\S+$/
+</code></pre>
+<p>To prevent matching multiple @ signs:</p>
+<pre><code>/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+</code></pre>
+<p>The above regexes match the whole string, remove the leading and <code>^</code> and trailing <code>$</code> if you want to match anywhere in the string. The example below matches <em>anywhere</em> in the string.</p>
+<p>If you do want to match the whole sring, you may want to <code>trim()</code> the string first.</p>
+<p>Example JavaScript function:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function validateEmail(email) {
+  var re = /\S+@\S+\.\S+/;
+  return re.test(email);
+}
+    
+console.log(validateEmail('my email is anystring@anystring.any')); // true
+    
+console.log(validateEmail('my email is anystring@anystring .any')); // false</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="915 votes">915</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/34813/esteban-k%c3%bcber" rel="noopener">Esteban K&amp;#252;ber</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1373724" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Just for completeness, <a href="http://www.regular-expressions.info/email.html" rel="noreferrer">here you have another RFC 2822 compliant regex</a></p>
+<blockquote>
+<p>The official standard is known as <a href="https://www.rfc-editor.org/rfc/rfc2822#section-3.4.1" rel="noreferrer">RFC 2822</a>. It describes the syntax that valid email addresses must adhere to. You can (<strong>but you shouldn't</strong> — <a href="http://www.regular-expressions.info/email.html" rel="noreferrer">read on</a>) implement it with this regular expression:</p>
+<p><code>(?:[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+)*|&quot;(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*&quot;)@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])</code></p>
+<p>(...) We get a more practical implementation of RFC 2822 if we omit the syntax using double quotes and square brackets. <strong>It will still match 99.99% of all email addresses in actual use today.</strong></p>
+<p><code>[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?</code></p>
+<p>A further change you could make is to allow any two-letter country code top level domain, and only specific generic top level domains. <strong>This regex filters dummy email addresses like <code>asdf@adsf.adsf</code></strong>. You <strong>will need to update it as new top-level domains are added</strong>.</p>
+<p><code>[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b</code></p>
+<p>So even when following official standards, there are still trade-offs to be made. <em><strong>Don't blindly copy regular expressions from online libraries or discussion forums. Always test them on your own data and with your own applications.</strong></em></p>
+</blockquote>
+<p><sub>Emphasis mine</sub></p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

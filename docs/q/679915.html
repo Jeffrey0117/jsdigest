@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I test for an empty JavaScript object? · jsdigest</title>
+<meta name="description" content="After an AJAX request, sometimes my application may return an empty object, like: var a = {}; How can I check whether that&#39;s the case?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I test for an empty JavaScript object?</h1>
+    <div class="q-meta big"><span class="score hot" title="3888 votes">3.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/64784/falmp" rel="noopener">falmp</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">javascript-objects</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>After an AJAX request, sometimes my application may return an empty object, like:</p>
+
+<pre><code>var a = {};
+</code></pre>
+
+<p>How can I check whether that's the case?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="7558 votes">7.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1927876/adam-zerner" rel="noopener">Adam Zerner</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/32108184" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>You can use a for…in loop with an <code>Object.hasOwn</code> (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwn#browser_compatibility" rel="noreferrer">ECMA 2022+</a>) test to check whether an object has any own properties:</p>
+<pre><code>function isEmpty(obj) {
+  for (const prop in obj) {
+    if (Object.hasOwn(obj, prop)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+</code></pre>
+<p>If you also need to distinguish <code>{}</code>-like empty objects from other objects with no own properties (e.g. <code>Date</code>s), you can do various (and unfortunately need-specific) type checks:</p>
+<pre class="lang-js prettyprint-override"><code>function isEmptyObject(value) {
+  if (value == null) {
+    // null or undefined
+    return false;
+  }
+
+  if (typeof value !== 'object') {
+    // boolean, number, string, function, etc.
+    return false;
+  }
+
+  const proto = Object.getPrototypeOf(value);
+
+  // consider `Object.create(null)`, commonly used as a safe map
+  // before `Map` support, an empty object as well as `{}`
+  if (proto !== null &amp;&amp; proto !== Object.prototype) {
+    return false;
+  }
+
+  return isEmpty(value);
+}
+</code></pre>
+<p>Note that comparing against <code>Object.prototype</code> like in this example will fail to recognize cross-realm objects.</p>
+<p><em>Do not use</em> <code>Object.keys(obj).length</code>. It is O(N) complexity because it creates an array containing all the property names only to get the length of that array. Iterating over the object accomplishes the same goal but is O(1).</p>
+<p>For compatibility with JavaScript engines that don’t support ES 2022+, <code>const</code> can be replaced with <code>var</code> and <code>Object.hasOwn</code> with <code>Object.prototype.hasOwnProperty.call</code>:</p>
+<pre><code>function isEmpty(obj) {
+  for (var prop in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+      return false;
+    }
+  }
+
+  return true
+}
+</code></pre>
+<p>Many popular libraries also provide functions to check for empty objects:</p>
+<p><a href="https://api.jquery.com/jQuery.isEmptyObject/" rel="noreferrer">jQuery</a>:</p>
+<pre><code>jQuery.isEmptyObject({}); // true
+</code></pre>
+<p><a href="https://lodash.com/docs#isEmpty" rel="noreferrer">lodash</a>:</p>
+<pre><code>_.isEmpty({}); // true
+</code></pre>
+<p><a href="https://underscorejs.org/#isEmpty" rel="noreferrer">Underscore</a>:</p>
+<pre><code>_.isEmpty({}); // true
+</code></pre>
+<p><a href="https://github.com/hapijs/hoek" rel="noreferrer">Hoek</a>:</p>
+<pre><code>Hoek.deepEqual({}, {}); // true
+</code></pre>
+<p><a href="https://docs.sencha.com/extjs/6.0.2/modern/Ext.Object.html#method-isEmpty" rel="noreferrer">ExtJS</a>:</p>
+<pre><code>Ext.Object.isEmpty({}); // true
+</code></pre>
+<p><a href="https://docs.angularjs.org/api/ng/function/angular.equals" rel="noreferrer">AngularJS (version 1)</a>:</p>
+<pre><code>angular.equals({}, {}); // true
+</code></pre>
+<p><a href="https://ramdajs.com/docs/#isEmpty" rel="noreferrer">Ramda</a>:</p>
+<pre><code>R.isEmpty({}); // true
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1507 votes">1.5k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/48015/christoph" rel="noopener">Christoph</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/679937" rel="noopener">原文 ↗</a></div><div class="prose"><p>If <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys#Browser_compatibility" rel="noreferrer">ECMAScript 5 support</a> is available, you can use <code>Object.keys()</code>:</p>
+<pre><code>function isEmpty(obj) {
+    return Object.keys(obj).length === 0;
+}
+</code></pre>
+<p>For ES3 and older, there's no easy way to do this. You'll have to loop over the properties explicitly:</p>
+<pre><code>function isEmpty(obj) {
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop))
+            return false;
+    }
+
+    return true;
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="593 votes">593</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/255849/erik-t%c3%b6yr%c3%a4-silfversw%c3%a4rd" rel="noopener">Erik T&amp;#246;yr&amp;#228; Silfversw&amp;#228;rd</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2866221" rel="noopener">原文 ↗</a></div><div class="prose"><p>For those of you who have the same problem but use jQuery, you can use <a href="http://api.jquery.com/jQuery.isEmptyObject/" rel="noreferrer">jQuery.isEmptyObject</a>.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

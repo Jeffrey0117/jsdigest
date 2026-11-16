@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scroll to an element with jQuery · jsdigest</title>
+<meta name="description" content="I have this input element: &lt;input type=&quot;text&quot; class=&quot;textfield&quot; value=&quot;&quot; id=&quot;subject&quot; name=&quot;subject&quot;&gt; Then I have some other elements, like other tag&#39;s &amp; &lt;text…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Scroll to an element with jQuery</h1>
+    <div class="q-meta big"><span class="score hot" title="2732 votes">2.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/735997/diegop" rel="noopener">DiegoP.</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">scroll</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/6677035/scroll-to-an-element-with-jquery" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have this <code>input</code> element:</p>
+<pre><code>  &lt;input type=&quot;text&quot; class=&quot;textfield&quot; value=&quot;&quot; id=&quot;subject&quot; name=&quot;subject&quot;&gt;
+</code></pre>
+<p>Then I have some other elements, like other  tag's &amp; <code>&lt;textarea&gt;</code> tag's, etc...</p>
+<p>When the user clicks on the <code>&lt;input id=&quot;#subject&quot;&gt;</code>, the page should scroll to the page's last element, and it should do so with a nice animation <em>(It should be a scroll to bottom and not to top)</em>.</p>
+<p>The last item of the page is a <code>submit</code> button with <code>#submit</code>:</p>
+<pre><code>&lt;input type=&quot;submit&quot; class=&quot;submit&quot; id=&quot;submit&quot; name=&quot;submit&quot; value=&quot;Ok, Done.&quot;&gt;
+</code></pre>
+<p>The animation should not be too fast and should be fluid.</p>
+<p>I am running the latest jQuery version. I prefer to not install any plugin but to use the default jQuery features to achieve this.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4556 votes">4.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/343088/steve" rel="noopener">Steve</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6677069" rel="noopener">原文 ↗</a></div><div class="prose"><p>Assuming you have a button with the id <code>button</code>, try this example:</p>
+<pre><code>$(&quot;#button&quot;).click(function() {
+    $([document.documentElement, document.body]).animate({
+        scrollTop: $(&quot;#elementtoScrollToID&quot;).offset().top
+    }, 2000);
+});
+</code></pre>
+<p>I got the code from the article <em><a href="https://www.abeautifulsite.net/posts/smoothly-scroll-to-an-element-without-a-jquery-plugin-2" rel="noreferrer">Smoothly scroll to an element without a jQuery plugin</a></em>. And I have tested it on the example below.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;html&gt;
+    &lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"&gt;&lt;/script&gt;
+    &lt;script&gt;
+        $(document).ready(function (){
+            $("#click").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div1").offset().top
+                }, 2000);
+            });
+        });
+    &lt;/script&gt;
+    &lt;div id="div1" style="height: 1000px; width 100px"&gt;
+        Test
+    &lt;/div&gt;
+    &lt;br/&gt;
+    &lt;div id="div2" style="height: 1000px; width 100px"&gt;
+        Test 2
+    &lt;/div&gt;
+    &lt;button id="click"&gt;Click me&lt;/button&gt;
+&lt;/html&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="573 votes">573</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/904725/grey-perez" rel="noopener">Grey Perez</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/12742737" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>jQuery .scrollTo(): <a href="http://demos.flesler.com/jquery/scrollTo/" rel="noreferrer"> View - Demo, API, Source </a></strong></p>
+<p>I wrote this lightweight plugin to make page/element scrolling much easier. It's flexible where you could pass in a target element or specified value. Perhaps this could be part of jQuery's next official release, what do you think?</p>
+<hr />
+<p><strong>Examples Usage:</strong></p>
+<pre><code>$('body').scrollTo('#target'); // Scroll screen to target element
+
+$('body').scrollTo(500); // Scroll screen 500 pixels down
+
+$('#scrollable').scrollTo(100); // Scroll individual element 100 pixels down
+</code></pre>
+<hr />
+<p><strong>Options:</strong></p>
+<p><em>scrollTarget</em>: A element, string, or number which indicates desired scroll position.</p>
+<p><em>offsetTop</em>: A number that defines additional spacing above scroll target.</p>
+<p><em>duration</em>: A string or number determining how long the animation will run.</p>
+<p><em>easing</em>: A string indicating which easing function to use for the transition.</p>
+<p><em>complete</em>: A function to call once the animation is complete.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="510 votes">510</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/790785/atharva" rel="noopener">Atharva</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/20760191" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you are not much interested in the smooth scroll effect and just interested in scrolling to a particular element, you don't require some jQuery function for this. Javascript has got your case covered:</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/element.scrollIntoView" rel="noreferrer">https://developer.mozilla.org/en-US/docs/Web/API/element.scrollIntoView</a></p>
+<p>So all you need to do is: <code>$(&quot;selector&quot;).get(0).scrollIntoView();</code></p>
+<p><code>.get(0)</code> is used because we want to retrieve the JavaScript's DOM element and not the JQuery's DOM element.</p>
+<h1>UPDATE</h1>
+<p>now is possible to scroll with animation, passing scroll options (see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView#parameters" rel="noreferrer">MDN</a>). You can even control the block position. It seems to have large support, except for <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView#browser_compatibility" rel="noreferrer">Safari</a></p>
+<pre class="lang-js prettyprint-override"><code>$(&quot;selector&quot;).get(0).scrollIntoView({behavior: 'smooth'});
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

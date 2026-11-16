@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sending command line arguments to npm script · jsdigest</title>
+<meta name="description" content="The scripts portion of my package.json currently looks like this: &quot;scripts&quot;: { &quot;start&quot;: &quot;node ./script.js server&quot; } ...which means I can run npm start to start…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Sending command line arguments to npm script</h1>
+    <div class="q-meta big"><span class="score hot" title="1524 votes">1.5k</span><span class="q-by">asked by user291545</span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">node.js</span><span class="tag">npm</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/11580961/sending-command-line-arguments-to-npm-script" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>The <code>scripts</code> portion of my <code>package.json</code> currently looks like this:</p>
+<pre class="lang-json prettyprint-override"><code>&quot;scripts&quot;: {
+    &quot;start&quot;: &quot;node ./script.js server&quot;
+}
+</code></pre>
+<p>...which means I can run <code>npm start</code> to start the server. So far so good.</p>
+<p>However, I would like to be able to run something like <code>npm start 8080</code> and have the argument(s) passed to <code>script.js</code> (e.g. <code>npm start 8080</code> =&gt; <code>node ./script.js server 8080</code>). Is this possible?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2058 votes">2.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/245966/jakub-g" rel="noopener">jakub.g</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/14404223" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h2>npm 2 and newer</h2>
+<p>It's possible to <a href="https://github.com/npm/npm/pull/5518" rel="noreferrer">pass args to <code>npm run</code></a> since npm 2 (2014). The syntax is as follows:</p>
+<p><code>npm run &lt;command&gt; [-- &lt;args&gt;]</code></p>
+<p>Note the <code>--</code> separator, used to separate the params passed to <code>npm</code> command itself, and the params passed to your script. (This is a common convention used by various command line tools).</p>
+<p>With the example <code>package.json</code>:</p>
+<pre class="lang-json prettyprint-override"><code>&quot;scripts&quot;: {
+    &quot;grunt&quot;: &quot;grunt&quot;,
+    &quot;server&quot;: &quot;node server.js&quot;
+}
+</code></pre>
+<p>here's how to pass the params to those scripts:</p>
+<pre class="lang-bash prettyprint-override"><code>npm run grunt -- task:target  // invokes `grunt task:target`
+npm run server -- --port=1337 // invokes `node server.js --port=1337`
+</code></pre>
+<p><em>Note</em>: <strong>If your param does not start with <code>-</code> or <code>--</code>, then having an explicit <code>--</code> separator is not needed; but it's better to do it anyway for clarity.</strong></p>
+<pre class="lang-bash prettyprint-override"><code>npm run grunt task:target     // invokes `grunt task:target`
+</code></pre>
+<p>Note below the difference in behavior (<code>test.js</code> has <code>console.log(process.argv)</code>): the params which start with <code>-</code> or <code>--</code> <em>are passed to <code>npm</code> and not to the script</em>, and are silently swallowed there.</p>
+<pre class="lang-bash prettyprint-override"><code>$ npm run test foobar
+['C:\\Program Files\\nodejs\\node.exe', 'C:\\git\\myrepo\\test.js', 'foobar']
+
+$ npm run test -foobar
+['C:\\Program Files\\nodejs\\node.exe', 'C:\\git\\myrepo\\test.js']
+
+$ npm run test --foobar
+['C:\\Program Files\\nodejs\\node.exe', 'C:\\git\\myrepo\\test.js']
+
+$ npm run test -- foobar
+['C:\\Program Files\\nodejs\\node.exe', 'C:\\git\\myrepo\\test.js', 'foobar']
+
+$ npm run test -- -foobar
+['C:\\Program Files\\nodejs\\node.exe', 'C:\\git\\myrepo\\test.js', '-foobar']
+
+$ npm run test -- --foobar
+['C:\\Program Files\\nodejs\\node.exe', 'C:\\git\\myrepo\\test.js', '--foobar']
+</code></pre>
+<p>The difference is clearer when you use a param <em>actually used by npm</em>:</p>
+<pre class="lang-bash prettyprint-override"><code>$ npm test --help      // this is disguised `npm --help test`
+npm test [-- &lt;args&gt;]
+
+aliases: tst, t
+</code></pre>
+<p>To get the parameter value, <a href="https://stackoverflow.com/q/4351521">see this question</a>. For reading named parameters, it's probably best to use a parsing library like <a href="https://github.com/yargs/yargs" rel="noreferrer">yargs</a> or <a href="https://github.com/substack/minimist" rel="noreferrer">minimist</a>; nodejs exposes <code>process.argv</code> globally, containing command line parameter values, but this is a low-level API (whitespace-separated array of strings, as provided by the operating system to the node executable).</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="368 votes">368</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/262819/cjerdonek" rel="noopener">cjerdonek</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/25356509" rel="noopener">原文 ↗</a></div><div class="prose"><p>You asked to be able to run something <em>like</em> <code>npm start 8080</code>.  This is possible without needing to modify <code>script.js</code> or configuration files as follows.</p>
+
+<p>For example, in your <code>"scripts"</code> JSON value, include--</p>
+
+<pre><code>"start": "node ./script.js server $PORT"
+</code></pre>
+
+<p>And then from the command-line:</p>
+
+<pre><code>$ PORT=8080 npm start
+</code></pre>
+
+<p>I have confirmed that this works using bash and npm 1.4.23.  Note that this work-around does not require GitHub npm <a href="https://github.com/npm/npm/issues/3494" rel="noreferrer">issue #3494</a> to be resolved.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="149 votes">149</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/754522/francoisrv" rel="noopener">francoisrv</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/19381235" rel="noopener">原文 ↗</a></div><div class="prose"><p>You could also do that:</p>
+<p>In <code>package.json</code>:</p>
+<pre class="lang-json prettyprint-override"><code>&quot;scripts&quot;: {
+    &quot;cool&quot;: &quot;./cool.js&quot;
+}
+</code></pre>
+<p>In <code>cool.js</code>:</p>
+<pre class="lang-js prettyprint-override"><code>console.log({ myVar: process.env.npm_config_myVar });
+</code></pre>
+<p>In CLI:</p>
+<pre class="lang-bash prettyprint-override"><code>npm --myVar=something run-script cool
+</code></pre>
+<p>Should output:</p>
+<pre class="lang-js prettyprint-override"><code>{ myVar: 'something' }
+</code></pre>
+<p>Update: Using npm 3.10.3, it appears that it lowercases the <code>process.env.npm_config_</code> variables? I'm also using <code>better-npm-run</code>, so I'm not sure if this is vanilla default behavior or not, but this answer <em>is</em> working. Instead of <code>process.env.npm_config_myVar</code>, try <code>process.env.npm_config_myvar</code></p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

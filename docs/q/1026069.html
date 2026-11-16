@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I make the first letter of a string uppercase in JavaScript? · jsdigest</title>
+<meta name="description" content="How do I make the first character of a string uppercase if it&#39;s a letter, but not change the case of any of the other letters? For example: &quot;this is a test&quot; →…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I make the first letter of a string uppercase in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="5416 votes">5.4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/126778/robert-wills" rel="noopener">Robert Wills</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">string</span><span class="tag">uppercase</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I make the first character of a string uppercase if it's a letter, but not change the case of any of the other letters?</p>
+<p>For example:</p>
+<ul>
+<li><code>&quot;this is a test&quot;</code> → <code>&quot;This is a test&quot;</code></li>
+<li><code>&quot;the Eiffel Tower&quot;</code> → <code>&quot;The Eiffel Tower&quot;</code></li>
+<li><code>&quot;/index.html&quot;</code> → <code>&quot;/index.html&quot;</code></li>
+</ul>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="8195 votes">8.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/48492/steve-harrison" rel="noopener">Steve Harrison</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1026087" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>function capitalizeFirstLetter(val) {
+    return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+}
+</code></pre>
+<p>Some other answers modify <code>String.prototype</code> (this answer used to as well), but I would advise against this now due to maintainability (hard to find out where the function is being added to the <code>prototype</code> and could cause conflicts if other code uses the same name/a browser adds a native function with that same name in future).</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1646 votes">1.6k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/171490/steve-hansell" rel="noopener">Steve Hansell</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3291856" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>Edited to add this DISCLAIMER</strong>: please read the comments to understand the risks of editing JS basic types.</p>
+<hr />
+<p>Here's a more object-oriented approach:</p>
+<pre><code>Object.defineProperty(String.prototype, 'capitalize', {
+  value: function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+  },
+  enumerable: false
+});
+</code></pre>
+<p>You'd call the function, like this:</p>
+<pre><code>&quot;hello, world!&quot;.capitalize();
+</code></pre>
+<p>With the expected output being:</p>
+<pre><code>&quot;Hello, world!&quot;
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1211 votes">1.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1532041/sam6ber" rel="noopener">sam6ber</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11524251" rel="noopener">原文 ↗</a></div><div class="prose"><p>Using just CSS and its <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/text-transform" rel="noreferrer"><code>text-transform</code></a> property:</p>
+<pre class="lang-css prettyprint-override"><code>p::first-letter {
+    text-transform: capitalize;
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

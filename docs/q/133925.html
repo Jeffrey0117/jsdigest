@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaScript post request like a form submit · jsdigest</title>
+<meta name="description" content="I&#39;m trying to direct a browser to a different page. If I wanted a GET request, I might say document.location.href = &#39;http://example.com/q=a&#39;; But the resource…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>JavaScript post request like a form submit</h1>
+    <div class="q-meta big"><span class="score hot" title="1767 votes">1.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/16981/joseph-holsten" rel="noopener">Joseph Holsten</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">forms</span><span class="tag">post</span><span class="tag">submit</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm trying to direct a browser to a different page. If I wanted a GET request, I might say</p>
+<pre class="lang-js prettyprint-override"><code>document.location.href = 'http://example.com/q=a';
+</code></pre>
+<p>But the resource I'm trying to access won't respond properly unless I use a POST request. If this were not dynamically generated, I might use the HTML</p>
+<pre class="lang-html prettyprint-override"><code>&lt;form action=&quot;http://example.com/&quot; method=&quot;POST&quot;&gt;
+    &lt;input type=&quot;hidden&quot; name=&quot;q&quot; value=&quot;a&quot;&gt;
+&lt;/form&gt;
+</code></pre>
+<p>Then I would just submit the form from the DOM.</p>
+<p>But really I would like JavaScript code that allows me to say</p>
+<pre class="lang-js prettyprint-override"><code>post_to_url('http://example.com/', {'q':'a'});
+</code></pre>
+<p>What's the best cross browser implementation?</p>
+<p>I need a solution that changes the location of the browser, just like submitting a form. If this is possible with <a href="http://en.wikipedia.org/wiki/XMLHttpRequest" rel="noreferrer">XMLHttpRequest</a>, it is not obvious. And this should not be asynchronous, nor use XML, so Ajax is not the answer.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2391 votes">2.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/20089/rakesh-pai" rel="noopener">Rakesh Pai</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/133997" rel="noopener">原文 ↗</a></div><div class="prose"><h2>Dynamically create <code>&lt;input&gt;</code>s in a form and submit it</h2>
+<pre class="lang-js prettyprint-override"><code>/**
+ * sends a request to the specified url from a form. this will change the window location.
+ * @param {string} path the path to send the post request to
+ * @param {object} params the parameters to add to the url
+ * @param {string} [method=post] the method to use on the form
+ */
+
+function post(path, params, method='post') {
+
+  // The rest of this code assumes you are not using a library.
+  // It can be made less verbose if you use one.
+  const form = document.createElement('form');
+  form.method = method;
+  form.action = path;
+
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      const hiddenField = document.createElement('input');
+      hiddenField.type = 'hidden';
+      hiddenField.name = key;
+      hiddenField.value = params[key];
+
+      form.appendChild(hiddenField);
+    }
+  }
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+</code></pre>
+<p>Example:</p>
+<pre class="lang-js prettyprint-override"><code>post('/contact/', {name: 'Johnny Bravo'});
+</code></pre>
+<p><strong>EDIT</strong>: Since this has gotten upvoted so much, I'm guessing people will be copy-pasting this a lot. So I added the <code>hasOwnProperty</code> check to fix any inadvertent bugs.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="155 votes">155</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/9931/ryan-delucchi" rel="noopener">Ryan Delucchi</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5533477" rel="noopener">原文 ↗</a></div><div class="prose"><p>This would be a version of the selected answer using <a href="http://en.wikipedia.org/wiki/JQuery">jQuery</a>.</p>
+
+<pre><code>// Post to the provided URL with the specified parameters.
+function post(path, parameters) {
+    var form = $('&lt;form&gt;&lt;/form&gt;');
+
+    form.attr("method", "post");
+    form.attr("action", path);
+
+    $.each(parameters, function(key, value) {
+        var field = $('&lt;input&gt;&lt;/input&gt;');
+
+        field.attr("type", "hidden");
+        field.attr("name", key);
+        field.attr("value", value);
+
+        form.append(field);
+    });
+
+    // The form needs to be a part of the document in
+    // order for us to be able to submit it.
+    $(document.body).append(form);
+    form.submit();
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="86 votes">86</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/11897/alexandre-victoor" rel="noopener">Alexandre Victoor</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/134033" rel="noopener">原文 ↗</a></div><div class="prose"><p>A simple quick-and-dirty implementation of @Aaron answer:</p>
+
+<pre><code>document.body.innerHTML += '&lt;form id="dynForm" action="http://example.com/" method="post"&gt;&lt;input type="hidden" name="q" value="a"&gt;&lt;/form&gt;';
+document.getElementById("dynForm").submit();
+</code></pre>
+
+<p>Of course, you should rather use a JavaScript framework such as <a href="http://en.wikipedia.org/wiki/Prototype_JavaScript_Framework" rel="noreferrer">Prototype</a> or <a href="http://en.wikipedia.org/wiki/JQuery" rel="noreferrer">jQuery</a>...</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

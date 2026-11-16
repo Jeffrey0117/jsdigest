@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How does the &#39;Access-Control-Allow-Origin&#39; header work? · jsdigest</title>
+<meta name="description" content="Apparently, I have completely misunderstood its semantics. I thought of something like this: A client downloads JavaScript code MyCode.js from http://siteA - t…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How does the &#39;Access-Control-Allow-Origin&#39; header work?</h1>
+    <div class="q-meta big"><span class="score hot" title="1664 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/80002/mark" rel="noopener">mark</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">cross-domain</span><span class="tag">cors</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/10636611/how-does-the-access-control-allow-origin-header-work" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Apparently, I have completely misunderstood its semantics. I thought of something like this:</p>
+<ol>
+<li>A client downloads JavaScript code MyCode.js from <code>http://siteA</code> - <strong>the origin</strong>.</li>
+<li>The response header of MyCode.js contains <strong>Access-Control-Allow-Origin: <code>http://siteB</code></strong>, which I thought meant that MyCode.js was allowed to make cross-origin references to the site B.</li>
+<li>The client triggers some functionality of MyCode.js, which in turn make requests to <code>http://siteB</code>, which should be fine, despite being cross-origin requests.</li>
+</ol>
+<p>Well, I am wrong. It does not work like this at all. So, I have read <em><a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing" rel="noreferrer">Cross-origin resource sharing</a></em> and attempted to read <em><a href="http://www.w3.org/TR/cors/" rel="noreferrer">Cross-Origin Resource Sharing in w3c recommendation</a></em>.</p>
+<p>One thing is sure - I still do not understand how I am supposed to use this header.</p>
+<p>I have full control of both site A and site B. How do I enable the JavaScript code downloaded from the site A to access resources on the site B using this header?</p>
+<p>P.S.: I do not want to utilize <a href="https://en.wikipedia.org/wiki/JSONP" rel="noreferrer">JSONP</a>.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1957 votes">2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/710446/apsillers" rel="noopener">apsillers</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10636765" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><em>Access-Control-Allow-Origin</em> is a <a href="https://web.archive.org/web/20120724073230/http://www.html5rocks.com/en/tutorials/cors/" rel="noreferrer">CORS (cross-origin resource sharing) header</a>.</p>
+<p>When Site A tries to fetch content from Site B,  Site B can send an <em>Access-Control-Allow-Origin</em> response header to tell the browser that the content of this page is accessible to certain origins. (An <em>origin</em> is a <a href="https://stackoverflow.com/a/19542686/710446">domain, plus a scheme and port number</a>.)  By default, Site B's pages are <a href="https://en.wikipedia.org/wiki/Same-origin_policy" rel="noreferrer">not accessible to any other origin</a>; using the <em>Access-Control-Allow-Origin</em> header opens a door for cross-origin access by specific requesting origins.</p>
+<p>For each resource/page that Site B wants to make accessible to Site A, Site B should serve its pages with the response header:</p>
+<pre class="lang-none prettyprint-override"><code>Access-Control-Allow-Origin: http://siteA.com
+</code></pre>
+<p>Modern browsers will not block cross-domain requests outright.  If Site A requests a page from Site B, the browser will actually fetch the requested page <em>on the network level</em> and check if the response headers list Site A as a permitted requester domain.  If Site B has not indicated that Site A is allowed to access this page, the browser will trigger the <code>XMLHttpRequest</code>'s <code>error</code> event and  deny the response data to the requesting JavaScript code.</p>
+<h3>Non-simple requests</h3>
+<p>What happens on the network level can be <em>slightly</em> more complex than explained above. If the request is a <a href="https://web.archive.org/web/20160312183900/http://www.html5rocks.com/en/tutorials/cors/#toc-handling-a-not-so-simple-request" rel="noreferrer">&quot;non-simple&quot; request</a>, the browser first sends a data-less &quot;preflight&quot; OPTIONS request, to verify that the server will accept the request. A request is non-simple when either (or both) using:</p>
+<ol>
+<li>An HTTP verb other than GET or POST (e.g. PUT, DELETE);</li>
+<li>Non-simple request headers; the only simple requests headers are:
+<ul>
+<li><code>Accept</code>;</li>
+<li><code>Accept-Language</code>;</li>
+<li><code>Content-Language</code>;</li>
+<li><code>Content-Type</code> (this is only simple when its value is <code>application/x-www-form-urlencoded</code>, <code>multipart/form-data</code>, or <code>text/plain</code>).</li>
+</ul>
+</li>
+</ol>
+<p>If the server responds to the OPTIONS preflight with appropriate response headers (<code>Access-Control-Allow-Headers</code> for non-simple headers, <code>Access-Control-Allow-Methods</code> for non-simple verbs) that match the non-simple verb and/or non-simple headers, then the browser sends the actual request.</p>
+<p>Supposing that Site A wants to send a PUT request for <code>/somePage</code>, with a non-simple <code>Content-Type</code> value of <code>application/json</code>, the browser would first send a preflight request:</p>
+<pre class="lang-none prettyprint-override"><code>OPTIONS /somePage HTTP/1.1
+Origin: http://siteA.com
+Access-Control-Request-Method: PUT
+Access-Control-Request-Headers: Content-Type
+</code></pre>
+<p>Note that <code>Access-Control-Request-Method</code> and <code>Access-Control-Request-Headers</code> are added by the browser automatically; you do not need to add them. This OPTIONS preflight gets the successful response headers:</p>
+<pre class="lang-none prettyprint-override"><code>Access-Control-Allow-Origin: http://siteA.com
+Access-Control-Allow-Methods: GET, POST, PUT
+Access-Control-Allow-Headers: Content-Type
+</code></pre>
+<p>When sending the actual request (after preflight is done), the behavior is identical to how a simple request is handled. In other words, a non-simple request whose preflight is successful is treated the same as a simple request (i.e., the server must still send <code>Access-Control-Allow-Origin</code> again for the actual response).</p>
+<p>The browsers sends the actual request:</p>
+<pre class="lang-none prettyprint-override"><code>PUT /somePage HTTP/1.1
+Origin: http://siteA.com
+Content-Type: application/json
+
+{ &quot;myRequestContent&quot;: &quot;JSON is so great&quot; }
+</code></pre>
+<p>And the server sends back an <code>Access-Control-Allow-Origin</code>, just as it would for a simple request:</p>
+<pre class="lang-none prettyprint-override"><code>Access-Control-Allow-Origin: http://siteA.com
+</code></pre>
+<p>See <em><a href="https://stackoverflow.com/a/13400954/710446">Understanding XMLHttpRequest over CORS</a></em> for a little more information about non-simple requests.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="151 votes">151</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/498175/wayne-ye" rel="noopener">Wayne Ye</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/21310171" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Cross-Origin Resource Sharing - <code>CORS</code> (A.K.A. Cross-Domain AJAX request) is an issue that most web developers might encounter, according to Same-Origin-Policy, browsers restrict client JavaScript in a security sandbox, usually JS cannot directly communicate with a remote server from a different domain. In the past developers created many tricky ways to achieve Cross-Domain resource request, most commonly using ways are:</p>
+<ol>
+<li>Use Flash/Silverlight or server side as a &quot;proxy&quot; to communicate
+with remote.</li>
+<li>JSON With Padding (<a href="http://en.wikipedia.org/wiki/JSONP" rel="nofollow noreferrer">JSONP</a>).</li>
+<li>Embeds remote server in an iframe and communicate through fragment or window.name, refer <a href="http://www.ibm.com/developerworks/library/wa-crossdomaincomm/#N10120" rel="nofollow noreferrer">here</a>.</li>
+</ol>
+<p>Those tricky ways have more or less some issues, for example JSONP might result in security hole if developers simply &quot;eval&quot; it, and #3 above, although it works, both domains should build strict contract between each other, it neither flexible nor elegant IMHO:)</p>
+<p>W3C had introduced Cross-Origin Resource Sharing (CORS) as a standard solution to provide a safe, flexible and a recommended standard way to solve this issue.</p>
+<p><strong>The Mechanism</strong></p>
+<p>From a high level we can simply deem CORS as a contract between client AJAX call from domain A and a page hosted on domain B, a typical Cross-Origin request/response would be:</p>
+<p><strong>DomainA AJAX request headers</strong></p>
+<pre><code>Host DomainB.com
+User-Agent Mozilla/5.0 (Windows NT 6.1; WOW64; rv:2.0) Gecko/20100101 Firefox/4.0
+Accept text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8,application/json
+Accept-Language en-us;
+Accept-Encoding gzip, deflate
+Keep-Alive 115
+Origin http://DomainA.com 
+</code></pre>
+<p><strong>DomainB response headers</strong></p>
+<pre><code>Cache-Control private
+Content-Type application/json; charset=utf-8
+Access-Control-Allow-Origin DomainA.com
+Content-Length 87
+Proxy-Connection Keep-Alive
+Connection Keep-Alive
+</code></pre>
+<p>The blue parts I marked above were the kernal facts, &quot;Origin&quot; request header &quot;indicates where the cross-origin request or preflight request originates from&quot;, the &quot;Access-Control-Allow-Origin&quot; response header indicates this page allows remote request from DomainA (if the value is * indicate allows remote requests from any domain).</p>
+<p>As I mentioned above, W3 recommended browser to implement a &quot;<strong>preflight request</strong>&quot; before submiting the actually Cross-Origin HTTP request, in a nutshell it is an HTTP <code>OPTIONS</code> request:</p>
+<pre><code>OPTIONS DomainB.com/foo.aspx HTTP/1.1
+</code></pre>
+<p>If foo.aspx supports OPTIONS HTTP verb, it might return response like below:</p>
+<pre><code>HTTP/1.1 200 OK
+Date: Wed, 01 Mar 2011 15:38:19 GMT
+Access-Control-Allow-Origin: http://DomainA.com
+Access-Control-Allow-Methods: POST, GET, OPTIONS, HEAD
+Access-Control-Allow-Headers: X-Requested-With
+Access-Control-Max-Age: 1728000
+Connection: Keep-Alive
+Content-Type: application/json
+</code></pre>
+<p>Only if the response contains &quot;Access-Control-Allow-Origin&quot; AND its value is &quot;*&quot; or contain the domain who submitted the CORS request, by satisfying this mandtory condition browser will submit the actual Cross-Domain request, and cache the result in &quot;<strong>Preflight-Result-Cache</strong>&quot;.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="103 votes">103</span>
+    <span class="a-by">by anon</span>
+    <a class="a-src" href="https://stackoverflow.com/a/42605316" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>According to <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS" rel="noreferrer">this</a> Mozilla Developer Network article,</p>
+<blockquote>
+<p>A resource makes a <strong>cross-origin HTTP request</strong> when it requests a resource from a different domain, or port than the one which the first resource itself serves.</p>
+</blockquote>
+<p><a href="https://i.sstatic.net/zn3sT.png" rel="noreferrer"><img src="https://i.sstatic.net/zn3sT.png" alt="Enter image description here" /></a></p>
+<p>An <strong>HTML page</strong> served from <code>http://domain-a.com</code> makes an <code>&lt;img&gt;</code> src request for <code>http://domain-b.com/image.jpg</code>.
+Many pages on the web today load resources like <strong>CSS style sheets</strong>, <strong>images</strong> and <strong>scripts</strong> from separate domains (thus it should be cool).</p>
+<h3>Same-Origin Policy</h3>
+<p>For security reasons, browsers restrict <strong>cross-origin HTTP</strong> requests <strong>initiated from within scripts</strong>.
+For example, <code>XMLHttpRequest</code> and <code>Fetch</code> follow the <strong>same-origin policy</strong>.
+So, a web application using <code>XMLHttpRequest</code> or <code>Fetch</code> could only make <strong>HTTP requests</strong> to <strong>its own domain</strong>.</p>
+<h3>Cross-Origin Resource Sharing (CORS)</h3>
+<p>To improve web applications, developers asked browser vendors to allow cross-domain requests.</p>
+<p>The <strong>Cross-origin resource sharing (CORS)</strong> mechanism gives web servers <strong>cross-domain access controls</strong>, which enable secure cross-domain data transfers.
+Modern browsers use CORS in an API container - such as <code>XMLHttpRequest</code> or <code>fetch</code> - to mitigate risks of cross-origin HTTP requests.</p>
+<h3>How CORS works (<em>Access-Control-Allow-Origin</em> header)</h3>
+<p><a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing" rel="noreferrer">Wikipedia</a>:</p>
+<blockquote>
+<p>The CORS standard describes new HTTP headers which provide browsers and servers a way to request remote URLs only when they have permission.</p>
+<p>Although some validation and authorization can be performed by the server, <strong>it is generally the browser's responsibility</strong> to support these headers and honor the restrictions they impose.</p>
+<h3>Example</h3>
+<ol>
+<li>The browser sends the <code>OPTIONS</code> request with an <code>Origin HTTP</code> header.</li>
+</ol>
+<p>The value of this header is the domain that served the parent page.
+When a page from <code>http://www.example.com</code> attempts to access a user's
+data in <code>service.example.com</code>, the following request header would be
+sent to <code>service.example.com</code>:</p>
+<p><code>lang-none Origin: http://www.example.com </code></p>
+<ol start="2">
+<li>The server at <code>service.example.com</code> may respond with:</li>
+</ol>
+<ul>
+<li><p>An <code>Access-Control-Allow-Origin</code> (ACAO) header in its response indicating which origin sites are allowed. For example:</p>
+<p><code>Access-Control-Allow-Origin: http://www.example.com</code></p>
+</li>
+<li><p>An error page if the server does not allow the cross-origin request</p>
+</li>
+<li><p>An <code>Access-Control-Allow-Origin</code> (ACAO) header with a wildcard that allows all domains:</p>
+<p><code>Access-Control-Allow-Origin: *</code></p>
+</li>
+</ul>
+</blockquote>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

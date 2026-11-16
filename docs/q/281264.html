@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remove empty elements from an array in Javascript · jsdigest</title>
+<meta name="description" content="How do I remove empty elements from an array in JavaScript? Is there a straightforward way, or do I need to loop through it and remove them manually?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Remove empty elements from an array in Javascript</h1>
+    <div class="q-meta big"><span class="score hot" title="1665 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/8954/mkkt-bkkt" rel="noopener">Mkkt Bkkt</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/281264/remove-empty-elements-from-an-array-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I remove empty elements from an array in JavaScript? </p>
+
+<p>Is there a straightforward way, or do I need to loop through it and remove them manually?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1505 votes">1.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/5445/christian-c-salvad%c3%b3" rel="noopener">Christian C. Salvad&amp;#243;</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/281335" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>EDIT:</strong> This question was answered almost nine years ago when there were not many useful built-in methods in the <code>Array.prototype</code>.</p>
+
+<p>Now, certainly, I would recommend you to use the <code>filter</code> method.</p>
+
+<p>Take in mind that this method will return you <em>a new array</em> with the elements that pass the criteria of the callback function you provide to it.</p>
+
+<p>For example, if you want to remove <code>null</code> or <code>undefined</code> values: </p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var array = [0, 1, null, 2, "", 3, undefined, 3,,,,,, 4,, 4,, 5,, 6,,,,];
+
+var filtered = array.filter(function (el) {
+  return el != null;
+});
+
+console.log(filtered);</code></pre>
+</div>
+</div>
+</p>
+
+<p>It will depend on what you consider to be "empty" for example, if you were dealing with strings, the above function wouldn't remove elements that are an empty string.</p>
+
+<p>One typical pattern that I see often used is to remove elements that are <em>falsy</em>, which include an empty string <code>""</code>, <code>0</code>, <code>NaN</code>, <code>null</code>, <code>undefined</code>, and <code>false</code>.</p>
+
+<p>You can pass to the <code>filter</code> method, the <code>Boolean</code> constructor function, or return the same element in the filter criteria function, for example:</p>
+
+<pre><code>var filtered = array.filter(Boolean);
+</code></pre>
+
+<p>Or</p>
+
+<pre><code>var filtered = array.filter(function(el) { return el; });
+</code></pre>
+
+<p>In both ways, this works because the <code>filter</code> method in the first case, calls the <code>Boolean</code> constructor as a function, converting the value, and in the second case, the <code>filter</code> method internally turns the return value of the callback implicitly to <code>Boolean</code>.</p>
+
+<p>If you are working with sparse arrays, and you are trying to get rid of the "holes", you can use the <code>filter</code> method passing a callback that returns true, for example:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var sparseArray = [0, , , 1, , , , , 2, , , , 3],
+    cleanArray = sparseArray.filter(function () { return true });
+
+console.log(cleanArray); // [ 0, 1, 2, 3 ]</code></pre>
+</div>
+</div>
+</p>
+
+<p><strong>Old answer:</strong> Don't do this!</p>
+
+<p>I use this method, extending the native Array prototype:</p>
+
+<pre><code>Array.prototype.clean = function(deleteValue) {
+  for (var i = 0; i &lt; this.length; i++) {
+    if (this[i] == deleteValue) {         
+      this.splice(i, 1);
+      i--;
+    }
+  }
+  return this;
+};
+
+test = new Array("", "One", "Two", "", "Three", "", "Four").clean("");
+test2 = [1, 2,, 3,, 3,,,,,, 4,, 4,, 5,, 6,,,,];
+test2.clean(undefined);
+</code></pre>
+
+<p>Or you can simply push the existing elements into other array:</p>
+
+<pre><code>// Will remove all falsy values: undefined, null, 0, false, NaN and "" (empty string)
+function cleanArray(actual) {
+  var newArray = new Array();
+  for (var i = 0; i &lt; actual.length; i++) {
+    if (actual[i]) {
+      newArray.push(actual[i]);
+    }
+  }
+  return newArray;
+}
+
+cleanArray([1, 2,, 3,, 3,,,,,, 4,, 4,, 5,, 6,,,,]);
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1836 votes">1.8k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/104380/vsync" rel="noopener">vsync</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2843625" rel="noopener">原文 ↗</a></div><div class="prose"><h2>A few simple ways:</h2>
+<pre class="lang-js prettyprint-override"><code>var arr = [1,2,,3,,-3,null,,0,,undefined,4,,4,,5,,6,,,,];
+
+arr.filter(n =&gt; n)
+// [1, 2, 3, -3, 4, 4, 5, 6]
+
+arr.filter(Number) 
+// [1, 2, 3, -3, 4, 4, 5, 6]
+
+arr.filter(Boolean) 
+// [1, 2, 3, -3, 4, 4, 5, 6]
+</code></pre>
+<p><strong>or - Classic way: simple iteration</strong></p>
+<pre class="lang-js prettyprint-override"><code>var arr = [1,2,null, undefined,3,,3,,,0,,,[],,{},,5,,6,,,,],
+    len = arr.length, i;
+
+for(i = 0; i &lt; len; i++ )
+    arr[i] &amp;&amp; arr.push(arr[i]);  // copy non-empty values to the end of the array
+
+arr.splice(0 , len);  // cut the array and leave only the non-empty values
+// [1,2,3,3,[],Object{},5,6]
+</code></pre>
+<br/>
+<h2>jQuery:</h2>
+<pre class="lang-js prettyprint-override"><code>var arr = [1,2,,3,,3,,,0,,,4,,4,,5,,6,,,,];
+    
+arr = $.grep(arr, n =&gt; n == 0 || n);
+// [1, 2, 3, 3, 0, 4, 4, 5, 6]
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="268 votes">268</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/196507/lepe" rel="noopener">lepe</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/7924304" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you need to remove ALL empty values ("", null, undefined and 0): </p>
+
+<pre><code>arr = arr.filter(function(e){return e}); 
+</code></pre>
+
+<p>To remove empty values and Line breaks:</p>
+
+<pre><code>arr = arr.filter(function(e){ return e.replace(/(\r\n|\n|\r)/gm,"")});
+</code></pre>
+
+<p>Example:</p>
+
+<pre><code>arr = ["hello",0,"",null,undefined,1,100," "]  
+arr.filter(function(e){return e});
+</code></pre>
+
+<p>Return:</p>
+
+<pre><code>["hello", 1, 100, " "]
+</code></pre>
+
+<p><strong>UPDATE (based on Alnitak's comment)</strong></p>
+
+<p>In some situations you may want to keep "0" in the array and remove anything else (null, undefined and ""), this is one way:</p>
+
+<pre><code>arr.filter(function(e){ return e === 0 || e });
+</code></pre>
+
+<p>Return:</p>
+
+<pre><code>["hello", 0, 1, 100, " "]
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

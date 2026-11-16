@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Length of a JavaScript object · jsdigest</title>
+<meta name="description" content="I have a JavaScript object. Is there a built-in or accepted best practice way to get the length of this object? const myObject = new Object(); myObject[&quot;firstn…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Length of a JavaScript object</h1>
+    <div class="q-meta big"><span class="score hot" title="3083 votes">3.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/147/gareth-simpson" rel="noopener">Gareth Simpson</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">object</span><span class="tag">javascript-objects</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/5223/length-of-a-javascript-object" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have a JavaScript object. Is there a built-in or accepted best practice way to get the length of this object?</p>
+<pre><code>const myObject = new Object();
+myObject[&quot;firstname&quot;] = &quot;Gareth&quot;;
+myObject[&quot;lastname&quot;] = &quot;Simpson&quot;;
+myObject[&quot;age&quot;] = 21;
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3475 votes">3.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by James Coglan</span>
+    <a class="a-src" href="https://stackoverflow.com/a/6700" rel="noopener">原文 ↗</a></div><div class="prose"><h2>Updated answer</h2>
+<p><strong>Here's an update as of 2016 and <a href="http://kangax.github.io/compat-table/es5/" rel="noreferrer">widespread deployment of ES5</a> and beyond.</strong>  For IE9+ and all other modern ES5+ capable browsers, you can use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys" rel="noreferrer"><code>Object.keys()</code></a> so the above code just becomes:</p>
+<pre><code>var size = Object.keys(myObj).length;
+</code></pre>
+<p>This doesn't have to modify any existing prototype since <code>Object.keys()</code> is now built-in.</p>
+<p><strong>Edit</strong>: Objects can have symbolic properties that can not be returned via Object.key method. So the answer would be incomplete without mentioning them.</p>
+<p>Symbol type was added to the language to create unique identifiers for object properties. The main benefit of the Symbol type is the prevention of overwrites.</p>
+<p><code>Object.keys</code> or <code>Object.getOwnPropertyNames</code> does not work for symbolic properties. To return them you need to use <code>Object.getOwnPropertySymbols</code>.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var person = {
+  [Symbol('name')]: 'John Doe',
+  [Symbol('age')]: 33,
+  "occupation": "Programmer"
+};
+
+const propOwn = Object.getOwnPropertyNames(person);
+console.log(propOwn.length); // 1
+
+let propSymb = Object.getOwnPropertySymbols(person);
+console.log(propSymb.length); // 2</code></pre>
+</div>
+</div>
+</p>
+<h2>Older answer</h2>
+<p>The most robust answer (i.e. that captures the intent of what you're trying to do while causing the fewest bugs) would be:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>Object.size = function(obj) {
+  var size = 0,
+    key;
+  for (key in obj) {
+    if (obj.hasOwnProperty(key)) size++;
+  }
+  return size;
+};
+
+// Get the size of an object
+const myObj = {}
+var size = Object.size(myObj);</code></pre>
+</div>
+</div>
+</p>
+<p>There's a sort of convention in JavaScript that you <a href="https://stackoverflow.com/questions/10757455/object-prototype-is-verboten">don't add things to Object.prototype</a>, because it can break enumerations in various libraries. Adding methods to Object is usually safe, though.</p>
+<hr />
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="2051 votes">2.1k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/131023/aeosynth" rel="noopener">aeosynth</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5527037" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you know you don't have to worry about <code>hasOwnProperty</code> checks, you can use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys" rel="noreferrer">Object.keys()</a> method in this way:</p>
+<pre><code>Object.keys(myArray).length
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="315 votes">315</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/11236/ripper234" rel="noopener">ripper234</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11346637" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>Updated</strong>: If you're using <a href="http://underscorejs.org/#size">Underscore.js</a> (recommended, it's lightweight!), then you can just do</p>
+
+<pre><code>_.size({one : 1, two : 2, three : 3});
+=&gt; 3
+</code></pre>
+
+<p><strong>If not</strong>, and you don't want to mess around with Object properties for whatever reason, and are already using jQuery, a plugin is equally accessible:</p>
+
+<pre><code>$.assocArraySize = function(obj) {
+    // http://stackoverflow.com/a/6700/11236
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

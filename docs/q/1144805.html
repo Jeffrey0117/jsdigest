@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scroll to the top of the page using JavaScript? · jsdigest</title>
+<meta name="description" content="How do I scroll to the top of the page using JavaScript? The scrollbar instantly jumping to the top of the page is desirable too as I&#39;m not looking to achieve…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Scroll to the top of the page using JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="2091 votes">2.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/64878/kingnestor" rel="noopener">KingNestor</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">scroll</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1144805/scroll-to-the-top-of-the-page-using-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I scroll to the top of the page using JavaScript? The scrollbar instantly jumping to the top of the page is desirable too as I'm not looking to achieve smooth scrolling.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2732 votes">2.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/131944/savorybytes" rel="noopener">SavoryBytes</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1145012" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you don't need the change to animate then you don't need to use any special plugins - I'd just use the native JavaScript <code>window.scrollTo()</code> method -- passing in <code>0, 0</code> will scroll the page to the top left instantly.</p>
+<pre><code>window.scrollTo(xCoord, yCoord);
+</code></pre>
+<p>Parameters</p>
+<ul>
+<li>xCoord is the pixel along the horizontal axis.</li>
+<li>yCoord is the pixel along the vertical axis.</li>
+</ul>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1476 votes">1.5k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/134360/mark-ursino" rel="noopener">Mark Ursino</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1145297" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you do want smooth scrolling, try something like this:</p>
+
+<pre><code>$("a[href='#top']").click(function() {
+  $("html, body").animate({ scrollTop: 0 }, "slow");
+  return false;
+});
+</code></pre>
+
+<p>That will take any <code>&lt;a&gt;</code> tag whose <code>href="#top"</code> and make it smooth scroll to the top.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="461 votes">461</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1740102/ganesh-ghalame" rel="noopener">Ganesh Ghalame</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/52948533" rel="noopener">原文 ↗</a></div><div class="prose"><p>Better solution with smooth animation:</p>
+
+<pre><code>// this changes the scrolling behavior to "smooth"
+window.scrollTo({ top: 0, behavior: 'smooth' });
+</code></pre>
+
+<p>Reference: <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollTo#Example" rel="noreferrer">https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollTo#Example</a></p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

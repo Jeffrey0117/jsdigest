@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to get the children of the $(this) selector? · jsdigest</title>
+<meta name="description" content="I have a layout similar to this, and would like to use a jQuery selector to select the child img inside the div on click. &lt;div id=&quot;...&quot;&gt; &lt;img src=&quot;...&quot;&gt; &lt;/div&gt;…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to get the children of the $(this) selector?</h1>
+    <div class="q-meta big"><span class="score hot" title="2422 votes">2.4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/16974/alex" rel="noopener">Alex</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">jquery-selectors</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/306583/how-to-get-the-children-of-the-this-selector" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have a layout similar to this, and would like to use a <code>jQuery</code> selector to select the child <code>img</code> inside the <code>div</code> on click.</p>
+<pre class="lang-html prettyprint-override"><code>&lt;div id=&quot;...&quot;&gt;
+  &lt;img src=&quot;...&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<p>To get the <code>div</code>, I've got this selector:</p>
+<pre class="lang-js prettyprint-override"><code>$(this)
+</code></pre>
+<p>How can I get the child <code>img</code> using a selector?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2984 votes">3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/33036/simon" rel="noopener">Simon</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/306904" rel="noopener">原文 ↗</a></div><div class="prose"><p>The jQuery constructor accepts a 2nd parameter called <a href="http://api.jquery.com/jQuery/#jQuery-selector-context" rel="noreferrer"><code>context</code></a> which can be used to override the context of the selection. </p>
+
+<pre><code>jQuery("img", this);
+</code></pre>
+
+<p>Which is the same as using <a href="http://api.jquery.com/find" rel="noreferrer"><code>.find()</code></a> like this:</p>
+
+<pre><code>jQuery(this).find("img");
+</code></pre>
+
+<p>If the imgs you desire are <strong>only</strong> direct descendants of the clicked element, you can also use <a href="http://api.jquery.com/children" rel="noreferrer"><code>.children()</code></a>:</p>
+
+<pre><code>jQuery(this).children("img");
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="496 votes">496</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/28376/philnash" rel="noopener">philnash</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/306892" rel="noopener">原文 ↗</a></div><div class="prose"><p>You could also use</p>
+
+<pre><code>$(this).find('img');
+</code></pre>
+
+<p>which would return all <code>img</code>s that are descendants of the <code>div</code></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="149 votes">149</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/60422/rakslice" rel="noopener">rakslice</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6781092" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you need to get the first <code>img</code> that's down exactly one level, you can do </p>
+
+<pre><code>$(this).children("img:first")
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

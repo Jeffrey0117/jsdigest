@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check if a variable is a string in JavaScript · jsdigest</title>
+<meta name="description" content="How can I determine whether a variable is a string or something else in JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Check if a variable is a string in JavaScript</h1>
+    <div class="q-meta big"><span class="score hot" title="2882 votes">2.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/455137/olical" rel="noopener">Olical</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">string</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/4059147/check-if-a-variable-is-a-string-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How can I determine whether a variable is a string or something else in JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2445 votes">2.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/67606/pablo-santa-cruz" rel="noopener">Pablo Santa Cruz</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4059166" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>You can use <code>typeof</code> operator:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var booleanValue = true;
+var numericalValue = 354;
+var stringValue = "This is a String";
+var stringObject = new String("This is a String Object");
+console.log(typeof booleanValue) // displays "boolean"
+console.log(typeof numericalValue) // displays "number"
+console.log(typeof stringValue) // displays "string"
+console.log(typeof stringObject) // displays "object"</code></pre>
+</div>
+</div>
+</p>
+<p>Example from <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof" rel="noreferrer">this webpage</a>. (Example was slightly modified though).</p>
+<p>This won't work as expected in the case of strings created with <code>new String()</code>, but this is seldom used and recommended against<sup>[1][2]</sup>. See the other answers for how to handle these, if you so desire.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// Test this approach:
+
+let isString = value =&gt; typeof value === 'string';
+
+let falseCases = [
+  [ 'null', null ],
+  [ 'undefined', undefined ],
+  [ 'object', { a: 1, b: 2 } ],
+  [ 'array', [ 1, 2, 3 ] ],
+  [ 'number', 123 ],
+  [ 'zero', 0 ],
+  [ 'RegExp', new RegExp('hello') ],
+  [ 'number with valueOf returning string', Object.assign(10, { valueOf: () =&gt; 'abc' }) ],
+  [ 'object pretending to be string', { constructor: String } ]
+];
+let trueCases = [
+  [ 'empty literal string', '' ],
+  [ 'unicode string literal', String.fromCharCode(10000) ],
+  [ 'empty boxed string', new String('') ],
+  [ 'unicode boxed string', new String(String.fromCharCode(10000)) ],
+  [ 'string with overwritten "constructor"', Object.assign('hi', { constructor: Array }) ],
+  [ 'string with overwritten "toString"', Object.assign('hi', { toString: 123 }) ],
+  [ 'string with overwritten "valueOf"', Object.assign('hi', { valueOf: 123 }) ],
+  [ 'string with overwritten "constructor"', Object.assign('hi', { constructor: RegExp }) ],
+  [ 'proxied string', new Proxy(new String('hello'), {}) ],
+];
+
+console.log('NEGATIVE TESTS:');
+for (let [ name, val ] of falseCases) {
+  console.log(`Test ${name}:\n  Expect: false\n  Got:    ${isString(val)}`); 
+}
+
+console.log('\nPOSITIVE TESTS:');
+for (let [ name, val ] of trueCases) {
+  console.log(`Test ${name}:\n  Expect: true\n  Got:    ${isString(val)}`); 
+}</code></pre>
+</div>
+</div>
+</p>
+<hr />
+<ol>
+<li>The Google JavaScript Style Guide <a href="https://google.github.io/styleguide/jsguide.html#disallowed-features-wrapper-objects" rel="noreferrer">says to never use primitive object wrappers</a>.</li>
+<li>Douglas Crockford <a href="http://www.crockford.com/javascript/recommend.html" rel="noreferrer">recommended that primitive object wrappers be deprecated</a>.</li>
+</ol>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="3028 votes">3k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1221512/drax" rel="noopener">DRAX</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/9436948" rel="noopener">原文 ↗</a></div><div class="prose"><p>This is what works for me:</p>
+<pre><code>if (typeof myVar === 'string' || myVar instanceof String)
+// it's a string
+else
+// it's something else
+</code></pre>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// Test this approach:
+
+let isString = value =&gt; typeof value === 'string' || value instanceof String;
+
+let falseCases = [
+  [ 'null', null ],
+  [ 'undefined', undefined ],
+  [ 'object', { a: 1, b: 2 } ],
+  [ 'array', [ 1, 2, 3 ] ],
+  [ 'number', 123 ],
+  [ 'zero', 0 ],
+  [ 'RegExp', new RegExp('hello') ],
+  [ 'number with valueOf returning string', Object.assign(10, { valueOf: () =&gt; 'abc' }) ],
+  [ 'object pretending to be string', { constructor: String } ]
+];
+let trueCases = [
+  [ 'empty literal string', '' ],
+  [ 'unicode string literal', String.fromCharCode(10000) ],
+  [ 'empty boxed string', new String('') ],
+  [ 'unicode boxed string', new String(String.fromCharCode(10000)) ],
+  [ 'string with overwritten "constructor"', Object.assign('hi', { constructor: Array }) ],
+  [ 'string with overwritten "toString"', Object.assign('hi', { toString: 123 }) ],
+  [ 'string with overwritten "valueOf"', Object.assign('hi', { valueOf: 123 }) ],
+  [ 'string with overwritten "constructor"', Object.assign('hi', { constructor: RegExp }) ],
+  [ 'proxied string', new Proxy(new String('hello'), {}) ],
+];
+
+console.log('NEGATIVE TESTS:');
+for (let [ name, val ] of falseCases) {
+  console.log(`Test ${name}:\n  Expect: false\n  Got:    ${isString(val)}`); 
+}
+
+console.log('\nPOSITIVE TESTS:');
+for (let [ name, val ] of trueCases) {
+  console.log(`Test ${name}:\n  Expect: true\n  Got:    ${isString(val)}`); 
+}</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="262 votes">262</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/912236/orwellophile" rel="noopener">Orwellophile</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/17772086" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><pre><code>function isString(x) {
+  return Object.prototype.toString.call(x) === &quot;[object String]&quot;
+}
+</code></pre>
+<p>Or, inline (I have an UltiSnip setup for this):</p>
+<pre><code>Object.prototype.toString.call(myVar) === &quot;[object String]&quot;
+</code></pre>
+<p>FYI, Pablo Santa Cruz's answer is wrong, because <code>typeof new String(&quot;string&quot;)</code> is <code>object</code></p>
+<p>DRAX's answer is accurate and functional and should be the correct answer (since Pablo Santa Cruz is most definitely incorrect, and I won't argue against the popular vote.)</p>
+<p>However, this answer is also definitely correct, and actually the best answer (except, perhaps, for the suggestion of using <a href="https://lodash.com/" rel="noreferrer">lodash</a>/<a href="http://underscorejs.org/" rel="noreferrer">underscore</a>). <em>disclaimer: I contributed to the lodash 4 codebase.</em></p>
+<p>My original answer (which obviously flew right over a lot of heads) follows:</p>
+<p>I transcoded this from underscore.js:</p>
+<pre><code>['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'].forEach( 
+    function(name) { 
+        window['is' + name] = function(obj) {
+              return toString.call(obj) == '[object ' + name + ']';
+    }; 
+});
+</code></pre>
+<p>That will define isString, isNumber, etc.</p>
+<hr />
+<p>In Node.js, this can be implemented as a module:</p>
+<pre><code>module.exports = [
+  'Arguments',
+  'Function', 
+  'String', 
+  'Number', 
+  'Date', 
+  'RegExp'
+].reduce( (obj, name) =&gt; {
+  obj[ 'is' + name ] = x =&gt; toString.call(x) == '[object ' + name + ']';
+  return obj;
+}, {});
+</code></pre>
+<p>[edit]: <code>Object.prototype.toString.call(x)</code> works to delineate between functions and async functions as well:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const fn1 = () =&gt; new Promise((resolve, reject) =&gt; setTimeout(() =&gt; resolve({}), 1000))
+const fn2 = async () =&gt; ({})
+
+console.log('fn1', Object.prototype.toString.call(fn1))
+console.log('fn2', Object.prototype.toString.call(fn2))</code></pre>
+</div>
+</div>
+</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// Test this approach:
+
+function isString(x) {
+  return Object.prototype.toString.call(x) === "[object String]"
+}
+
+let falseCases = [
+  [ 'null', null ],
+  [ 'undefined', undefined ],
+  [ 'object', { a: 1, b: 2 } ],
+  [ 'array', [ 1, 2, 3 ] ],
+  [ 'number', 123 ],
+  [ 'zero', 0 ],
+  [ 'RegExp', new RegExp('hello') ],
+  [ 'number with valueOf returning string', Object.assign(10, { valueOf: () =&gt; 'abc' }) ],
+  [ 'object pretending to be string', { constructor: String } ]
+];
+let trueCases = [
+  [ 'empty literal string', '' ],
+  [ 'unicode string literal', String.fromCharCode(10000) ],
+  [ 'empty boxed string', new String('') ],
+  [ 'unicode boxed string', new String(String.fromCharCode(10000)) ],
+  [ 'string with overwritten "constructor"', Object.assign('hi', { constructor: Array }) ],
+  [ 'string with overwritten "toString"', Object.assign('hi', { toString: 123 }) ],
+  [ 'string with overwritten "valueOf"', Object.assign('hi', { valueOf: 123 }) ],
+  [ 'string with overwritten "constructor"', Object.assign('hi', { constructor: RegExp }) ],
+  [ 'proxied string', new Proxy(new String('hello'), {}) ],
+];
+
+console.log('NEGATIVE TESTS:');
+for (let [ name, val ] of falseCases) {
+  console.log(`Test ${name}:\n  Expect: false\n  Got:    ${isString(val)}`); 
+}
+
+console.log('\nPOSITIVE TESTS:');
+for (let [ name, val ] of trueCases) {
+  console.log(`Test ${name}:\n  Expect: true\n  Got:    ${isString(val)}`); 
+}</code></pre>
+</div>
+</div>
+</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pretty-print JSON using JavaScript · jsdigest</title>
+<meta name="description" content="How can I display JSON in an easy-to-read (for human readers) format? I&#39;m looking primarily for indentation and whitespace, with perhaps even colors / font-sty…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>pretty-print JSON using JavaScript</h1>
+    <div class="q-meta big"><span class="score hot" title="3557 votes">3.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/298406/mark" rel="noopener">Mark</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">json</span><span class="tag">pretty-print</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/4810841/pretty-print-json-using-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How can I display JSON in an easy-to-read (for human readers) format? I'm looking primarily for indentation and whitespace, with perhaps even colors / font-styles / etc.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="6934 votes">6.9k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/27862/user123444555621" rel="noopener">user123444555621</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/7220510" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify" rel="noreferrer">Pretty-printing is implemented natively in <code>JSON.stringify()</code></a></strong>. The third argument enables pretty printing and sets the spacing to use:</p>
+
+<pre><code>var str = JSON.stringify(obj, null, 2); // spacing level = 2
+</code></pre>
+
+<p>If you need syntax highlighting, you might use some regex magic like so:</p>
+
+<pre><code>function syntaxHighlight(json) {
+    if (typeof json != 'string') {
+         json = JSON.stringify(json, undefined, 2);
+    }
+    json = json.replace(/&amp;/g, '&amp;amp;').replace(/&lt;/g, '&amp;lt;').replace(/&gt;/g, '&amp;gt;');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        var cls = 'number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+                cls = 'key';
+            } else {
+                cls = 'string';
+            }
+        } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+        } else if (/null/.test(match)) {
+            cls = 'null';
+        }
+        return '&lt;span class="' + cls + '"&gt;' + match + '&lt;/span&gt;';
+    });
+}
+</code></pre>
+
+<p>See in action here: <a href="http://jsfiddle.net/KJQ9K/554/" rel="noreferrer">jsfiddle</a></p>
+
+<p><strong>Or a full snippet provided below:</strong></p>
+
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="false" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function output(inp) {
+    document.body.appendChild(document.createElement('pre')).innerHTML = inp;
+}
+
+function syntaxHighlight(json) {
+    json = json.replace(/&amp;/g, '&amp;amp;').replace(/&lt;/g, '&amp;lt;').replace(/&gt;/g, '&amp;gt;');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        var cls = 'number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+                cls = 'key';
+            } else {
+                cls = 'string';
+            }
+        } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+        } else if (/null/.test(match)) {
+            cls = 'null';
+        }
+        return '&lt;span class="' + cls + '"&gt;' + match + '&lt;/span&gt;';
+    });
+}
+
+var obj = {a:1, 'b':'foo', c:[false,'false',null, 'null', {d:{e:1.3e5,f:'1.3e5'}}]};
+var str = JSON.stringify(obj, undefined, 4);
+
+output(str);
+output(syntaxHighlight(str));</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+.string { color: green; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: red; }</code></pre>
+</div>
+</div>
+</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="441 votes">441</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2102634/rick-hanlon-ii" rel="noopener">Rick Hanlon II</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/17243919" rel="noopener">原文 ↗</a></div><div class="prose"><p>User Pumbaa80's answer is great if you have an <strong>object</strong> you want pretty printed. If you're starting from a valid JSON <strong>string</strong> that you want to pretty printed, you need to convert it to an object first:</p>
+
+<pre><code>var jsonString = '{"some":"json"}';
+var jsonPretty = JSON.stringify(JSON.parse(jsonString),null,2);  
+</code></pre>
+
+<p>This builds a JSON object from the string, and then converts it back to a string using JSON stringify's pretty print.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="140 votes">140</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1306464/charmie" rel="noopener">Charmie</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/46862258" rel="noopener">原文 ↗</a></div><div class="prose"><p>Better way.</p>
+
+<p><a href="https://stackoverflow.com/questions/11359291/prettify-json-array-in-javascript">Prettify JSON Array in Javascript</a></p>
+
+<pre><code>JSON.stringify(jsonobj,null,'\t')
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

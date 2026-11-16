@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Short circuit Array.forEach like calling break · jsdigest</title>
+<meta name="description" content="[1,2,3].forEach(function(el) { if(el === 1) break; }); How can I do this using the new forEach method in JavaScript? I&#39;ve tried return; , return false; and bre…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Short circuit Array.forEach like calling break</h1>
+    <div class="q-meta big"><span class="score hot" title="2249 votes">2.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/140811/scott-klarenbach" rel="noopener">Scott Klarenbach</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">foreach</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/2641347/short-circuit-array-foreach-like-calling-break" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><pre><code>[1,2,3].forEach(function(el) {
+    if(el === 1) break;
+});
+</code></pre>
+
+<p>How can I do this using the new <code>forEach</code> method in JavaScript? I've tried <code>return;</code>, <code>return false;</code> and <code>break</code>. <code>break</code> crashes and <code>return</code> does nothing but continue iteration.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2932 votes">2.9k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/18936/bobince" rel="noopener">bobince</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2641374" rel="noopener">原文 ↗</a></div><div class="prose"><p>There's no built-in ability to <code>break</code> in <code>forEach</code>. To interrupt execution you would have to throw an exception of some sort. eg.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var BreakException = {};
+
+try {
+  [1, 2, 3].forEach(function(el) {
+    console.log(el);
+    if (el === 2) throw BreakException;
+  });
+} catch (e) {
+  if (e !== BreakException) throw e;
+}</code></pre>
+</div>
+</div>
+</p>
+<p>JavaScript exceptions aren't terribly pretty. A traditional <code>for</code> loop might be more appropriate if you really need to <code>break</code> inside it.</p>
+<h2>Use <a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/some" rel="noreferrer"><code>Array#some</code></a></h2>
+<p>Instead, use <a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/some" rel="noreferrer"><code>Array#some</code></a>:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>[1, 2, 3].some(function(el) {
+  console.log(el);
+  return el === 2;
+});</code></pre>
+</div>
+</div>
+</p>
+<p>This works because <code>some</code> returns <code>true</code> as soon as any of the callbacks, executed in array order, return <code>true</code>, short-circuiting the execution of the rest.</p>
+<p><code>some</code>, its inverse <a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/every" rel="noreferrer"><code>every</code></a> (which will stop on a <code>return false</code>), and <code>forEach</code> are all ECMAScript Fifth Edition methods which will need to be added to the <code>Array.prototype</code> on browsers where they're missing.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="885 votes">885</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2602797/canac" rel="noopener">canac</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/32101207" rel="noopener">原文 ↗</a></div><div class="prose"><p>There is now an even better way to do this in ECMAScript2015 (aka ES6) using the new <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of" rel="noreferrer">for of loop</a>. For example, this code does not print the array elements after the number 5:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+for (const el of arr) {
+  console.log(el);
+  if (el === 5) {
+    break;
+  }
+}</code></pre>
+</div>
+</div>
+</p>
+<p>From the docs:</p>
+<blockquote>
+<p>Both <strong>for...in</strong> and <strong>for...of</strong> statements iterate over something. The main difference between them is in what they iterate over. The <strong>for...in</strong> statement iterates over the enumerable properties of an object, in original insertion order. The <strong>for...of</strong> statement iterates over data that iterable object defines to be iterated over.</p>
+</blockquote>
+<p>Need the index in the iteration? You can use <a href="http://devdocs.io/javascript/global_objects/array/entries" rel="noreferrer"><code>Array.entries()</code></a>:</p>
+<pre><code>for (const [index, el] of arr.entries()) {
+  if ( index === 5 ) break;
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="247 votes">247</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1044966/valdemar-rudolfovich" rel="noopener">Valdemar_Rudolfovich</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11557657" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every" rel="nofollow noreferrer">every method</a> that performs the loop while a true value is being returned:</p>
+<pre><code>[1,2,3].every(function(el) {
+    return !(el === 1);
+});
+</code></pre>
+<p>ES6</p>
+<pre><code>[1,2,3].every( el =&gt; el !== 1 )
+</code></pre>
+<p>for old browser support use:</p>
+<pre><code>if (!Array.prototype.every)
+{
+  Array.prototype.every = function(fun /*, thisp*/)
+  {
+    var len = this.length;
+    if (typeof fun != &quot;function&quot;)
+      throw new TypeError();
+
+    var thisp = arguments[1];
+    for (var i = 0; i &lt; len; i++)
+    {
+      if (i in this &amp;&amp;
+          !fun.call(thisp, this[i], i, this))
+        return false;
+    }
+
+    return true;
+  };
+}
+</code></pre>
+<p><a href="http://www.tutorialspoint.com/javascript/array_every.htm" rel="nofollow noreferrer">More details</a></p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

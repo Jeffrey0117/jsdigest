@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to create an array containing 1...N · jsdigest</title>
+<meta name="description" content="I&#39;m looking for any alternatives to the below for creating a JavaScript array containing 1 through to N where N is only known at runtime. var foo = []; for (va…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to create an array containing 1...N</h1>
+    <div class="q-meta big"><span class="score hot" title="2484 votes">2.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/305844/godders" rel="noopener">Godders</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">range</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/3746725/how-to-create-an-array-containing-1-n" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm looking for any alternatives to the below for creating a JavaScript array containing 1 through to N where N is only known at runtime.</p>
+<pre><code>var foo = [];
+
+for (var i = 1; i &lt;= N; i++) {
+   foo.push(i);
+}
+</code></pre>
+<p>To me it feels like there should be a way of doing this without the loop.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score" title="562 votes">562</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/6144/scunliffe" rel="noopener">scunliffe</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3746797" rel="noopener">原文 ↗</a></div><div class="prose"><p>If I get what you are after, you want an array of numbers <code>1..n</code> that you can later loop through.</p>
+<p>If this is all you need, can you do this instead?</p>
+<pre><code>var foo = new Array(45); // create an empty array with length 45
+</code></pre>
+<p>then when you want to use it... (un-optimized, just for example)</p>
+<pre><code>for(var i = 0; i &lt; foo.length; i++){
+  document.write('Item: ' + (i + 1) + ' of ' + foo.length + '&lt;br/&gt;'); 
+}
+</code></pre>
+<p>e.g. if you don't need to <strong>store</strong> anything in the array, you just need a container of the right length that you can iterate over... this might be easier.</p>
+<p>See it in action here: <a href="http://jsfiddle.net/3kcvm/" rel="noreferrer">http://jsfiddle.net/3kcvm/</a></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="3985 votes">4k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4079317/niko-ruotsalainen" rel="noopener">Niko Ruotsalainen</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/33352604" rel="noopener">原文 ↗</a></div><div class="prose"><p>In ES6 using Array <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from" rel="noreferrer"><code>from()</code></a> and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/keys" rel="noreferrer"><code>keys()</code></a> methods.</p>
+<pre><code>Array.from(Array(10).keys())
+//=&gt; [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></pre>
+<p>Shorter version using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator" rel="noreferrer">spread operator</a>.</p>
+<pre><code>[...Array(10).keys()]
+//=&gt; [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></pre>
+<p>Start from 1 by passing map function to Array <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from" rel="noreferrer"><code>from()</code></a>, with an object with a <code>length</code> property:</p>
+<pre><code>Array.from({length: 10}, (_, i) =&gt; i + 1)
+//=&gt; [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="900 votes">900</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1010404/ihor-shubin" rel="noopener">Ihor Shubin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/20066663" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>You can do so:</p>
+
+<pre><code>var N = 10; 
+Array.apply(null, {length: N}).map(Number.call, Number)
+</code></pre>
+
+<blockquote>
+  <p>result:  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</p>
+</blockquote>
+
+<p>or with random values:</p>
+
+<pre><code>Array.apply(null, {length: N}).map(Function.call, Math.random)
+</code></pre>
+
+<blockquote>
+  <p>result: [0.7082694901619107, 0.9572225909214467, 0.8586748542729765,
+  0.8653848143294454, 0.008339877473190427, 0.9911756622605026, 0.8133423360995948, 0.8377588465809822, 0.5577575915958732, 0.16363654541783035]</p>
+</blockquote>
+
+<h3>Explanation</h3>
+
+<p>First, note that <code>Number.call(undefined, N)</code> is equivalent to <code>Number(N)</code>, which just returns <code>N</code>.  We'll use that fact later.</p>
+
+<p><code>Array.apply(null, [undefined, undefined, undefined])</code> is equivalent to <code>Array(undefined, undefined, undefined)</code>, which produces a three-element array and assigns <code>undefined</code> to each element.</p>
+
+<p>How can you generalize that to <em>N</em> elements?  Consider how <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array"><code>Array()</code></a> works, which goes something like this:</p>
+
+<pre><code>function Array() {
+    if ( arguments.length == 1 &amp;&amp;
+         'number' === typeof arguments[0] &amp;&amp;
+         arguments[0] &gt;= 0 &amp;&amp; arguments &amp;&amp;
+         arguments[0] &lt; 1 &lt;&lt; 32 ) {
+        return [ … ];  // array of length arguments[0], generated by native code
+    }
+    var a = [];
+    for (var i = 0; i &lt; arguments.length; i++) {
+        a.push(arguments[i]);
+    }
+    return a;
+}
+</code></pre>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply">Since ECMAScript 5</a>, <code>Function.prototype.apply(thisArg, argsArray)</code> also accepts a duck-typed array-like object as its second parameter.  If we invoke <code>Array.apply(null, { length: N })</code>, then it will execute</p>
+
+<pre><code>function Array() {
+    var a = [];
+    for (var i = 0; i &lt; /* arguments.length = */ N; i++) {
+        a.push(/* arguments[i] = */ undefined);
+    }
+    return a;
+}
+</code></pre>
+
+<p>Now we have an <em>N</em>-element array, with each element set to <code>undefined</code>.  When we call <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map"><code>.map(callback, thisArg)</code></a> on it, each element will be set to the result of <code>callback.call(thisArg, element, index, array)</code>.  Therefore, <code>[undefined, undefined, …, undefined].map(Number.call, Number)</code> would map each element to <code>(Number.call).call(Number, undefined, index, array)</code>, which is the same as <code>Number.call(undefined, index, array)</code>, which, as we observed earlier, evaluates to <code>index</code>.  That completes the array whose elements are the same as their index.</p>
+
+<p>Why go through the trouble of <code>Array.apply(null, {length: N})</code> instead of just <code>Array(N)</code>?  After all, both expressions would result an an <em>N</em>-element array of undefined elements.  The difference is that in the former expression, each element is explicitly <em>set</em> to undefined, whereas in the latter, each element was never set.  According to the documentation of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map"><code>.map()</code></a>:</p>
+
+<blockquote>
+  <p><code>callback</code> is invoked only for indexes of the array which have assigned values; it is not invoked for indexes which have been deleted or which have never been assigned values.</p>
+</blockquote>
+
+<p>Therefore, <code>Array(N)</code> is insufficient; <code>Array(N).map(Number.call, Number)</code> would result in an uninitialized array of length <em>N</em>.</p>
+
+<h3>Compatibility</h3>
+
+<p>Since this technique relies on behaviour of <code>Function.prototype.apply()</code> specified in ECMAScript 5, it will <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply#Description">not work</a> in pre-ECMAScript 5 browsers such as Chrome 14 and Internet Explorer 9.</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

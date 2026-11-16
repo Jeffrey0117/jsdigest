@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merge/flatten an array of arrays · jsdigest</title>
+<meta name="description" content="I have a JavaScript array like: [[&quot;$6&quot;], [&quot;$12&quot;], [&quot;$25&quot;], [&quot;$25&quot;], [&quot;$18&quot;], [&quot;$22&quot;], [&quot;$10&quot;]] How would I go about merging the separate inner arrays into one…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Merge/flatten an array of arrays</h1>
+    <div class="q-meta big"><span class="score hot" title="1583 votes">1.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/109407/andy" rel="noopener">Andy</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">multidimensional-array</span><span class="tag">merge</span><span class="tag">flatten</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/10865025/merge-flatten-an-array-of-arrays" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have a JavaScript array like:</p>
+
+<pre><code>[["$6"], ["$12"], ["$25"], ["$25"], ["$18"], ["$22"], ["$10"]]
+</code></pre>
+
+<p>How would I go about merging the separate inner arrays into one like:</p>
+
+<pre><code>["$6", "$12", "$25", ...]
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2611 votes">2.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/53114/gumbo" rel="noopener">Gumbo</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10865042" rel="noopener">原文 ↗</a></div><div class="prose"><hr />
+<h3>ES2019</h3>
+<p>ES2019 introduced the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat" rel="noreferrer"><code>Array.prototype.flat()</code></a> method which you could use to flatten the arrays. It is compatible with <a href="https://caniuse.com/array-flat" rel="noreferrer">most environments</a>, although it is only available in Node.js starting with version 11, and not at all in Internet Explorer.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const arrays = [
+      ["$6"],
+      ["$12"],
+      ["$25"],
+      ["$25"],
+      ["$18"],
+      ["$22"],
+      ["$10"]
+    ];
+const merge3 = arrays.flat(1); //The depth level specifying how deep a nested array structure should be flattened. Defaults to 1.
+console.log(merge3);
+    </code></pre>
+</div>
+</div>
+</p>
+<hr />
+<h3>Older browsers</h3>
+<p>For older browsers, you can use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat" rel="noreferrer"><code>Array.prototype.concat</code></a> to merge arrays:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var arrays = [
+  ["$6"],
+  ["$12"],
+  ["$25"],
+  ["$25"],
+  ["$18"],
+  ["$22"],
+  ["$10"]
+];
+var merged = [].concat.apply([], arrays);
+
+console.log(merged);</code></pre>
+</div>
+</div>
+</p>
+<p>Using the <code>apply</code> method of <code>concat</code> will just take the second parameter as an array, so the last line is identical to this:</p>
+<pre><code>var merged = [].concat([&quot;$6&quot;], [&quot;$12&quot;], [&quot;$25&quot;], [&quot;$25&quot;], [&quot;$18&quot;], [&quot;$22&quot;], [&quot;$10&quot;]);
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="615 votes">615</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1370576/noah-freitas" rel="noopener">Noah Freitas</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/15030117" rel="noopener">原文 ↗</a></div><div class="prose"><p>Here's a short function that uses some of the newer JavaScript array methods to flatten an n-dimensional array.</p>
+
+<pre><code>function flatten(arr) {
+  return arr.reduce(function (flat, toFlatten) {
+    return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+  }, []);
+}
+</code></pre>
+
+<p>Usage:</p>
+
+<pre><code>flatten([[1, 2, 3], [4, 5]]); // [1, 2, 3, 4, 5]
+flatten([[[1, [1.1]], 2, 3], [4, 5]]); // [1, 1.1, 2, 3, 4, 5]
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="360 votes">360</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/485115/nikita-volkov" rel="noopener">Nikita Volkov</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/15397506" rel="noopener">原文 ↗</a></div><div class="prose"><p>There is a confusingly hidden method, which constructs a new array without mutating the original one:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var oldArray = [[1],[2,3],[4]];
+var newArray = Array.prototype.concat.apply([], oldArray);
+console.log(newArray); // [ 1, 2, 3, 4 ]</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

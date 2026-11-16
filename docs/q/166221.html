@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I upload files asynchronously with jQuery? · jsdigest</title>
+<meta name="description" content="I would like to upload a file asynchronously with jQuery. $(document).ready(function () { $(&quot;#uploadbutton&quot;).click(function () { var filename = $(&quot;#file&quot;).val(…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I upload files asynchronously with jQuery?</h1>
+    <div class="q-meta big"><span class="score hot" title="3163 votes">3.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/2138/sergio-del-amo" rel="noopener">Sergio del Amo</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">ajax</span><span class="tag">asynchronous</span><span class="tag">xmlhttprequest</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously-with-jquery" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I would like to upload a file asynchronously with jQuery. </p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>$(document).ready(function () {
+    $("#uploadbutton").click(function () {
+        var filename = $("#file").val();
+
+        $.ajax({
+            type: "POST",
+            url: "addFile.do",
+            enctype: 'multipart/form-data',
+            data: {
+                file: filename
+            },
+            success: function () {
+                alert("Data Uploaded: ");
+            }
+        });
+    });
+});</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"&gt;&lt;/script&gt;
+&lt;span&gt;File&lt;/span&gt;
+&lt;input type="file" id="file" name="file" size="10"/&gt;
+&lt;input id="uploadbutton" type="button" value="Upload"/&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>Instead of the file being uploaded, I am only getting the filename. What can I do to fix this problem?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2633 votes">2.6k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/931340/olanod" rel="noopener">olanod</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/8758614" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>With <a href="http://en.wikipedia.org/wiki/HTML5" rel="noreferrer">HTML5</a> you can make file uploads with Ajax and jQuery. Not only that, you can do file validations (name, size, and MIME type) or handle the progress event with the HTML5 progress tag (or a div). Recently I had to make a file uploader, but I didn't want to use <a href="http://en.wikipedia.org/wiki/Adobe_Flash" rel="noreferrer">Flash</a> nor Iframes or plugins and after some research I came up with the solution.</p>
+
+<p>The HTML:</p>
+
+<pre><code>&lt;form enctype="multipart/form-data"&gt;
+    &lt;input name="file" type="file" /&gt;
+    &lt;input type="button" value="Upload" /&gt;
+&lt;/form&gt;
+&lt;progress&gt;&lt;/progress&gt;
+</code></pre>
+
+<p>First, you can do some validation if you want. For example, in the <code>.on('change')</code> event of the file:</p>
+
+<pre><code>$(':file').on('change', function () {
+  var file = this.files[0];
+
+  if (file.size &gt; 1024) {
+    alert('max upload size is 1k');
+  }
+
+  // Also see .name, .type
+});
+</code></pre>
+
+<p>Now the <code>$.ajax()</code> submit with the button's click:</p>
+
+<pre><code>$(':button').on('click', function () {
+  $.ajax({
+    // Your server script to process the upload
+    url: 'upload.php',
+    type: 'POST',
+
+    // Form data
+    data: new FormData($('form')[0]),
+
+    // Tell jQuery not to process data or worry about content-type
+    // You *must* include these options!
+    cache: false,
+    contentType: false,
+    processData: false,
+
+    // Custom XMLHttpRequest
+    xhr: function () {
+      var myXhr = $.ajaxSettings.xhr();
+      if (myXhr.upload) {
+        // For handling the progress of the upload
+        myXhr.upload.addEventListener('progress', function (e) {
+          if (e.lengthComputable) {
+            $('progress').attr({
+              value: e.loaded,
+              max: e.total,
+            });
+          }
+        }, false);
+      }
+      return myXhr;
+    }
+  });
+});
+</code></pre>
+
+<p>As you can see, with HTML5 (and some research) file uploading not only becomes possible but super easy. Try it with <a href="http://en.wikipedia.org/wiki/Google_Chrome" rel="noreferrer">Google Chrome</a> as some of the HTML5 components of the examples aren't available in every browser.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="304 votes">304</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/12870/oli" rel="noopener">Oli</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/166284" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h2>2019 Update: It <em>still</em> depends on the browsers <em>your</em> demographic uses.</h2>
+<p>An important thing to understand with the &quot;new&quot; HTML5 <code>file</code> API is that it <a href="http://caniuse.com/fileapi" rel="noreferrer">wasn't supported until IE 10</a>. If the specific market you're aiming at has a higher-than-average propensity toward older versions of Windows, you might not have access to it.</p>
+<p>As of 2017, about 5% of browsers are one of IE 6, 7, 8 or 9. If you head into a big corporation (e.g., this is a B2B tool or something you're delivering for training) that number can skyrocket. In 2016, I dealt with a company using IE8 on over 60% of their machines.</p>
+<p>It's 2019 as of this edit, almost 11 years after my initial answer. IE9 and lower are <em>globally</em> around the 1% mark but there are still clusters of higher usage.</p>
+<p>The important take-away from this —whatever the feature— is, <strong>check what browser <em>your</em> users use</strong>. If you don't, you'll learn a quick and painful lesson in why &quot;works for me&quot; isn't good enough in a deliverable to a client. <a href="https://caniuse.com/" rel="noreferrer">caniuse</a> is a useful tool but note where they get their demographics from. They may not align with yours. This is never truer than enterprise environments.</p>
+<p>My answer from 2008 follows.</p>
+<hr />
+<p>However, there are viable non-JS methods of file uploads. You can create an iframe on the page (that you hide with CSS) and then target your form to post to that iframe. The main page doesn't need to move.</p>
+<p>It's a &quot;real&quot; post so it's not wholly interactive. If you need status you need something server-side to process that. This varies massively depending on your server. <a href="http://en.wikipedia.org/wiki/ASP.NET" rel="noreferrer">ASP.NET</a> has nicer mechanisms. PHP plain fails, but you can use <a href="http://en.wikipedia.org/wiki/Perl" rel="noreferrer">Perl</a> or Apache modifications to get around it.</p>
+<p>If you need multiple file uploads, it's best to do each file one at a time (to overcome maximum file upload limits). Post the first form to the iframe, monitor its progress using the above and when it has finished, post the second form to the iframe, and so on.</p>
+<p>Or use a Java/Flash solution. They're a lot more flexible in what they can do with their posts...</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="120 votes">120</span>
+    <span class="a-by">by pixxaar</span>
+    <a class="a-src" href="https://stackoverflow.com/a/309393" rel="noopener">原文 ↗</a></div><div class="prose"><p>I recommend using the <a href="http://fineuploader.com/demos.html" rel="noreferrer">Fine Uploader</a> plugin for this purpose. Your <code>JavaScript</code> code would be:</p>
+
+<pre><code>$(document).ready(function() {
+  $("#uploadbutton").jsupload({
+    action: "addFile.do",
+    onComplete: function(response){
+      alert( "server response: " + response);
+    }
+  });
+});
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

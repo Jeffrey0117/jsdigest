@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to measure time taken by a function to execute · jsdigest</title>
+<meta name="description" content="I need to get execution time in milliseconds. Note : I originally asked this question back in 2008. The accepted answer then was to use new Date().getTime() Ho…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to measure time taken by a function to execute</h1>
+    <div class="q-meta big"><span class="score hot" title="1821 votes">1.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/13370/julius-a" rel="noopener">Julius A</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">profiling</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/313893/how-to-measure-time-taken-by-a-function-to-execute" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I need to get execution time in milliseconds.</p>
+<p><strong>Note</strong>: I originally asked this question back in 2008. The accepted answer then was to use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime" rel="noreferrer"><code>new Date().getTime()</code></a> However, we can all agree now  that using the standard <a href="https://developer.mozilla.org/en-US/docs/Web/API/Performance.now" rel="noreferrer"><code>performance.now()</code></a> API is more appropriate. I am therefore changing the accepted answer to this one.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2820 votes">2.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/104380/vsync" rel="noopener">vsync</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1975103" rel="noopener">原文 ↗</a></div><div class="prose"><h2>Using  <a href="https://developer.mozilla.org/en-US/docs/Web/API/Performance.now" rel="noreferrer"><strong>performance.now()</strong></a>:</h2>
+<pre class="lang-js prettyprint-override"><code>const startTime = performance.now()
+
+doSomething()   // &lt;---- measured code goes between startTime and endTime
+    
+const endTime = performance.now()
+
+console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+</code></pre>
+<blockquote>
+<p>In <code>Node.js</code> it is required to import the <a href="https://nodejs.org/api/perf_hooks.html#perf_hooks_class_performance" rel="noreferrer"><code>performance</code></a> class</p>
+</blockquote>
+<p>importing performance</p>
+<pre class="lang-js prettyprint-override"><code>const { performance } = require('perf_hooks');
+</code></pre>
+<hr />
+<h2>Using <strong><a href="https://developer.mozilla.org/en-US/docs/DOM/console.time" rel="noreferrer">console.time</a></strong>: (<a href="https://console.spec.whatwg.org/#time" rel="noreferrer">living standard</a>)</h2>
+<pre class="lang-js prettyprint-override"><code>console.time('doSomething')
+    
+doSomething()   // &lt;---- The function you're measuring time for 
+    
+console.timeEnd('doSomething')
+</code></pre>
+<p><em><strong>Note:</strong></em> <br>The string being passed to the <code>time()</code> and <code>timeEnd()</code> methods must match<br>(<em>for the timer to finish as expected</em>).</p>
+<blockquote>
+<h3><code>console.time()</code> documentations:</h3>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Console/time" rel="noreferrer">MDN documentation</a></li>
+<li><a href="https://nodejs.org/api/console.html#console_console_timeend_label" rel="noreferrer">Node.js documentation</a></li>
+</ul>
+</blockquote>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="714 votes">714</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4853/owen" rel="noopener">Owen</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/313903" rel="noopener">原文 ↗</a></div><div class="prose"><p>use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime" rel="noreferrer">new Date().getTime()</a></p>
+
+<blockquote>
+  <p>The getTime() method returns the number of milliseconds since midnight of January 1, 1970.</p>
+</blockquote>
+
+<p>ex.</p>
+
+<pre><code>var start = new Date().getTime();
+
+for (i = 0; i &lt; 50000; ++i) {
+// do something
+}
+
+var end = new Date().getTime();
+var time = end - start;
+alert('Execution time: ' + time);
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="477 votes">477</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/632951/pacerier" rel="noopener">Pacerier</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/15641427" rel="noopener">原文 ↗</a></div><div class="prose"><h2>Don't use Date(). Read below.</h2>
+<p><strong>Use <a href="http://updates.html5rocks.com/2012/08/When-milliseconds-are-not-enough-performance-now" rel="nofollow noreferrer"><code>performance.now()</code></a></strong>:</p>
+<pre><code>const a = performance.now();
+alert('do something...');
+const b = performance.now();
+alert('It took ' + (b - a) + ' ms.');
+</code></pre>
+<p>It works on:</p>
+<ul>
+<li><p><a href="https://nodejs.org/api/perf_hooks.html#performancenow" rel="nofollow noreferrer">node v8.5.0++</a></p>
+</li>
+<li><p>IE 10 ++</p>
+</li>
+<li><p>FireFox 15 ++</p>
+</li>
+<li><p>Chrome 24 ++</p>
+</li>
+<li><p>Safari 8 ++</p>
+</li>
+<li><p>Opera 15 ++</p>
+</li>
+<li><p>Android 4.4 ++</p>
+</li>
+<li><p><a href="http://caniuse.com/#search=performance.now" rel="nofollow noreferrer">etc, etc</a></p>
+</li>
+</ul>
+<p><code>console.time</code> may be viable <strong>for you</strong>, but it's non-standard <a href="https://developer.mozilla.org/en-US/docs/Web/API/Console.time" rel="nofollow noreferrer">§</a>:</p>
+<blockquote>
+<p>This feature is non-standard and is not on a standards track. Do not use it on production sites facing the Web: it will not work for every user. There <strong>may also be large incompatibilities between implementations</strong> and the behavior may change in the future.</p>
+</blockquote>
+<p>Besides browser support, <code>performance.now</code> seems to have the <em>potential</em> to provide more accurate timings as it appears to be the bare-bones version of <code>console.time</code>.</p>
+<hr>
+<p>&lt;rant&gt; Also, <strong>DON'T EVER use <code>Date</code> for <em>anything</em></strong> because  it's affected by changes in &quot;system time&quot;. Which means we <strong>will</strong> get invalid results —like &quot;negative timing&quot;— when the user doesn't have an accurate system time:</p>
+<blockquote>
+<p>On Oct 2014, my system clock went haywire and <em>guess what</em>.... I opened Gmail and saw <em>all</em> of my day's emails &quot;sent <strong>0 minutes ago</strong>&quot;. And I'd thought Gmail is supposed to be built by world-class engineers from Google.......</p>
+</blockquote>
+<p>(Set your system clock to one year ago and go to Gmail so we can all have a good laugh. Perhaps someday we will have a <a href="https://web.archive.org/web/20220714024645/http://www.damnyouautocorrect.com/" rel="nofollow noreferrer">Hall of Shame</a> for JS <code>Date</code>.)</p>
+<p>Google Spreadsheet's <a href="https://support.google.com/docs/answer/3092981" rel="nofollow noreferrer"><code>now()</code></a> function also suffers from this problem.</p>
+<p>The only time you'll be using <code>Date</code> is when you want to show the user <strong>his</strong> system clock time. Not when you want to get <a href="https://web.archive.org/web/20231130230239/http://vancouver-webpages.com/time/" rel="nofollow noreferrer"><strong>the</strong> time</a> or to measure anything.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

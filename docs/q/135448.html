@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I check if an object has a specific property in JavaScript? · jsdigest</title>
+<meta name="description" content="How do I check if an object has a specific property in JavaScript? Consider: x = {&#39;key&#39;: 1}; if ( x.hasOwnProperty(&#39;key&#39;) ) { //Do this } Is there another way…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I check if an object has a specific property in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="1912 votes">1.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/4915/sheats" rel="noopener">sheats</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/135448/how-do-i-check-if-an-object-has-a-specific-property-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I check if an object has a specific property in JavaScript?</p>
+<p>Consider:</p>
+<pre><code>x = {'key': 1};
+if ( x.hasOwnProperty('key') ) {
+    //Do this
+}
+</code></pre>
+<p>Is there another way to do it?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1791 votes">1.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/6524/john-resig" rel="noopener">John Resig</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/136411" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h2>2022 UPDATE</h2>
+<h2><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwn" rel="noreferrer"><code>Object.hasOwn()</code></a></h2>
+<blockquote>
+<p><code>Object.hasOwn()</code> is recommended over <code>Object.hasOwnProperty()</code> because it works for objects created using <code>Object.create(null)</code> and with objects that have overridden the inherited <code>hasOwnProperty()</code> method. While it is possible to workaround these problems by calling <code>Object.prototype.hasOwnProperty()</code> on an external object, <code>Object.hasOwn()</code> is more intuitive.</p>
+</blockquote>
+<h4>Example</h4>
+<pre class="lang-js prettyprint-override"><code>const object1 = {
+  prop: 'exists'
+};
+
+console.log(Object.hasOwn(object1, 'prop'));
+// expected output: true
+</code></pre>
+<hr />
+<h2>Original answer</h2>
+<p>I'm really confused by the answers that have been given - most of them are just outright incorrect. Of course you can have object properties that have undefined, null, or false values. So simply reducing the property check to <code>typeof this[property]</code> or, even worse, <code>x.key</code> will give you completely misleading results.</p>
+<p>It depends on what you're looking for. If you want to know if an object physically contains a property (and it is not coming from somewhere up on the prototype chain) then <code>object.hasOwnProperty</code> is the way to go. All modern browsers support it. (It was missing in older versions of Safari - 2.0.1 and older - but those versions of the browser are rarely used any more.)</p>
+<p>If what you're looking for is if an object has a property on it that is iterable (when you iterate over the properties of the object, it will appear) then doing: <code>prop in object</code> will give you your desired effect.</p>
+<p>Since using <code>hasOwnProperty</code> is probably what you want, and considering that you may want a fallback method, I present to you the following solution:</p>
+<pre><code>var obj = {
+    a: undefined,
+    b: null,
+    c: false
+};
+
+// a, b, c all found
+for ( var prop in obj ) {
+    document.writeln( &quot;Object1: &quot; + prop );
+}
+
+function Class(){
+    this.a = undefined;
+    this.b = null;
+    this.c = false;
+}
+
+Class.prototype = {
+    a: undefined,
+    b: true,
+    c: true,
+    d: true,
+    e: true
+};
+
+var obj2 = new Class();
+
+// a, b, c, d, e found
+for ( var prop in obj2 ) {
+    document.writeln( &quot;Object2: &quot; + prop );
+}
+
+function hasOwnProperty(obj, prop) {
+    var proto = obj.__proto__ || obj.constructor.prototype;
+    return (prop in obj) &amp;&amp;
+        (!(prop in proto) || proto[prop] !== obj[prop]);
+}
+
+if ( Object.prototype.hasOwnProperty ) {
+    var hasOwnProperty = function(obj, prop) {
+        return obj.hasOwnProperty(prop);
+    }
+}
+
+// a, b, c found in modern browsers
+// b, c found in Safari 2.0.1 and older
+for ( var prop in obj2 ) {
+    if ( hasOwnProperty(obj2, prop) ) {
+        document.writeln( &quot;Object2 w/ hasOwn: &quot; + prop );
+    }
+}
+</code></pre>
+<p>The above is a working, cross-browser, solution to <code>hasOwnProperty()</code>, with one caveat: It is unable to distinguish between cases where an identical property is on the prototype and on the instance - it just assumes that it's coming from the prototype. You could shift it to be more lenient or strict, based upon your situation, but at the very least this should be more helpful.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="325 votes">325</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/19212/brian-m-hunt" rel="noopener">Brian M. Hunt</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11315692" rel="noopener">原文 ↗</a></div><div class="prose"><p>With <a href="http://underscorejs.org/" rel="nofollow noreferrer">Underscore.js</a> or (<a href="https://stackoverflow.com/questions/13789618/differences-between-lodash-and-underscore-js">even better</a>) <a href="http://lodash.com/" rel="nofollow noreferrer">Lodash</a>:</p>
+<pre><code>_.has(x, 'key');
+</code></pre>
+<p>Which calls <code>Object.prototype.hasOwnProperty</code>, but (a) is shorter to type, and (b) uses &quot;a safe reference to <code>hasOwnProperty</code>&quot; (i.e. it works even if <code>hasOwnProperty</code> is overwritten).</p>
+<p>In particular, Lodash defines <code>_.has</code> as:</p>
+<pre><code>function has(object, key) {
+  return object ? hasOwnProperty.call(object, key) : false;
+}
+// hasOwnProperty = Object.prototype.hasOwnProperty
+</code></pre>
+<h2>2023 Update</h2>
+<p>As noted in John Resig's answer, this is now essentially built-in with <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwn" rel="nofollow noreferrer"><code>Object.hasOwn</code></a>. Lodash/underscore remain fallbacks for cases where <code>Object.hasOwn</code> is <a href="https://caniuse.com/?search=object.hasown" rel="nofollow noreferrer">not available</a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="238 votes">238</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/356380/whisher" rel="noopener">Whisher</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/14664748" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use this (but read the warning below):</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var x = {
+  'key': 1
+};
+
+if ('key' in x) {
+  console.log('has');
+}</code></pre>
+</div>
+</div>
+</p>
+<p>But <strong>be warned</strong>: <code>'constructor' in x</code> will return <code>true</code> even if <code>x</code> is an empty object - same for <code>'toString' in x</code>, and many others. It's better to use <code>Object.hasOwn(x, 'key')</code>.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

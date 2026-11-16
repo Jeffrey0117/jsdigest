@@ -1,0 +1,961 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Is it possible to apply CSS to half of a character? · jsdigest</title>
+<meta name="description" content="What I am looking for: A way to style one HALF of a character. (In this case, half the letter being transparent) What I have currently searched for and tried (…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Is it possible to apply CSS to half of a character?</h1>
+    <div class="q-meta big"><span class="score hot" title="3194 votes">3.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/3009513/simplyazuma" rel="noopener">SimplyAzuma</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">html</span><span class="tag">css</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/23569441/is-it-possible-to-apply-css-to-half-of-a-character" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p><strong>What I am looking for:</strong></p>
+<p>A way to style one <strong>HALF</strong> of a character. (In this case, half the letter being transparent)</p>
+<p><strong>What I have currently searched for and tried (With no luck):</strong></p>
+<ul>
+<li>Methods for styling half of a character/letter</li>
+<li>Styling part of a character with CSS or JavaScript</li>
+<li>Apply CSS to 50% of a character</li>
+</ul>
+<p>Below is an example of what I am trying to obtain.</p>
+<p><img src="https://i.sstatic.net/SaH8v.png" alt="x" /></p>
+<p>Does a CSS or JavaScript solution exist for this, or am I going to have to resort to images? I would prefer not to go the image route as this text will end up being generated dynamically.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3159 votes">3.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2210457/arbel" rel="noopener">Arbel</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/23569891" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h1><a href="https://github.com/arbelh/HalfStyle" rel="noreferrer">Now on GitHub as a Plugin!</a></h1>
+
+<p><img src="https://i.sstatic.net/Glo2Q.png" alt="enter image description here"> Feel free to fork and improve.</p>
+
+<h1><a href="http://jsfiddle.net/arbel/pd9yB/1355/" rel="noreferrer">Demo</a> | <a href="https://github.com/arbelh/HalfStyle/archive/master.zip" rel="noreferrer">Download Zip</a> | <a href="http://www.half-style.com" rel="noreferrer">Half-Style.com</a> (Redirects to GitHub)</h1>
+
+<hr>
+
+<ul>
+<li><strong>Pure CSS</strong> for a Single Character</li>
+<li>JavaScript used for automation across text or multiple characters</li>
+<li>Preserves Text Accessibility for screen readers for the blind or visually
+impaired</li>
+</ul>
+
+<h1>Part 1: Basic Solution</h1>
+
+<p><img src="https://i.sstatic.net/ZYic1.png" alt="Half Style on text"></p>
+
+<p><strong>Demo:</strong> <a href="http://jsfiddle.net/arbel/pd9yB/1694/" rel="noreferrer">http://jsfiddle.net/arbel/pd9yB/1694/</a></p>
+
+<hr>
+
+<p>This works on any dynamic text, or a single character, and is all automated. All you need to do is add a class on the target text and the rest is taken care of.</p>
+
+<p>Also, the accessibility of the original text is preserved for screen readers for the blind or visually impaired.</p>
+
+<p><strong>Explanation for a single character:</strong></p>
+
+<p>Pure CSS. All you need to do is to apply <code>.halfStyle</code> class to each element that contains the character you want to be half-styled.</p>
+
+<p>For each span element containing the character, you can create a data attribute, for example here <code>data-content="X"</code>, and on the pseudo element use <code>content: attr(data-content);</code> so the <code>.halfStyle:before</code> class will be dynamic and you won't need to hard code it for every instance.</p>
+
+<p><strong>Explanation for any text:</strong></p>
+
+<p>Simply add <code>textToHalfStyle</code> class to the element containing the text.</p>
+
+<hr>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// jQuery for automated mode
+jQuery(function($) {
+    var text, chars, $el, i, output;
+
+    // Iterate over all class occurences
+    $('.textToHalfStyle').each(function(idx, el) {
+    $el = $(el);
+    text = $el.text();
+    chars = text.split('');
+
+    // Set the screen-reader text
+    $el.html('&lt;span style="position: absolute !important;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);"&gt;' + text + '&lt;/span&gt;');
+
+    // Reset output for appending
+    output = '';
+
+    // Iterate over all chars in the text
+    for (i = 0; i &lt; chars.length; i++) {
+        // Create a styled element for each character and append to container
+        output += '&lt;span aria-hidden="true" class="halfStyle" data-content="' + chars[i] + '"&gt;' + chars[i] + '&lt;/span&gt;';
+    }
+
+    // Write to DOM only once
+    $el.append(output);
+  });
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.halfStyle {
+    position: relative;
+    display: inline-block;
+    font-size: 80px; /* or any font size will work */
+    color: black; /* or transparent, any color */
+    overflow: hidden;
+    white-space: pre; /* to preserve the spaces from collapsing */
+}
+
+.halfStyle:before {
+    display: block;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    content: attr(data-content); /* dynamic content for the pseudo element */
+    overflow: hidden;
+    color: #f00;
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
+
+&lt;p&gt;Single Characters:&lt;/p&gt;
+&lt;span class="halfStyle" data-content="X"&gt;X&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Y"&gt;Y&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Z"&gt;Z&lt;/span&gt;
+&lt;span class="halfStyle" data-content="A"&gt;A&lt;/span&gt;
+
+&lt;hr/&gt;
+&lt;p&gt;Automated:&lt;/p&gt;
+
+&lt;span class="textToHalfStyle"&gt;Half-style, please.&lt;/span&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>(<a href="http://jsfiddle.net/arbel/pd9yB/1695/" rel="noreferrer">JSFiddle demo</a>)</p>
+
+<hr>
+
+<h1>Part 2: Advanced solution - Independent left and right parts</h1>
+
+<p><img src="https://i.sstatic.net/zYa0F.png" alt="Half Style on text - advanced - With Text Shadow"></p>
+
+<p><strong><em>With this solution you can style left and right parts, individually and independently</em></strong>.</p>
+
+<p>Everything is the same, only more advanced CSS does the magic.</p>
+
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>jQuery(function($) {
+    var text, chars, $el, i, output;
+
+    // Iterate over all class occurences
+    $('.textToHalfStyle').each(function(idx, el) {
+        $el = $(el);
+        text = $el.text();
+        chars = text.split('');
+
+        // Set the screen-reader text
+        $el.html('&lt;span style="position: absolute !important;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);"&gt;' + text + '&lt;/span&gt;');
+
+        // Reset output for appending
+        output = '';
+
+        // Iterate over all chars in the text
+        for (i = 0; i &lt; chars.length; i++) {
+            // Create a styled element for each character and append to container
+            output += '&lt;span aria-hidden="true" class="halfStyle" data-content="' + chars[i] + '"&gt;' + chars[i] + '&lt;/span&gt;';
+        }
+
+        // Write to DOM only once
+        $el.append(output);
+    });
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.halfStyle {
+    position: relative;
+    display: inline-block;
+    font-size: 80px; /* or any font size will work */
+    color: transparent; /* hide the base character */
+    overflow: hidden;
+    white-space: pre; /* to preserve the spaces from collapsing */
+}
+
+.halfStyle:before { /* creates the left part */
+    display: block;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    width: 50%;
+    content: attr(data-content); /* dynamic content for the pseudo element */
+    overflow: hidden;
+    pointer-events: none; /* so the base char is selectable by mouse */
+    color: #f00; /* for demo purposes */
+    text-shadow: 2px -2px 0px #af0; /* for demo purposes */
+}
+
+.halfStyle:after { /* creates the right part */
+    display: block;
+    direction: rtl; /* very important, will make the width to start from right */
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    content: attr(data-content); /* dynamic content for the pseudo element */
+    overflow: hidden;
+    pointer-events: none; /* so the base char is selectable by mouse */
+    color: #000; /* for demo purposes */
+    text-shadow: 2px 2px 0px #0af; /* for demo purposes */
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;p&gt;Single Characters:&lt;/p&gt;
+&lt;span class="halfStyle" data-content="X"&gt;X&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Y"&gt;Y&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Z"&gt;Z&lt;/span&gt;
+&lt;span class="halfStyle" data-content="A"&gt;A&lt;/span&gt;
+
+&lt;hr/&gt;
+&lt;p&gt;Automated:&lt;/p&gt;
+
+&lt;span class="textToHalfStyle"&gt;Half-style, please.&lt;/span&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>(<a href="http://jsfiddle.net/arbel/pd9yB/1695/" rel="noreferrer">JSFiddle demo</a>)</p>
+
+<hr/>
+
+<hr/>
+
+<h1>Part 3: Mix-Match and Improve</h1>
+
+<p>Now that we know what is possible, let's create some variations.</p>
+
+<hr/>
+
+<h2>-Horizontal Half Parts</h2>
+
+<ul>
+<li><h3>Without Text Shadow:</h3>
+
+<p><img src="https://i.sstatic.net/i8dpE.png" alt="Horizontal Half Parts - No Text Shadow"></p></li>
+<li><h3>Possibility of Text Shadow for each half part independently:</h3>
+
+<p><img src="https://i.sstatic.net/2eDaQ.png" alt="halfStyle - Horizontal Half Parts - With Text Shadow"></p></li>
+</ul>
+
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// jQuery for automated mode
+jQuery(function($) {
+    var text, chars, $el, i, output;
+
+    // Iterate over all class occurences
+    $('.textToHalfStyle').each(function(idx, el) {
+        $el = $(el);
+        text = $el.text();
+        chars = text.split('');
+
+        // Set the screen-reader text
+        $el.html('&lt;span style="position: absolute !important;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);"&gt;' + text + '&lt;/span&gt;');
+
+        // Reset output for appending
+        output = '';
+
+        // Iterate over all chars in the text
+        for (i = 0; i &lt; chars.length; i++) {
+            // Create a styled element for each character and append to container
+            output += '&lt;span aria-hidden="true" class="halfStyle" data-content="' + chars[i] + '"&gt;' + chars[i] + '&lt;/span&gt;';
+        }
+
+        // Write to DOM only once
+        $el.append(output);
+    });
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.halfStyle {
+  position: relative;
+  display: inline-block;
+  font-size: 80px; /* or any font size will work */
+  color: transparent; /* hide the base character */
+  overflow: hidden;
+  white-space: pre; /* to preserve the spaces from collapsing */
+}
+
+.halfStyle:before { /* creates the top part */
+  display: block;
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  height: 50%;
+  content: attr(data-content); /* dynamic content for the pseudo element */
+  overflow: hidden;
+  pointer-events: none; /* so the base char is selectable by mouse */
+  color: #f00; /* for demo purposes */
+  text-shadow: 2px -2px 0px #af0; /* for demo purposes */
+}
+
+.halfStyle:after { /* creates the bottom part */
+  display: block;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  height: 100%;
+  content: attr(data-content); /* dynamic content for the pseudo element */
+  overflow: hidden;
+  pointer-events: none; /* so the base char is selectable by mouse */
+  color: #000; /* for demo purposes */
+  text-shadow: 2px 2px 0px #0af; /* for demo purposes */
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;p&gt;Single Characters:&lt;/p&gt;
+&lt;span class="halfStyle" data-content="X"&gt;X&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Y"&gt;Y&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Z"&gt;Z&lt;/span&gt;
+&lt;span class="halfStyle" data-content="A"&gt;A&lt;/span&gt;
+
+&lt;hr/&gt;
+&lt;p&gt;Automated:&lt;/p&gt;
+
+&lt;span class="textToHalfStyle"&gt;Half-style, please.&lt;/span&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>(<a href="http://jsfiddle.net/arbel/pd9yB/1696/" rel="noreferrer">JSFiddle demo</a>)</p>
+
+<hr/>
+
+<hr/>
+
+<h2>-Vertical 1/3 Parts</h2>
+
+<ul>
+<li><h3>Without Text Shadow:</h3>
+
+<p><img src="https://i.sstatic.net/paJvV.png" alt="halfStyle - Vertical 1/3 Parts - No Text Shadow"></p></li>
+<li><h3>Possibility of Text Shadow for each 1/3 part independently:</h3>
+
+<p><img src="https://i.sstatic.net/ypn4X.png" alt="halfStyle - Vertical 1/3 Parts - With Text Shadow"></p></li>
+</ul>
+
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// jQuery for automated mode
+jQuery(function($) {
+    var text, chars, $el, i, output;
+
+    // Iterate over all class occurences
+    $('.textToHalfStyle').each(function(idx, el) {
+    $el = $(el);
+    text = $el.text();
+    chars = text.split('');
+
+    // Set the screen-reader text
+    $el.html('&lt;span style="position: absolute !important;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);"&gt;' + text + '&lt;/span&gt;');
+
+    // Reset output for appending
+    output = '';
+
+    // Iterate over all chars in the text
+    for (i = 0; i &lt; chars.length; i++) {
+        // Create a styled element for each character and append to container
+        output += '&lt;span aria-hidden="true" class="halfStyle" data-content="' + chars[i] + '"&gt;' + chars[i] + '&lt;/span&gt;';
+    }
+
+    // Write to DOM only once
+    $el.append(output);
+  });
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.halfStyle { /* base char and also the right 1/3 */
+    position: relative;
+    display: inline-block;
+    font-size: 80px; /* or any font size will work */
+    color: transparent; /* hide the base character */
+    overflow: hidden;
+    white-space: pre; /* to preserve the spaces from collapsing */
+    color: #f0f; /* for demo purposes */
+    text-shadow: 2px 2px 0px #0af; /* for demo purposes */
+}
+
+.halfStyle:before { /* creates the left 1/3 */
+    display: block;
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    width: 33.33%;
+    content: attr(data-content); /* dynamic content for the pseudo element */
+    overflow: hidden;
+    pointer-events: none; /* so the base char is selectable by mouse */
+    color: #f00; /* for demo purposes */
+    text-shadow: 2px -2px 0px #af0; /* for demo purposes */
+}
+
+.halfStyle:after { /* creates the middle 1/3 */
+    display: block;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    width: 66.66%;
+    content: attr(data-content); /* dynamic content for the pseudo element */
+    overflow: hidden;
+    pointer-events: none; /* so the base char is selectable by mouse */
+    color: #000; /* for demo purposes */
+    text-shadow: 2px 2px 0px #af0; /* for demo purposes */
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
+
+&lt;p&gt;Single Characters:&lt;/p&gt;
+&lt;span class="halfStyle" data-content="X"&gt;X&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Y"&gt;Y&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Z"&gt;Z&lt;/span&gt;
+&lt;span class="halfStyle" data-content="A"&gt;A&lt;/span&gt;
+
+&lt;hr/&gt;
+&lt;p&gt;Automated:&lt;/p&gt;
+
+&lt;span class="textToHalfStyle"&gt;Half-style, please.&lt;/span&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>(<a href="http://jsfiddle.net/arbel/pd9yB/1697/" rel="noreferrer">JSFiddle demo</a>)</p>
+
+<hr/>
+
+<hr/>
+
+<h2>-Horizontal 1/3 Parts</h2>
+
+<ul>
+<li><h3>Without Text Shadow:</h3>
+
+<p><img src="https://i.sstatic.net/M1unV.png" alt="halfStyle - Horizontal 1/3 Parts - No Text Shadow"></p></li>
+<li><h3>Possibility of Text Shadow for each 1/3 part independently:</h3>
+
+<p><img src="https://i.sstatic.net/UeuxW.png" alt="halfStyle - Horizontal 1/3 Parts - With Text Shadow"></p></li>
+</ul>
+
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// jQuery for automated mode
+jQuery(function($) {
+    var text, chars, $el, i, output;
+
+    // Iterate over all class occurences
+    $('.textToHalfStyle').each(function(idx, el) {
+    $el = $(el);
+    text = $el.text();
+    chars = text.split('');
+
+    // Set the screen-reader text
+    $el.html('&lt;span style="position: absolute !important;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);"&gt;' + text + '&lt;/span&gt;');
+
+    // Reset output for appending
+    output = '';
+
+    // Iterate over all chars in the text
+    for (i = 0; i &lt; chars.length; i++) {
+        // Create a styled element for each character and append to container
+        output += '&lt;span aria-hidden="true" class="halfStyle" data-content="' + chars[i] + '"&gt;' + chars[i] + '&lt;/span&gt;';
+    }
+
+    // Write to DOM only once
+    $el.append(output);
+  });
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.halfStyle { /* base char and also the bottom 1/3 */
+  position: relative;
+  display: inline-block;
+  font-size: 80px; /* or any font size will work */
+  color: transparent;
+  overflow: hidden;
+  white-space: pre; /* to preserve the spaces from collapsing */
+  color: #f0f;
+  text-shadow: 2px 2px 0px #0af; /* for demo purposes */
+}
+
+.halfStyle:before { /* creates the top 1/3 */
+  display: block;
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  height: 33.33%;
+  content: attr(data-content); /* dynamic content for the pseudo element */
+  overflow: hidden;
+  pointer-events: none; /* so the base char is selectable by mouse */
+  color: #f00; /* for demo purposes */
+  text-shadow: 2px -2px 0px #fa0; /* for demo purposes */
+}
+
+.halfStyle:after { /* creates the middle 1/3 */
+  display: block;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  height: 66.66%;
+  content: attr(data-content); /* dynamic content for the pseudo element */
+  overflow: hidden;
+  pointer-events: none; /* so the base char is selectable by mouse */
+  color: #000; /* for demo purposes */
+  text-shadow: 2px 2px 0px #af0; /* for demo purposes */
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;p&gt;Single Characters:&lt;/p&gt;
+&lt;span class="halfStyle" data-content="X"&gt;X&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Y"&gt;Y&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Z"&gt;Z&lt;/span&gt;
+&lt;span class="halfStyle" data-content="A"&gt;A&lt;/span&gt;
+
+&lt;hr/&gt;
+&lt;p&gt;Automated:&lt;/p&gt;
+
+&lt;span class="textToHalfStyle"&gt;Half-style, please.&lt;/span&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>(<a href="http://jsfiddle.net/arbel/pd9yB/1698/" rel="noreferrer">JSFiddle demo</a>)</p>
+
+<hr/>
+
+<hr/>
+
+<h2>-HalfStyle Improvement By @KevinGranger</h2>
+
+<p><img src="https://i.sstatic.net/PgdJ6.png" alt="halfStyle - KevinGranger"></p>
+
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// jQuery for automated mode
+jQuery(function($) {
+    var text, chars, $el, i, output;
+
+    // Iterate over all class occurences
+    $('.textToHalfStyle').each(function(idx, el) {
+    $el = $(el);
+    text = $el.text();
+    chars = text.split('');
+
+    // Set the screen-reader text
+    $el.html('&lt;span style="position: absolute !important;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);"&gt;' + text + '&lt;/span&gt;');
+
+    // Reset output for appending
+    output = '';
+
+    // Iterate over all chars in the text
+    for (i = 0; i &lt; chars.length; i++) {
+        // Create a styled element for each character and append to container
+        output += '&lt;span aria-hidden="true" class="halfStyle" data-content="' + chars[i] + '"&gt;' + chars[i] + '&lt;/span&gt;';
+    }
+
+    // Write to DOM only once
+    $el.append(output);
+  });
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>body {
+    background-color: black;
+}
+
+.textToHalfStyle {
+    display: block;
+    margin: 200px 0 0 0;
+    text-align: center;
+}
+
+.halfStyle {
+    font-family: 'Libre Baskerville', serif;
+    position: relative;
+    display: inline-block;
+    width: 1;
+    font-size: 70px;
+    color: black;
+    overflow: hidden;
+    white-space: pre;
+    text-shadow: 1px 2px 0 white;
+}
+
+.halfStyle:before {
+    display: block;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    width: 50%;
+    content: attr(data-content); /* dynamic content for the pseudo element */
+    overflow: hidden;
+    color: white;
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;p&gt;Single Characters:&lt;/p&gt;
+&lt;span class="halfStyle" data-content="X"&gt;X&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Y"&gt;Y&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Z"&gt;Z&lt;/span&gt;
+&lt;span class="halfStyle" data-content="A"&gt;A&lt;/span&gt;
+
+&lt;hr/&gt;
+&lt;p&gt;Automated:&lt;/p&gt;
+
+&lt;span class="textToHalfStyle"&gt;Half-style, please.&lt;/span&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>(<a href="http://jsfiddle.net/arbel/pd9yB/1699/" rel="noreferrer">JSFiddle demo</a>)</p>
+
+<p><hr/>
+<hr/></p>
+
+<h2>-PeelingStyle improvement of HalfStyle by <a href="https://stackoverflow.com/users/3631752/sam-tremaine">@SamTremaine</a></h2>
+
+<p><img src="https://i.sstatic.net/r67KC.png" alt="halfStyle - SamTremaine"></p>
+
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// jQuery for automated mode
+jQuery(function($) {
+    var text, chars, $el, i, output;
+
+    // Iterate over all class occurences
+    $('.textToHalfStyle').each(function(idx, el) {
+    $el = $(el);
+    text = $el.text();
+    chars = text.split('');
+
+    // Set the screen-reader text
+    $el.html('&lt;span style="position: absolute !important;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);"&gt;' + text + '&lt;/span&gt;');
+
+    // Reset output for appending
+    output = '';
+
+    // Iterate over all chars in the text
+    for (i = 0; i &lt; chars.length; i++) {
+        // Create a styled element for each character and append to container
+        output += '&lt;span aria-hidden="true" class="halfStyle" data-content="' + chars[i] + '"&gt;' + chars[i] + '&lt;/span&gt;';
+    }
+
+    // Write to DOM only once
+    $el.append(output);
+  });
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.halfStyle {
+    position: relative;
+    display: inline-block;
+    font-size: 68px;
+    color: rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    white-space: pre;
+    transform: rotate(4deg);
+    text-shadow: 2px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.halfStyle:before { /* creates the left part */
+    display: block;
+    z-index: 1;
+    position: absolute;
+    top: -0.5px;
+    left: -3px;
+    width: 100%;
+    content: attr(data-content);
+    overflow: hidden;
+    pointer-events: none;
+    color: #FFF;
+    transform: rotate(-4deg);
+    text-shadow: 0px 0px 1px #000;
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;p&gt;Single Characters:&lt;/p&gt;
+&lt;span class="halfStyle" data-content="X"&gt;X&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Y"&gt;Y&lt;/span&gt;
+&lt;span class="halfStyle" data-content="Z"&gt;Z&lt;/span&gt;
+&lt;span class="halfStyle" data-content="A"&gt;A&lt;/span&gt;
+
+&lt;hr/&gt;
+&lt;p&gt;Automated:&lt;/p&gt;
+
+&lt;span class="textToHalfStyle"&gt;Half-style, please.&lt;/span&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>(<a href="http://jsfiddle.net/arbel/pd9yB/1700/" rel="noreferrer">JSFiddle demo</a> and on <a href="http://experimental.samtremaine.co.uk/half-style/" rel="noreferrer">samtremaine.co.uk</a>)</p>
+
+<p><hr/>
+<hr/></p>
+
+<h1>Part 4: Ready for Production</h1>
+
+<p>Customized different Half-Style style-sets can be used on desired elements on the same page.
+You can define multiple style-sets and tell the plugin which one to use.</p>
+
+<p>The plugin uses data attribute <code>data-halfstyle="[-CustomClassName-]"</code> on the target <code>.textToHalfStyle</code> elements and makes all the necessary changes automatically.</p>
+
+<p>So, simply on the element containing the text add <code>textToHalfStyle</code> class and data attribute <code>data-halfstyle="[-CustomClassName-]"</code>. The plugin will do the rest of the job.</p>
+
+<p><img src="https://i.sstatic.net/RxjKF.png" alt="halfStyle - Multiple on Same Page"></p>
+
+<p>Also the CSS style-sets' class definitions match the <code>[-CustomClassName-]</code> part mentioned above and is chained to <code>.halfStyle</code>, so we will have <code>.halfStyle.[-CustomClassName-]</code></p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>jQuery(function($) {
+    var halfstyle_text, halfstyle_chars, $halfstyle_el, halfstyle_i, halfstyle_output, halfstyle_style;
+
+    // Iterate over all class occurrences
+    $('.textToHalfStyle').each(function(idx, halfstyle_el) {
+        $halfstyle_el = $(halfstyle_el);
+        halfstyle_style = $halfstyle_el.data('halfstyle') || 'hs-base';
+        halfstyle_text = $halfstyle_el.text();
+        halfstyle_chars = halfstyle_text.split('');
+
+        // Set the screen-reader text
+        $halfstyle_el.html('&lt;span style="position: absolute !important;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);"&gt;' + halfstyle_text + '&lt;/span&gt;');
+
+        // Reset output for appending
+        halfstyle_output = '';
+
+        // Iterate over all chars in the text
+        for (halfstyle_i = 0; halfstyle_i &lt; halfstyle_chars.length; halfstyle_i++) {
+            // Create a styled element for each character and append to container
+            halfstyle_output += '&lt;span aria-hidden="true" class="halfStyle ' + halfstyle_style + '" data-content="' + halfstyle_chars[halfstyle_i] + '"&gt;' + halfstyle_chars[halfstyle_i] + '&lt;/span&gt;';
+        }
+
+        // Write to DOM only once
+        $halfstyle_el.append(halfstyle_output);
+    });
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>/* start half-style hs-base */
+
+.halfStyle.hs-base {
+    position: relative;
+    display: inline-block;
+    font-size: 80px; /* or any font size will work */
+    overflow: hidden;
+    white-space: pre; /* to preserve the spaces from collapsing */
+    color: #000; /* for demo purposes */
+}
+
+.halfStyle.hs-base:before {
+    display: block;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    width: 50%;
+    content: attr(data-content); /* dynamic content for the pseudo element */
+    pointer-events: none; /* so the base char is selectable by mouse */
+    overflow: hidden;
+    color: #f00; /* for demo purposes */
+}
+
+/* end half-style hs-base */
+
+
+/* start half-style hs-horizontal-third */
+
+.halfStyle.hs-horizontal-third { /* base char and also the bottom 1/3 */
+    position: relative;
+    display: inline-block;
+    font-size: 80px; /* or any font size will work */
+    color: transparent;
+    overflow: hidden;
+    white-space: pre; /* to preserve the spaces from collapsing */
+    color: #f0f;
+    text-shadow: 2px 2px 0px #0af; /* for demo purposes */
+}
+
+.halfStyle.hs-horizontal-third:before { /* creates the top 1/3 */
+    display: block;
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    height: 33.33%;
+    content: attr(data-content); /* dynamic content for the pseudo element */
+    overflow: hidden;
+    pointer-events: none; /* so the base char is selectable by mouse */
+    color: #f00; /* for demo purposes */
+    text-shadow: 2px -2px 0px #fa0; /* for demo purposes */
+}
+
+.halfStyle.hs-horizontal-third:after { /* creates the middle 1/3 */
+    display: block;
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    height: 66.66%;
+    content: attr(data-content); /* dynamic content for the pseudo element */
+    overflow: hidden;
+    pointer-events: none; /* so the base char is selectable by mouse */
+    color: #000; /* for demo purposes */
+    text-shadow: 2px 2px 0px #af0; /* for demo purposes */
+}
+
+/* end half-style hs-horizontal-third */
+
+
+/* start half-style hs-PeelingStyle, by user SamTremaine on Stackoverflow.com */
+
+.halfStyle.hs-PeelingStyle {
+  position: relative;
+  display: inline-block;
+  font-size: 68px;
+  color: rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  white-space: pre;
+  transform: rotate(4deg);
+  text-shadow: 2px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.halfStyle.hs-PeelingStyle:before { /* creates the left part */
+  display: block;
+  z-index: 1;
+  position: absolute;
+  top: -0.5px;
+  left: -3px;
+  width: 100%;
+  content: attr(data-content);
+  overflow: hidden;
+  pointer-events: none;
+  color: #FFF;
+  transform: rotate(-4deg);
+  text-shadow: 0px 0px 1px #000;
+}
+
+/* end half-style hs-PeelingStyle */
+
+
+/* start half-style hs-KevinGranger, by user KevinGranger on StackOverflow.com*/
+
+.textToHalfStyle.hs-KevinGranger {
+  display: block;
+  margin: 200px 0 0 0;
+  text-align: center;
+}
+
+.halfStyle.hs-KevinGranger {
+  font-family: 'Libre Baskerville', serif;
+  position: relative;
+  display: inline-block;
+  width: 1;
+  font-size: 70px;
+  color: black;
+  overflow: hidden;
+  white-space: pre;
+  text-shadow: 1px 2px 0 white;
+}
+
+.halfStyle.hs-KevinGranger:before {
+  display: block;
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  width: 50%;
+  content: attr(data-content); /* dynamic content for the pseudo element */
+  overflow: hidden;
+  color: white;
+}
+
+/* end half-style hs-KevinGranger</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;p&gt;
+    &lt;span class="textToHalfStyle" data-halfstyle="hs-base"&gt;Half-style, please.&lt;/span&gt;
+&lt;/p&gt;
+&lt;p&gt;
+    &lt;span class="textToHalfStyle" data-halfstyle="hs-horizontal-third"&gt;Half-style, please.&lt;/span&gt;
+&lt;/p&gt;
+&lt;p&gt;
+    &lt;span class="textToHalfStyle" data-halfstyle="hs-PeelingStyle"&gt;Half-style, please.&lt;/span&gt;
+&lt;/p&gt;
+&lt;p style="background-color:#000;"&gt;
+    &lt;span class="textToHalfStyle" data-halfstyle="hs-KevinGranger"&gt;Half-style, please.&lt;/span&gt;
+&lt;/p&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p>(<a href="http://jsfiddle.net/arbel/pd9yB/1701/" rel="noreferrer">JSFiddle demo</a>)</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="535 votes">535</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2948261/razvan-b" rel="noopener">Razvan B.</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/23569710" rel="noopener">原文 ↗</a></div><div class="prose"><p><img src="https://i.sstatic.net/TkwNq.png" alt="enter image description here"><br><br><br></p>
+
+<p>I've just finished developing the plugin and it is available for everyone to use! Hope you will enjoy it. </p>
+
+<h3>View Project on <a href="https://github.com/emisfera/Splitchar" rel="noreferrer">GitHub</a> - View Project <a href="http://razvanbalosin.com/Splitchar.js/" rel="noreferrer">Website</a>. <b>(so you can see all the split styles)</b></h3>
+
+<h2><b>Usage</b></h2>
+
+<p>First of all, make sure you have the <code>jQuery</code> library is included. The best way to get the latest jQuery version is to update your head tag with:</p>
+
+<pre><code>&lt;script src="http://code.jquery.com/jquery-latest.min.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>After downloading the files, make sure you include them in your project:</p>
+
+<pre><code>&lt;link rel="stylesheet" type="text/css" href="css/splitchar.css"&gt;
+&lt;script type="text/javascript" src="js/splitchar.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<h2><b>Markup</b></h2>
+
+<p>All you have to do is to asign the class <code>splitchar</code> , followed by the desired style to the element wrapping your text. e.g</p>
+
+<pre><code>&lt;h1 class="splitchar horizontal"&gt;Splitchar&lt;/h1&gt;
+</code></pre>
+
+<p>After all this is done, just make sure you call the jQuery function in your document ready file like this:</p>
+
+<pre><code>$(".splitchar").splitchar();
+</code></pre>
+
+<h2><b>Customizing</b></h2>
+
+<p>In order to make the text look exactly as you want it to, all you have to do is apply your design like this:</p>
+
+<pre><code>.horizontal { /* Base CSS - e.g font-size */ }
+.horizontal:before { /* CSS for the left half */ }
+.horizontal:after { /* CSS for the right half */ }
+</code></pre>
+
+<p><br>
+That's it! Now you have the <code>Splitchar</code> plugin all set. More info about it at <a href="http://razvanbalosin.com/Splitchar.js/" rel="noreferrer">http://razvanbalosin.com/Splitchar.js/</a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="268 votes">268</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/172279/da" rel="noopener">DA.</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/23569898" rel="noopener">原文 ↗</a></div><div class="prose"><p>Yes, you can do this with only one character and only CSS:</p>
+<p><a href="http://jsbin.com/rexoyice/1/" rel="noreferrer">http://jsbin.com/rexoyice/1/</a></p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-css lang-css prettyprint-override"><code>h1 {
+  display: inline-block;
+  margin: 0; /* for demo snippet */
+  line-height: 1em; /* for demo snippet */
+  font-family: helvetica, arial, sans-serif;
+  font-weight: bold;
+  font-size: 300px;
+  background: linear-gradient(to right, #7db9e8 50%,#1e5799 50%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;h1&gt;X&lt;/h1&gt;</code></pre>
+</div>
+</div>
+</p>
+<p>Visually, all the examples that use two characters (be it via JS, CSS pseudo elements, or just HTML) look fine, but note that that all adds content to the DOM which may cause accessibility--as well as text selection/cut/paste issues.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

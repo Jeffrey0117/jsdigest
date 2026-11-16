@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event binding on dynamically created elements? · jsdigest</title>
+<meta name="description" content="I have a bit of code where I am looping through all the select boxes on a page and binding a .hover event to them to do a bit of twiddling with their width on…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Event binding on dynamically created elements?</h1>
+    <div class="q-meta big"><span class="score hot" title="1673 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/27580/eli" rel="noopener">Eli</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">events</span><span class="tag">unobtrusive-javascript</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/203198/event-binding-on-dynamically-created-elements" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have a bit of code where I am looping through all the select boxes on a page and binding a <code>.hover</code> event to them to do a bit of twiddling with their width on <code>mouse on/off</code>.</p>
+
+<p>This happens on page ready and works just fine.</p>
+
+<p>The problem I have is that any select boxes I add via Ajax or DOM after the initial loop won't have the event bound.</p>
+
+<p>I have found this plugin (<a href="http://brandonaaron.net/docs/livequery/#getting-started" rel="noreferrer">jQuery Live Query Plugin</a>), but before I add another 5k to my pages with a plugin, I want to see if anyone knows a way to do this, either with jQuery directly or by another option.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2583 votes">2.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/37759/dev-e-loper" rel="noopener">dev.e.loper</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1207393" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>As of jQuery 1.7</strong> you should use <a href="https://api.jquery.com/on/#on-events-selector-data-handler" rel="noreferrer"><code>jQuery.fn.on</code></a> with the selector parameter filled:</p>
+<pre><code>$(staticAncestors).on(eventName, dynamicChild, function() {});
+</code></pre>
+<p><em>Explanation:</em></p>
+<p>This is called event delegation and works as followed. The event is attached to a static parent (<code>staticAncestors</code>) of the element that should be handled. This jQuery handler is triggered every time the event triggers on this element or one of the descendant elements. The handler then checks if the element that triggered the event matches your selector (<code>dynamicChild</code>). When there is a match then your custom handler function is executed.</p>
+<hr />
+<p><strong>Prior to this</strong>, the recommended approach was to use <a href="http://api.jquery.com/live" rel="noreferrer"><code>live()</code></a>:</p>
+<pre><code>$(selector).live( eventName, function(){} );
+</code></pre>
+<p>However, <code>live()</code> was deprecated in 1.7 in favour of <code>on()</code>, and completely removed in 1.9. The <code>live()</code> signature:</p>
+<pre><code>$(selector).live( eventName, function(){} );
+</code></pre>
+<p>... can be replaced with the following <a href="http://api.jquery.com/on/" rel="noreferrer"><code>on()</code></a> signature:</p>
+<pre><code>$(document).on( eventName, selector, function(){} );
+</code></pre>
+<hr />
+<p>For example, if your page was dynamically creating elements with the class name <code>dosomething</code> you would bind the event to <strong>a parent which already exists</strong> (this is the nub of the problem here, you need something that exists to bind to, don't bind to the dynamic content), this can be (and the easiest option) is <code>document</code>. Though bear in mind <a href="https://stackoverflow.com/questions/12824549/should-all-jquery-events-be-bound-to-document"><code>document</code> may not be the most efficient option</a>.</p>
+<pre><code>$(document).on('mouseover mouseout', '.dosomething', function(){
+    // what you want to happen when mouseover and mouseout 
+    // occurs on elements that match '.dosomething'
+});
+</code></pre>
+<p>Any parent that exists at the time the event is bound is fine. For example</p>
+<pre><code>$('.buttons').on('click', 'button', function(){
+    // do something here
+});
+</code></pre>
+<p>would apply to</p>
+<pre><code>&lt;div class=&quot;buttons&quot;&gt;
+    &lt;!-- &lt;button&gt;s that are generated dynamically and added here --&gt;
+&lt;/div&gt;
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="425 votes">425</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1806956/ronen-rabinovici" rel="noopener">Ronen Rabinovici</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/18144022" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h1>2025 Update - Delegated Events Implementation for Pure Vanilla JS (no jQuery)</h1>
+<p>Example - a table <code>#dataTable</code> exists, but the rows are programmatically added / changed  dynamically, the following code snippet will handle clicke events on the dinamically newly added rows:</p>
+<pre><code>document.querySelector(&quot;#dataTable tbody&quot;).addEventListener(&quot;click&quot;, function(event) {
+    const row = event.target.closest(&quot;tr&quot;);
+    if (row &amp;&amp; this.contains(row)) {
+        console.log(row.textContent.trim());
+    }
+});
+</code></pre>
+<p>That pattern is known as <strong>delegated event handling</strong> or <strong>event delegation</strong>.</p>
+<h3><strong>✅ What is Event Delegation?</strong></h3>
+<p>Instead of attaching an event listener to each child element (e.g., every &lt;tr&gt;), you attach <strong>one listener</strong> to a common ancestor (like &lt;tbody&gt;) and then use event.target or event.target.closest() to figure out which child element triggered the event.</p>
+<h2>Previous Answer (for jQuery):</h2>
+<p>There is a good explanation in the documentation of <a href="http://api.jquery.com/on/" rel="nofollow noreferrer"><code>jQuery.fn.on</code></a>.</p>
+<p>In short:</p>
+<blockquote>
+<p>Event handlers are bound only to the currently selected elements; they must exist on the page at the time your code makes the call to <code>.on()</code>.</p>
+</blockquote>
+<p>Thus in the following example <code>#dataTable tbody tr</code> must exist before the code is generated.</p>
+<pre><code>$(&quot;#dataTable tbody tr&quot;).on(&quot;click&quot;, function(event){
+    console.log($(this).text());
+});
+</code></pre>
+<p>If new HTML is being injected into the page, it is preferable to use delegated events to attach an event handler, as described next.</p>
+<p><strong>Delegated events</strong> have the advantage that they can process events from descendant elements that are added to the document at a later time. For example, if the table exists, but the rows are added dynamically using code, the following will handle it:</p>
+<pre><code>$(&quot;#dataTable tbody&quot;).on(&quot;click&quot;, &quot;tr&quot;, function(event){
+    console.log($(this).text());
+});
+</code></pre>
+<p>In addition to their ability to handle events on descendant elements which are not yet created, another advantage of delegated events is their potential for much lower overhead when many elements must be monitored. On a data table with 1,000 rows in its <code>tbody</code>, the first code example attaches a handler to 1,000 elements.</p>
+<p>A delegated-events approach (the second code example) attaches an event handler to only one element, the <code>tbody</code>, and the event only needs to bubble up one level (from the clicked <code>tr</code> to <code>tbody</code>).</p>
+<p><strong>Note:</strong> Delegated events do not work for <a href="http://en.wikipedia.org/wiki/Scalable_Vector_Graphics" rel="nofollow noreferrer">SVG</a>.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="290 votes">290</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1385441/ram-patra" rel="noopener">Ram Patra</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/27373951" rel="noopener">原文 ↗</a></div><div class="prose"><p>This is a <strong>pure JavaScript</strong> solution without any libraries or plugins:</p>
+<pre><code>document.addEventListener('click', function (e) {
+    if (hasClass(e.target, 'bu')) {
+        // .bu clicked
+        // Do your thing
+    } else if (hasClass(e.target, 'test')) {
+        // .test clicked
+        // Do your other thing
+    }
+}, false);
+</code></pre>
+<p>where <code>hasClass</code> is</p>
+<pre><code>function hasClass(elem, className) {
+    return elem.className.split(' ').indexOf(className) &gt; -1;
+}
+</code></pre>
+<p><kbd><strong><a href="http://jsfiddle.net/ramswaroop/Nrxp5/28/" rel="noreferrer">Live demo</a></strong></kbd></p>
+<p><em>Credit goes to Dave and Sime Vidas</em></p>
+<p>Using more modern JS, <code>hasClass</code> can be implemented as:</p>
+<pre><code>function hasClass(elem, className) {
+    return elem.classList.contains(className);
+}
+</code></pre>
+<hr />
+<p>The same jsfiddle Live demo embeded below:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function hasClass(elem, className) {
+  return elem.classList.contains(className);
+}
+
+document.addEventListener('click', function(e) {
+  if (hasClass(e.target, 'bu')) {
+    alert('bu');
+    document.querySelector('.bu').innerHTML = '&lt;div class="bu"&gt;Bu&lt;div class="tu"&gt;Tu&lt;/div&gt;&lt;/div&gt;';
+  } else if (hasClass(e.target, 'test')) {
+    alert('test');
+  } else if (hasClass(e.target, 'tu')) {
+    alert('tu');
+  }
+
+}, false);</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.test,
+.bu,
+.tu {
+  border: 1px solid gray;
+  padding: 10px;
+  margin: 10px;
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;div class="test"&gt;Test
+  &lt;div class="bu"&gt;Bu&lt;/div&gt;test
+&lt;/div&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

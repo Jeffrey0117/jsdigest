@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I format a number with commas as thousands separators? · jsdigest</title>
+<meta name="description" content="I am trying to print an integer in JavaScript with commas as thousands separators. For example, I want to show the number 1234567 as &quot;1,234,567&quot;. How would I g…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I format a number with commas as thousands separators?</h1>
+    <div class="q-meta big"><span class="score hot" title="2782 votes">2.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/28324/elias-zamaria" rel="noopener">Elias Zamaria</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">formatting</span><span class="tag">numbers</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/2901102/how-can-i-format-a-number-with-commas-as-thousands-separators" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I am trying to print an integer in JavaScript with commas as thousands separators. For example, I want to show the number 1234567 as &quot;1,234,567&quot;. How would I go about doing this?</p>
+<p>Here is how I am doing it:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function numberWithCommas(x) {
+    x = x.toString();
+    var pattern = /(-?\d+)(\d{3})/;
+    while (pattern.test(x))
+        x = x.replace(pattern, "$1,$2");
+    return x;
+}
+
+console.log(numberWithCommas(1000))</code></pre>
+</div>
+</div>
+</p>
+<p>Is there a simpler or more elegant way to do it? It would be nice if it works with floats also, but that is not necessary. It does not need to be locale-specific to decide between periods and commas.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3958 votes">4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/28324/elias-zamaria" rel="noopener">Elias Zamaria</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2901298" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>I used the idea from <a href="https://stackoverflow.com/questions/2901102/how-can-i-format-a-number-with-commas-as-thousands-separators/2901136#2901136">Kerry's answer</a>, but I simplified it since I was just looking for something simple for my specific purpose. Here is what I have:</p>
+<pre><code>function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, &quot;,&quot;);
+}
+</code></pre>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function numberWithCommas(x) {
+    return x.toString().replace(/\B(?&lt;!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function test(x, expect) {
+    const result = numberWithCommas(x);
+    const pass = result === expect;
+    console.log(`${pass ? "✓" : "ERROR ====&gt;"} ${x} =&gt; ${result}`);
+    return pass;
+}
+
+let failures = 0;
+failures += !test(0,        "0");
+failures += !test(100,      "100");
+failures += !test(1000,     "1,000");
+failures += !test(10000,    "10,000");
+failures += !test(100000,   "100,000");
+failures += !test(1000000,  "1,000,000");
+failures += !test(10000000, "10,000,000");
+if (failures) {
+    console.log(`${failures} test(s) failed`);
+} else {
+    console.log("All tests passed");
+}</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.as-console-wrapper {
+    max-height: 100% !important;
+}</code></pre>
+</div>
+</div>
+</p>
+<hr />
+<p>The regex uses two lookahead assertions:</p>
+<ul>
+<li>a positive one to look for any point in the string that has a multiple of 3 digits in a row after it,</li>
+<li>a negative assertion to make sure that point only has exactly a multiple of 3 digits. The replacement expression puts a comma there.</li>
+</ul>
+<p>For example, if you pass it <code>123456789.01</code>, the positive assertion will match every spot to the left of the 7 (since <code>789</code> is a multiple of 3 digits, <code>678</code> is a multiple of 3 digits, <code>567</code>, etc.).</p>
+<p>The negative assertion checks that the multiple of 3 digits does not have any digits after it. <code>789</code> has a period after it so it is exactly a multiple of 3 digits, so a comma goes there. <code>678</code> is a multiple of 3 digits, but it has a <code>9</code> after it, so those 3 digits are part of a group of 4, and a comma does not go there. Similarly for <code>567</code>.</p>
+<p><code>456789</code> is 6 digits, which is a multiple of 3, so a comma goes before that. <code>345678</code> is a multiple of 3, but it has a <code>9</code> after it, so no comma goes there. And so on. The <code>\B</code> keeps the regex from putting a comma at the beginning of the string.</p>
+<p><a href="https://stackoverflow.com/questions/2901102/how-can-i-format-a-number-with-commas-as-thousands-separators/2901136#comment14009614_2901298">neu-rah mentioned</a> that this function adds commas in undesirable places if there are more than 3 digits after the decimal point. If this is a problem, you can use this function:</p>
+<pre><code>function numberWithCommas(x) {
+    var parts = x.toString().split(&quot;.&quot;);
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, &quot;,&quot;);
+    return parts.join(&quot;.&quot;);
+}
+</code></pre>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function numberWithCommas(x) {
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+}
+
+function test(x, expect) {
+    const result = numberWithCommas(x);
+    const pass = result === expect;
+    console.log(`${pass ? "✓" : "ERROR ====&gt;"} ${x} =&gt; ${result}`);
+    return pass;
+}
+
+let failures = 0;
+failures += !test(0              , "0");
+failures += !test(0.123456       , "0.123456");
+failures += !test(100            , "100");
+failures += !test(100.123456     , "100.123456");
+failures += !test(1000           , "1,000");
+failures += !test(1000.123456    , "1,000.123456");
+failures += !test(10000          , "10,000");
+failures += !test(10000.123456   , "10,000.123456");
+failures += !test(100000         , "100,000");
+failures += !test(100000.123456  , "100,000.123456");
+failures += !test(1000000        , "1,000,000");
+failures += !test(1000000.123456 , "1,000,000.123456");
+failures += !test(10000000       , "10,000,000");
+failures += !test(10000000.123456, "10,000,000.123456");
+if (failures) {
+    console.log(`${failures} test(s) failed`);
+} else {
+    console.log("All tests passed");
+}</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.as-console-wrapper {
+    max-height: 100% !important;
+}</code></pre>
+</div>
+</div>
+</p>
+<p><a href="https://stackoverflow.com/questions/2901102/how-can-i-format-a-number-with-commas-as-thousands-separators/2901136#comment106989235_2901298">T.J. Crowder pointed out</a> that now that JavaScript has lookbehind (<a href="https://caniuse.com/#feat=js-regexp-lookbehind" rel="noreferrer">support info</a>), it can be solved in the regular expression itself:</p>
+<pre><code>function numberWithCommas(x) {
+    return x.toString().replace(/\B(?&lt;!\.\d*)(?=(\d{3})+(?!\d))/g, &quot;,&quot;);
+}
+</code></pre>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function numberWithCommas(x) {
+    return x.toString().replace(/\B(?&lt;!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function test(x, expect) {
+    const result = numberWithCommas(x);
+    const pass = result === expect;
+    console.log(`${pass ? "✓" : "ERROR ====&gt;"} ${x} =&gt; ${result}`);
+    return pass;
+}
+
+let failures = 0;
+failures += !test(0,               "0");
+failures += !test(0.123456,        "0.123456");
+failures += !test(100,             "100");
+failures += !test(100.123456,      "100.123456");
+failures += !test(1000,            "1,000");
+failures += !test(1000.123456,     "1,000.123456");
+failures += !test(10000,           "10,000");
+failures += !test(10000.123456,    "10,000.123456");
+failures += !test(100000,          "100,000");
+failures += !test(100000.123456,   "100,000.123456");
+failures += !test(1000000,         "1,000,000");
+failures += !test(1000000.123456,  "1,000,000.123456");
+failures += !test(10000000,        "10,000,000");
+failures += !test(10000000.123456, "10,000,000.123456");
+if (failures) {
+    console.log(`${failures} test(s) failed`);
+} else {
+    console.log("All tests passed");
+}</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.as-console-wrapper {
+    max-height: 100% !important;
+}</code></pre>
+</div>
+</div>
+</p>
+<p><code>(?&lt;!\.\d*)</code> is a negative lookbehind that says the match can't be preceded by a <code>.</code> followed by zero or more digits. The negative lookbehind is faster than the <code>split</code> and <code>join</code> solution (<a href="http://jsben.ch/umq99" rel="noreferrer">comparison</a>), at least in <a href="https://en.wikipedia.org/wiki/V8_%28JavaScript_engine%29" rel="noreferrer">V8</a>.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="3279 votes">3.3k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1286601/ukolka" rel="noopener">uKolka</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/17663871" rel="noopener">原文 ↗</a></div><div class="prose"><p>I'm surprised nobody mentioned <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString" rel="noreferrer">Number.prototype.toLocaleString</a>.
+It's implemented in JavaScript 1.5 (which was introduced in 1999), so it's basically supported across all major browsers.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var n = 34523453.345;
+console.log(n.toLocaleString());    // "34,523,453.345"</code></pre>
+</div>
+</div>
+</p>
+<p>It also works in <a href="https://en.wikipedia.org/wiki/Node.js" rel="noreferrer">Node.js</a> as of v0.12 via inclusion of <a href="https://github.com/andyearnshaw/Intl.js" rel="noreferrer">Intl</a>.</p>
+<p>If you want something different, <a href="http://numeraljs.com/" rel="noreferrer">Numeral.js</a> might be interesting.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="588 votes">588</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/104380/vsync" rel="noopener">vsync</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/32154217" rel="noopener">原文 ↗</a></div><div class="prose"><p>Below are two different browser APIs that can transform <em>Numbers</em> into structured <em>Strings</em>. Keep in mind that not all users' machines have a <a href="https://en.wikipedia.org/wiki/Decimal_separator" rel="noreferrer"><strong>locale</strong> that uses commas in numbers</a>. To enforce commas to the output, any &quot;western&quot; <em>locale</em> may be used, such as <code>en-US</code></p>
+<pre><code>let number = 1234567890; // Example number to be converted
+</code></pre>
+<p>⚠️ Mind that JavaScript has a <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER" rel="noreferrer">maximum integer</a> value of <code>9007199254740991</code></p>
+<hr />
+<h2><a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString" rel="noreferrer">toLocaleString</a></h2>
+<pre><code>// Default behaviour on a machine with a locale that uses commas for numbers
+let number = 1234567890;
+number.toLocaleString(); // &quot;1,234,567,890&quot;
+
+// With custom settings, forcing a &quot;US&quot; locale to guarantee commas in output
+let number2 = 1234.56789; // Floating point example
+number2.toLocaleString('en-US', {maximumFractionDigits:2}); // &quot;1,234.57&quot;
+
+// You can also force a minimum of two trailing digits
+let number3 = 1.5;
+number3.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); // &quot;1.50&quot;
+</code></pre>
+<h2><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NumberFormat" rel="noreferrer">NumberFormat</a></h2>
+<pre><code>let number = 1234567890;
+let nf = new Intl.NumberFormat('en-US');
+nf.format(number); // &quot;1,234,567,890&quot;
+</code></pre>
+<hr />
+<p>From what I checked (Firefox at least), they are both more or less same regarding performance.</p>
+<p>⚡ <strong>Live demo</strong>: <a href="https://codepen.io/vsync/pen/MWjdbgL?editors=1000" rel="noreferrer">https://codepen.io/vsync/pen/MWjdbgL?editors=1000</a></p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

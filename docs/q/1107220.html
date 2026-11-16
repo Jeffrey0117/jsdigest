@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I select an element by name with jQuery? · jsdigest</title>
+<meta name="description" content="I have a table column I’m trying to expand and hide. jQuery seems to hide the &lt;td&gt; elements when I select it by class but not by the element’s name . For examp…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I select an element by name with jQuery?</h1>
+    <div class="q-meta big"><span class="score hot" title="1564 votes">1.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/52256/t-t-t" rel="noopener">T.T.T.</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">html</span><span class="tag">dom</span><span class="tag">jquery-selectors</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1107220/how-can-i-select-an-element-by-name-with-jquery" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have a table column I’m trying to expand and hide. jQuery seems to hide the <code>&lt;td&gt;</code> elements when I select it by <code>class</code> but not by the element’s <code>name</code>.</p>
+<p>For example:</p>
+<pre class="lang-js prettyprint-override"><code>$(&quot;.bold&quot;).hide(); // Selecting by class works.
+$(&quot;tcol1&quot;).hide(); // Selecting by name does not work. [Edit: this is NOT selecting by name! This is selecting by element type.]
+</code></pre>
+<p>Note the HTML below. The second column has the same <code>name</code> for all rows.  How could I create this collection using the <code>name</code> attribute?</p>
+<pre class="lang-html prettyprint-override"><code>&lt;tr&gt;
+  &lt;td&gt;data1&lt;/td&gt;
+  &lt;td name=&quot;tcol1&quot; class=&quot;bold&quot;&gt; data2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td&gt;data1&lt;/td&gt;
+  &lt;td name=&quot;tcol1&quot; class=&quot;bold&quot;&gt; data2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td&gt;data1&lt;/td&gt;
+  &lt;td name=&quot;tcol1&quot; class=&quot;bold&quot;&gt; data2&lt;/td&gt;
+&lt;/tr&gt;
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2777 votes">2.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1950/jon-erickson" rel="noopener">Jon Erickson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1107264" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use the <a href="https://api.jquery.com/category/selectors/attribute-selectors/" rel="noreferrer">jQuery attribute selector</a>:</p>
+<pre class="lang-js prettyprint-override"><code>$('td[name=&quot;tcol1&quot;]')   // Matches exactly 'tcol1'
+$('td[name^=&quot;tcol&quot;]' )  // Matches those that begin with 'tcol'
+$('td[name$=&quot;tcol&quot;]' )  // Matches those that end with 'tcol'
+$('td[name*=&quot;tcol&quot;]' )  // Matches those that contain 'tcol'
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="346 votes">346</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2804791/user2804791" rel="noopener">user2804791</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/18947703" rel="noopener">原文 ↗</a></div><div class="prose"><p>Any attribute can be selected using <code>[attribute_name=value]</code> way.
+See the sample <a href="http://myvedham.blogspot.in/2013/09/jquery-select-by-name-and-id.html" rel="noreferrer">here</a>:</p>
+
+<pre><code>var value = $("[name='nameofobject']");
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="88 votes">88</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2583733/andreas-l" rel="noopener">Andreas L.</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/24661343" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you have something like:</p>
+
+<pre><code>&lt;input type="checkbox" name="mycheckbox" value="11" checked=""&gt;
+&lt;input type="checkbox" name="mycheckbox" value="12"&gt;
+</code></pre>
+
+<p>You can read all like this:</p>
+
+<pre><code>jQuery("input[name='mycheckbox']").each(function() {
+    console.log( this.value + ":" + this.checked );
+});
+</code></pre>
+
+<p>The snippet:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>jQuery("input[name='mycheckbox']").each(function() {
+  console.log( this.value + ":" + this.checked );
+});</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;input type="checkbox" name="mycheckbox" value="11" checked=""&gt;
+&lt;input type="checkbox" name="mycheckbox" value="12"&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

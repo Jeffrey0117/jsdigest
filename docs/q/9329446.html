@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loop (for each) over an array in JavaScript · jsdigest</title>
+<meta name="description" content="How can I loop through all the entries in an array using JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Loop (for each) over an array in JavaScript</h1>
+    <div class="q-meta big"><span class="score hot" title="5814 votes">5.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1140876/dante1986" rel="noopener">Dante1986</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">loops</span><span class="tag">foreach</span><span class="tag">iteration</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/9329446/loop-for-each-over-an-array-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How can I loop through all the entries in an array using JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="8612 votes">8.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/157247/t-j-crowder" rel="noopener">T.J. Crowder</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/9329476" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose">
+<p><strong>TL;DR</strong></p>
+<ul>
+<li><p><strong>Your best bets</strong> are usually</p>
+<ul>
+<li>a <code>for-of</code> loop (ES2015+ only; <a href="https://tc39.es/ecma262/#sec-for-in-and-for-of-statements" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/for...of" rel="noreferrer">MDN</a>) - simple and <code>async</code>-friendly
+<pre class="lang-js prettyprint-override"><code>for (const element of theArray) {
+    // ...use `element`...
+}
+</code></pre>
+</li>
+<li><code>forEach</code> (ES5+ only; <a href="https://tc39.es/ecma262/#sec-array.prototype.foreach" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach" rel="noreferrer">MDN</a>) (or its relatives <code>some</code> and such) - <strong>not</strong> <code>async</code>-friendly (but see details)
+<pre class="lang-js prettyprint-override"><code>theArray.forEach(element =&gt; {
+    // ...use `element`...
+});
+</code></pre>
+</li>
+<li>a simple old-fashioned <code>for</code> loop - <code>async</code>-friendly
+<pre class="lang-js prettyprint-override"><code>for (let index = 0; index &lt; theArray.length; ++index) {
+    const element = theArray[index];
+    // ...use `element`...
+}
+</code></pre>
+</li>
+<li><em>(rarely)</em> <code>for-in</code> <em>with safeguards</em> - <code>async</code>-friendly
+<pre class="lang-js prettyprint-override"><code>for (const propertyName in theArray) {
+    if (/*...is an array element property (see below)...*/) {
+        const element = theArray[propertyName];
+        // ...use `element`...
+    }
+}
+</code></pre>
+</li>
+</ul>
+</li>
+<li><p>Some quick &quot;don't&quot;s:</p>
+<ul>
+<li><strong>Don't use <code>for-in</code></strong> unless you use it with safeguards or are at least aware of why it might bite you.</li>
+<li><strong>Don't use <code>map</code> if you're not using its return value</strong>.<br><em>(There's sadly someone out there teaching <code>map</code> [<a href="https://tc39.es/ecma262/#sec-array.prototype.map" rel="noreferrer">spec</a> / <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/map" rel="noreferrer">MDN</a>] as though it were <code>forEach</code> — but as I write on my blog, <a href="https://thenewtoys.dev/blog/2021/04/17/misusing-map/" rel="noreferrer">that's not what it's for</a>. If you aren't using the array it creates, don't use <code>map</code>.)</em></li>
+<li><strong>Don't use <code>forEach</code></strong> if the callback does asynchronous work and you want the <code>forEach</code> to wait until that work is done (because it won't).</li>
+</ul>
+</li>
+</ul>
+<p>But there's <strong>lots</strong> more to explore, read on...</p>
+<hr />
+<p>JavaScript has powerful semantics for looping through arrays and array-like objects. I've split the answer into two parts: Options for genuine arrays, and options for things that are just array-<em>like</em>, such as the <code>arguments</code> object, other iterable objects (ES2015+), DOM collections, and so on.</p>
+<p>Okay, let's look at our options:</p>
+<h2>For Actual Arrays</h2>
+<p>You have five options (two supported basically forever, another added by ECMAScript 5 [&quot;ES5&quot;], and two more added in ECMAScript 2015 (&quot;ES2015&quot;, aka &quot;ES6&quot;):</p>
+<ol>
+<li>Use <code>for-of</code> (use an iterator implicitly) (ES2015+)</li>
+<li>Use <code>forEach</code> and related (ES5+)</li>
+<li>Use a simple <code>for</code> loop</li>
+<li>Use <code>for-in</code> <em>correctly</em></li>
+<li>Use an iterator explicitly (ES2015+)</li>
+</ol>
+<p>(You can see those old specs here: <a href="https://262.ecma-international.org/5.1/" rel="noreferrer">ES5</a>, <a href="https://262.ecma-international.org/6.0/index.html" rel="noreferrer">ES2015</a>, but both have been superceded; the current editor's draft is always <a href="https://tc39.github.io/ecma262/" rel="noreferrer">here</a>.)</p>
+<p>Details:</p>
+<h3>1. Use <code>for-of</code> (use an iterator implicitly) (ES2015+)</h3>
+<p>ES2015 added <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Iteration_protocols" rel="noreferrer"><em>iterators and iterables</em></a> to JavaScript. Arrays are iterable (so are strings, <code>Map</code>s, and <code>Set</code>s, as well as DOM collections and lists, as you'll see later). Iterable objects provide iterators for their values. The new <code>for-of</code> statement loops through the values returned by an iterator:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const a = ["a", "b", "c"];
+for (const element of a) { // You can use `let` instead of `const` if you like
+    console.log(element);
+}
+// a
+// b
+// c</code></pre>
+</div>
+</div>
+</p>
+<p>It doesn't get simpler than that! Under the covers, that gets an iterator from the array and loops through the values the iterator returns. The iterator provided by arrays provides the values of the array elements, in order beginning to end.</p>
+<p>Notice how <code>element</code> is scoped to each loop iteration; trying to use <code>element</code> after the end of the loop would fail because it doesn't exist outside the loop body.</p>
+<p>In theory, a <code>for-of</code> loop involves several function calls (one to get the iterator, then one to get each value from it). Even when that's true, it's nothing to worry about, function calls are <em><strong>very</strong></em> cheap in modern JavaScript engines (it bothered me for <code>forEach</code> [below] until I looked into it; <a href="http://blog.niftysnippets.org/2012/02/foreach-and-runtime-cost.html" rel="noreferrer">details</a>). But additionally, JavaScript engines optimize those calls away (in performance-critical code) when dealing with native iterators for things like arrays.</p>
+<p><code>for-of</code> is entirely <code>async</code>-friendly. If you need the work in a loop body to be done in series (not in parallel), an <code>await</code> in the loop body will wait for the promise to settle before continuing. Here's a silly example:</p>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function delay(ms) {
+    return new Promise(resolve =&gt; {
+        setTimeout(resolve, ms);
+    });
+}
+
+async function showSlowly(messages) {
+    for (const message of messages) {
+        await delay(400);
+        console.log(message);
+    }
+}
+
+showSlowly([
+    "So", "long", "and", "thanks", "for", "all", "the", "fish!"
+]);
+// `.catch` omitted because we know it never rejects</code></pre>
+</div>
+</div>
+</p>
+<p>Note how the words appear with a delay before each one.</p>
+<p>It's a matter of coding style, but <code>for-of</code> is the first thing I reach for when looping through anything iterable.</p>
+<h3>2. Use <code>forEach</code> and related</h3>
+<p>In any even vaguely-modern environment (so, not IE8) where you have access to the <code>Array</code> features added by ES5, you can use <code>forEach</code> (<a href="https://tc39.es/ecma262/#sec-array.prototype.foreach" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach" rel="noreferrer">MDN</a>) if you're only dealing with synchronous code (or you don't need to wait for an asynchronous process to finish during the loop):</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const a = ["a", "b", "c"];
+a.forEach((element) =&gt; {
+    console.log(element);
+});</code></pre>
+</div>
+</div>
+</p>
+<p><code>forEach</code> accepts a callback function and, optionally, a value to use as <code>this</code> when calling that callback (not used above). The callback is called for each element in the array, in order, skipping non-existent elements in sparse arrays. Although I only used one parameter above, the callback is called with three arguments: The element for that iteration, the index of that element, and a reference to the array you're iterating over (in case your function doesn't already have it handy).</p>
+<p>Like <code>for-of</code>, <code>forEach</code> has the advantage that you don't have to declare indexing and value variables in the containing scope; in this case, they're supplied as arguments to the iteration function, and so nicely scoped to just that iteration.</p>
+<p>Unlike <code>for-of</code>, <code>forEach</code> has the disadvantage that it doesn't understand <code>async</code> functions and <code>await</code>. If you use an <code>async</code> function as the callback, <code>forEach</code> does <strong>not</strong> wait for that function's promise to settle before continuing. Here's the <code>async</code> example from <code>for-of</code> using <code>forEach</code> instead — notice how there's an initial delay, but then all the text appears right away instead of waiting:</p>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function delay(ms) {
+    return new Promise(resolve =&gt; {
+        setTimeout(resolve, ms);
+    });
+}
+
+async function showSlowly(messages) {
+    // INCORRECT, doesn't wait before continuing,
+    // doesn't handle promise rejections
+    messages.forEach(async message =&gt; {
+        await delay(400);
+        console.log(message);
+    });
+}
+
+showSlowly([
+    "So", "long", "and", "thanks", "for", "all", "the", "fish!"
+]);
+// `.catch` omitted because we know it never rejects</code></pre>
+</div>
+</div>
+</p>
+<p><code>forEach</code> is the &quot;loop through them all&quot; function, but ES5 defined several other useful &quot;work your way through the array and do things&quot; functions, including:</p>
+<ul>
+<li><code>every</code> (<a href="https://tc39.es/ecma262/#sec-array.prototype.every" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/every" rel="noreferrer">MDN</a>) - stops looping the first time the callback returns a falsy value</li>
+<li><code>some</code> (<a href="https://tc39.es/ecma262/#sec-array.prototype.some" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/some" rel="noreferrer">MDN</a>) - stops looping the first time the callback returns a truthy value</li>
+<li><code>filter</code> (<a href="https://tc39.es/ecma262/#sec-array.prototype.filter" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/filter" rel="noreferrer">MDN</a>) - creates a new array including elements where the callback returns a truthy value, omitting the ones where it doesn't</li>
+<li><code>map</code> (<a href="https://tc39.es/ecma262/#sec-array.prototype.map" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/map" rel="noreferrer">MDN</a>) - creates a new array from the values returned by the callback</li>
+<li><code>reduce</code> (<a href="https://tc39.es/ecma262/#sec-array.prototype.reduce" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce" rel="noreferrer">MDN</a>) - builds up a value by repeatedly calling the callback, passing in previous values; see the spec for the details</li>
+<li><code>reduceRight</code> (<a href="https://tc39.es/ecma262/#sec-array.prototype.reduceright" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/reduceRight" rel="noreferrer">MDN</a>) - like <code>reduce</code>, but works in descending rather than ascending order</li>
+</ul>
+<p>As with <code>forEach</code>, if you use an <code>async</code> function as your callback, none of those waits for the function's promise to settle. That means:</p>
+<ul>
+<li>Using an <code>async</code> function callback is never appropriate with <code>every</code>, <code>some</code>, and <code>filter</code> since they will treat the returned promise as though it were a truthy value; they <strong>don't</strong> wait for the promise to settle and then use the fulfillment value.</li>
+<li>Using an <code>async</code> function callback is often appropriate with <code>map</code>, <strong>if</strong> the goal is to turn an array of something into an array of <em>promises</em>, perhaps for passing to one of the promise combinator functions (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/all" rel="noreferrer"><code>Promise.all</code></a>, <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race" rel="noreferrer"><code>Promise.race</code></a>, <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled" rel="noreferrer"><code>promise.allSettled</code></a>, or <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/any" rel="noreferrer"><code>Promise.any</code></a>).</li>
+<li>Using an <code>async</code> function callback is rarely appropriate with <code>reduce</code> or <code>reduceRight</code>, because (again) the callback will always return a promise. But there is an idiom of building a chain of promises from an array that uses <code>reduce</code> (<code>const promise = array.reduce((p, element) =&gt; p.then(/*...something using `element`...*/));</code>), but usually in those cases a <code>for-of</code> or <code>for</code> loop in an <code>async</code> function will be clearer and easier to debug.</li>
+</ul>
+<h3>3. Use a simple <code>for</code> loop</h3>
+<p>Sometimes the old ways are the best:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const a = ["a", "b", "c"];
+for (let index = 0; index &lt; a.length; ++index) {
+    const element = a[index];
+    console.log(element);
+}</code></pre>
+</div>
+</div>
+</p>
+<p>If the length of the array won't change during the loop, and it's in highly performance-sensitive code, a slightly more complicated version grabbing the length up front might be a <em><strong>tiny</strong></em> bit faster:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const a = ["a", "b", "c"];
+for (let index = 0, len = a.length; index &lt; len; ++index) {
+    const element = a[index];
+    console.log(element);
+}</code></pre>
+</div>
+</div>
+</p>
+<p>And/or counting backward:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const a = ["a", "b", "c"];
+for (let index = a.length - 1; index &gt;= 0; --index) {
+    const element = a[index];
+    console.log(element);
+}</code></pre>
+</div>
+</div>
+</p>
+<p>But with modern JavaScript engines, it's rare you need to eke out that last bit of juice.</p>
+<p>Before ES2015, the loop variable had to exist in the containing scope, because <code>var</code> only has function-level scope, not block-level scope. But as you saw in the examples above, you can use <code>let</code> within the <code>for</code> to scope the variables to just the loop. And when you do that, the <code>index</code> variable is recreated for each loop iteration, meaning closures created in the loop body keep a reference to the <code>index</code> for that specific iteration, which solves the old &quot;closures in loops&quot; problem:</p>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// (The `NodeList` from `querySelectorAll` is array-like)
+const divs = document.querySelectorAll("div");
+for (let index = 0; index &lt; divs.length; ++index) {
+    divs[index].addEventListener('click', e =&gt; {
+        console.log("Index is: " + index);
+    });
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;div&gt;zero&lt;/div&gt;
+&lt;div&gt;one&lt;/div&gt;
+&lt;div&gt;two&lt;/div&gt;
+&lt;div&gt;three&lt;/div&gt;
+&lt;div&gt;four&lt;/div&gt;</code></pre>
+</div>
+</div>
+</p>
+<p>In the above, you get &quot;Index is: 0&quot; if you click the first and &quot;Index is: 4&quot; if you click the last. This does <strong>not</strong> work if you use <code>var</code> instead of <code>let</code> (you'd always see &quot;Index is: 5&quot;).</p>
+<p>Like <code>for-of</code>, <code>for</code> loops work well in <code>async</code> functions. Here's the earlier example using a <code>for</code> loop:</p>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function delay(ms) {
+    return new Promise(resolve =&gt; {
+        setTimeout(resolve, ms);
+    });
+}
+
+async function showSlowly(messages) {
+    for (let i = 0; i &lt; messages.length; ++i) {
+        const message = messages[i];
+        await delay(400);
+        console.log(message);
+    }
+}
+
+showSlowly([
+    "So", "long", "and", "thanks", "for", "all", "the", "fish!"
+]);
+// `.catch` omitted because we know it never rejects</code></pre>
+</div>
+</div>
+</p>
+<h3>4. Use <code>for-in</code> <em>correctly</em></h3>
+<p><code>for-in</code> isn't for looping through arrays, it's for looping through the names of an object's properties. It does often seem to work for looping through arrays as a by-product of the fact that arrays are objects, but it doesn't just loop through the array indexes, it loops through <strong>all</strong> enumerable properties of the object (including inherited ones). (It also used to be that the order wasn't specified; it is now [details in <a href="https://stackoverflow.com/a/30919039/157247">this other answer</a>], but even though the order is specified now, the rules are complex, there are exceptions, and relying on the order is not best practice.)</p>
+<p>The only real use cases for <code>for-in</code> on an array are:</p>
+<ul>
+<li>It's a <a href="https://en.wikipedia.org/wiki/Sparse_array" rel="noreferrer"><em>sparse</em> array</a> with <strong>massive</strong> gaps in it, or</li>
+<li>You're using non-element properties on the array object and you want to include them in the loop</li>
+</ul>
+<p>Looking only at that first example: You can use <code>for-in</code> to visit those sparse array elements if you use appropriate safeguards:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// `a` is a sparse array
+const a = [];
+a[0] = "a";
+a[10] = "b";
+a[10000] = "c";
+for (const name in a) {
+    if (Object.hasOwn(a, name) &amp;&amp;       // These checks are
+        /^0$|^[1-9]\d*$/.test(name) &amp;&amp;  // explained
+        name &lt;= 4294967294              // below
+       ) {
+        const element = a[name];
+        console.log(a[name]);
+    }
+}</code></pre>
+</div>
+</div>
+</p>
+<p>Note the three checks:</p>
+<ol>
+<li><p>That the object has its <em>own</em> property by that name (not one it inherits from its prototype; this check is also often written as <code>a.hasOwnProperty(name)</code> but ES2022 adds <a href="https://github.com/tc39/proposal-accessible-object-hasownproperty" rel="noreferrer"><code>Object.hasOwn</code></a> which can be more reliable), and</p>
+</li>
+<li><p>That the name is all decimal digits (e.g., normal string form, not scientific notation), and</p>
+</li>
+<li><p>That the name's value when coerced to a number is &lt;= 2^32 - 2 (which is 4,294,967,294). Where does that number come from? It's part of the definition of an array index <a href="https://tc39.es/ecma262/#array-index" rel="noreferrer">in the specification</a>. Other numbers (non-integers, negative numbers, numbers greater than 2^32 - 2) are not array indexes. The reason it's 2^32 - <strong>2</strong> is that that makes the greatest index value one lower than 2^32 - <strong>1</strong>, which is the maximum value an array's <code>length</code> can have. (E.g., an array's length fits in a 32-bit unsigned integer.)</p>
+</li>
+</ol>
+<p>...although with that said, most code only does the <code>hasOwnProperty</code> check.</p>
+<p>You wouldn't do that in inline code, of course. You'd write a utility function. Perhaps:</p>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// Utility function for antiquated environments without `forEach`
+const hasOwn = Object.prototype.hasOwnProperty.call.bind(Object.prototype.hasOwnProperty);
+const rexNum = /^0$|^[1-9]\d*$/;
+function sparseEach(array, callback, thisArg) {
+    for (const name in array) {
+        const index = +name;
+        if (hasOwn(a, name) &amp;&amp;
+            rexNum.test(name) &amp;&amp;
+            index &lt;= 4294967294
+           ) {
+            callback.call(thisArg, array[name], index, array);
+        }
+    }
+}
+
+const a = [];
+a[5] = "five";
+a[10] = "ten";
+a[100000] = "one hundred thousand";
+a.b = "bee";
+
+sparseEach(a, (value, index) =&gt; {
+    console.log("Value at " + index + " is " + value);
+});</code></pre>
+</div>
+</div>
+</p>
+<p>Like <code>for</code>, <code>for-in</code> works well in asynchronous functions if the work within it needs to be done in series.</p>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function delay(ms) {
+    return new Promise(resolve =&gt; {
+        setTimeout(resolve, ms);
+    });
+}
+
+async function showSlowly(messages) {
+    for (const name in messages) {
+        if (messages.hasOwnProperty(name)) { // Almost always this is the only check people do
+            const message = messages[name];
+            await delay(400);
+            console.log(message);
+        }
+    }
+}
+
+showSlowly([
+    "So", "long", "and", "thanks", "for", "all", "the", "fish!"
+]);
+// `.catch` omitted because we know it never rejects</code></pre>
+</div>
+</div>
+</p>
+<h3>5. Use an iterator explicitly (ES2015+)</h3>
+<p><code>for-of</code> uses an iterator implicitly, doing all the scut work for you. Sometimes, you might want to use an iterator <em>explicitly</em>. It looks like this:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const a = ["a", "b", "c"];
+const it = a.values(); // Or `const it = a[Symbol.iterator]();` if you like
+let entry;
+while (!(entry = it.next()).done) {
+    const element = entry.value;
+    console.log(element);
+}</code></pre>
+</div>
+</div>
+</p>
+<p>An iterator is an object matching the Iterator definition in the specification. Its <code>next</code> method returns a new <em>result object</em> each time you call it. The result object has a property, <code>done</code>, telling us whether it's done, and a property <code>value</code> with the value for that iteration. (<code>done</code> is optional if it would be <code>false</code>, <code>value</code> is optional if it would be <code>undefined</code>.)</p>
+<p>What you get for <code>value</code> varies depending on the iterator. On arrays, the default iterator provides the value of each array element (<code>&quot;a&quot;</code>, <code>&quot;b&quot;</code>, and <code>&quot;c&quot;</code> in the example earlier). Arrays also have three other methods that return iterators:</p>
+<ul>
+<li><code>values()</code>: This is an alias for the <code>[Symbol.iterator]</code> method that returns the default iterator.</li>
+<li><code>keys()</code>: Returns an iterator that provides each key (index) in the array. In the example above, it would provide <code>0</code>, then <code>1</code>, then <code>2</code> (as numbers, not strings). (Also note that in a sparse array, it <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/keys#using_keys_on_sparse_arrays" rel="noreferrer"><strong>will</strong></a> include indexes for elements that don't exist.)</li>
+<li><code>entries()</code>: Returns an iterator that provides <code>[key, value]</code> arrays.</li>
+</ul>
+<p>Since iterator objects don't advance until you call <code>next</code>, they work well in <code>async</code> function loops. Here's the earlier <code>for-of</code> example using the iterator explicitly:</p>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function delay(ms) {
+    return new Promise(resolve =&gt; {
+        setTimeout(resolve, ms);
+    });
+}
+
+async function showSlowly(messages) {
+    const it = messages.values()
+    while (!(entry = it.next()).done) {
+        await delay(400);
+        const element = entry.value;
+        console.log(element);
+    }
+}
+
+showSlowly([
+    "So", "long", "and", "thanks", "for", "all", "the", "fish!"
+]);
+// `.catch` omitted because we know it never rejects</code></pre>
+</div>
+</div>
+</p>
+<h2>For Array-Like Objects</h2>
+<p>Aside from true arrays, there are also <em>array-like</em> objects that have a <code>length</code> property and properties with all-digits names: <a href="https://dom.spec.whatwg.org/#interface-nodelist" rel="noreferrer"><code>NodeList</code> instances</a>, <a href="https://dom.spec.whatwg.org/#interface-htmlcollection" rel="noreferrer"><code>HTMLCollection</code> instances</a>, the <code>arguments</code> object, etc. How do we loop through their contents?</p>
+<h3>Use most of the options above</h3>
+<p>At least some, and possibly most or even all, of the array approaches above apply equally well to array-like objects:</p>
+<ol>
+<li><p><strong>Use <code>for-of</code> (use an iterator implicitly) (ES2015+)</strong></p>
+<p><code>for-of</code> uses the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Iteration_protocols" rel="noreferrer">iterator</a> provided by the object (if any). That includes host-provided objects (like DOM collections and lists). For instance, <code>HTMLCollection</code> instances from <code>getElementsByXYZ</code> methods and <code>NodeList</code>s instances from <code>querySelectorAll</code> both support iteration. (This is defined <strong>quite</strong> subtly by the HTML and DOM specifications. Basically, any object with <code>length</code> and indexed access is automatically iterable. It <strong>doesn't</strong> have to be marked <code>iterable</code>; that is used only for collections that, in addition to being iterable, support <code>forEach</code>, <code>values</code>, <code>keys</code>, and <code>entries</code> methods. <code>NodeList</code> does; <code>HTMLCollection</code> doesn't, but both are iterable.)</p>
+<p>Here's an example of looping through <code>div</code> elements:</p>
+</li>
+</ol>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const divs = document.querySelectorAll("div");
+for (const div of divs) {
+    div.textContent = Math.random();
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;div&gt;zero&lt;/div&gt;
+&lt;div&gt;one&lt;/div&gt;
+&lt;div&gt;two&lt;/div&gt;
+&lt;div&gt;three&lt;/div&gt;
+&lt;div&gt;four&lt;/div&gt;</code></pre>
+</div>
+</div>
+</p>
+<ol start="2">
+<li><p><strong>Use <code>forEach</code> and related (ES5+)</strong></p>
+<p>The various functions on <code>Array.prototype</code> are &quot;intentionally generic&quot; and can be used on array-like objects via <code>Function#call</code> (<a href="https://tc39.es/ecma262/#sec-function.prototype.call" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Function/call" rel="noreferrer">MDN</a>) or <code>Function#apply</code> (<a href="https://tc39.es/ecma262/#sec-function.prototype.apply" rel="noreferrer">spec</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Function/apply" rel="noreferrer">MDN</a>). (If you have to deal with IE8 or earlier [ouch], see the &quot;Caveat for host-provided objects&quot; at the end of this answer, but it's not an issue with vaguely-modern browsers.)</p>
+<p>Suppose you wanted to use <code>forEach</code> on a <code>Node</code>'s <code>childNodes</code> collection (which, being an <code>HTMLCollection</code>, doesn't have <code>forEach</code> natively). You'd do this:</p>
+<pre><code>Array.prototype.forEach.call(node.childNodes, (child) =&gt; {
+    // Do something with `child`
+});
+</code></pre>
+<p>(Note, though, that you could just use <code>for-of</code> on <code>node.childNodes</code>.)</p>
+<p>If you're going to do that a lot, you might want to grab a copy of the function reference into a variable for reuse, e.g.:</p>
+<pre><code>// (This is all presumably in a module or some scoping function)
+const forEach = Array.prototype.forEach.call.bind(Array.prototype.forEach);
+
+// Then later...
+forEach(node.childNodes, (child) =&gt; {
+    // Do something with `child`
+});
+</code></pre>
+</li>
+<li><p><strong>Use a simple <code>for</code> loop</strong></p>
+<p>Perhaps obviously, a simple <code>for</code> loop works for array-like objects.</p>
+</li>
+<li><p><strong>Use an iterator explicitly (ES2015+)</strong></p>
+<p>See #1.</p>
+</li>
+</ol>
+<p>You <em><strong>may</strong></em> be able to get away with <code>for-in</code> (with safeguards), but with all of these more appropriate options, there's no reason to try.</p>
+<h3>Create a true array</h3>
+<p>Other times, you may want to convert an array-like object into a true array. Doing that is surprisingly easy:</p>
+<ol>
+<li><p><strong>Use <code>Array.from</code></strong></p>
+<p><code>Array.from</code> <a href="https://tc39.es/ecma262/#sec-array.from" rel="noreferrer">(spec)</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/from" rel="noreferrer">(MDN)</a> (ES2015+, but easily polyfilled) creates an array from an array-like object, optionally passing the entries through a mapping function first. So:</p>
+<pre><code>const divs = Array.from(document.querySelectorAll(&quot;div&quot;));
+</code></pre>
+<p>...takes the <code>NodeList</code> from <code>querySelectorAll</code> and makes an array from it.</p>
+<p>The mapping function is handy if you were going to map the contents in some way. For instance, if you wanted to get an array of the tag names of the elements with a given class:</p>
+<pre><code>// Typical use (with an arrow function):
+const divs = Array.from(document.querySelectorAll(&quot;.some-class&quot;), element =&gt; element.tagName);
+
+// Traditional function (since `Array.from` can be polyfilled):
+var divs = Array.from(document.querySelectorAll(&quot;.some-class&quot;), function(element) {
+    return element.tagName;
+});
+</code></pre>
+</li>
+<li><p><strong>Use spread syntax (<code>...</code>)</strong></p>
+<p>It's also possible to use ES2015's <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax" rel="noreferrer">spread syntax</a>. Like <code>for-of</code>, this uses the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Iteration_protocols" rel="noreferrer">iterator</a> provided by the object (see #1 in the previous section):</p>
+<pre><code>const trueArray = [...iterableObject];
+</code></pre>
+<p>So for instance, if we want to convert a <code>NodeList</code> into a true array, with spread syntax this becomes quite succinct:</p>
+<pre><code>const divs = [...document.querySelectorAll(&quot;div&quot;)];
+</code></pre>
+</li>
+<li><p><strong>Use the <code>slice</code> method of arrays</strong></p>
+<p>We can use the <a href="https://tc39.es/ecma262/#sec-array.prototype.slice" rel="noreferrer"><code>slice</code></a> method of arrays, which like the other methods mentioned above is &quot;intentionally generic&quot; and so can be used with array-like objects, like this:</p>
+<pre><code>const trueArray = Array.prototype.slice.call(arrayLikeObject);
+</code></pre>
+<p>So for instance, if we want to convert a <code>NodeList</code> into a true array, we could do this:</p>
+<pre><code>const divs = Array.prototype.slice.call(document.querySelectorAll(&quot;div&quot;));
+</code></pre>
+<p>(If you still have to handle IE8 [ouch], will fail; IE8 didn't let you use host-provided objects as <code>this</code> like that.)</p>
+</li>
+</ol>
+<h3>Caveat for host-provided objects</h3>
+<p>If you use <code>Array.prototype</code> functions with <em>host-provided</em> array-like objects (for example, DOM collections and such provided by the browser rather than the JavaScript engine), obsolete browsers like IE8 didn't necessarily handle that way, so if you have to support them, be sure to test in your target environments. But it's not an issue with vaguely-modern browsers. (For non-browser environments, naturally it'll depend on the environment.)</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="579 votes">579</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/101811/patrikakerstrand" rel="noopener">PatrikAkerstrand</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/9329496" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>Note</strong>: This answer is hopelessly out-of-date. For a more modern approach, look at <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" rel="noreferrer">the methods available on an array</a>. Methods of interest might be:</p>
+<ul>
+<li>forEach</li>
+<li>map</li>
+<li>filter</li>
+<li>reduce</li>
+<li>every</li>
+<li>some</li>
+</ul>
+<hr />
+<p>The standard way to iterate an array in <a href="http://en.wikipedia.org/wiki/JavaScript" rel="noreferrer">JavaScript</a> is a vanilla <code>for</code>-loop:</p>
+<pre><code>var length = arr.length,
+    element = null;
+for (var i = 0; i &lt; length; i++) {
+  element = arr[i];
+  // Do something with element
+}
+</code></pre>
+<p>Note, however, that this approach is only good if you have a dense array, and each index is occupied by an element. If the array is sparse, then you can run into performance problems with this approach, since you will iterate over a lot of indices that do not <em>really</em> exist in the array. In this case, a <code>for .. in</code>-loop might be a better idea. <strong>However</strong>, you must use the appropriate safeguards to ensure that only the desired properties of the array (that is, the array elements) are acted upon, since the <code>for..in</code>-loop will also be enumerated in legacy browsers, or if the additional properties are defined as <code>enumerable</code>.</p>
+<p>In <a href="https://en.wikipedia.org/wiki/ECMAScript#ECMAScript.2C_5th_Edition" rel="noreferrer">ECMAScript 5</a> there will be a forEach method on the array prototype, but it is not supported in legacy browsers. So to be able to use it consistently you must either have an environment that supports it (for example, <a href="http://en.wikipedia.org/wiki/Node.js" rel="noreferrer">Node.js</a> for server side JavaScript), or use a &quot;Polyfill&quot;. The Polyfill for this functionality is, however, trivial and since it makes the code easier to read, it is a good polyfill to include.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="280 votes">280</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/627770/poonam" rel="noopener">Poonam</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/9329601" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you’re using the <a href="http://jquery.com/" rel="noreferrer"><strong>jQuery</strong></a> library, you can use <a href="http://api.jquery.com/jQuery.each/" rel="noreferrer"><strong>jQuery.each</strong></a>:</p>
+
+
+
+<pre class="lang-js prettyprint-override"><code>$.each(yourArray, function(index, value) {
+  // do your stuff here
+});
+</code></pre>
+
+<p><strong>EDIT :</strong> </p>
+
+<p>As per question, user want code in javascript instead of jquery so the edit is</p>
+
+<pre class="lang-js prettyprint-override"><code>var length = yourArray.length;   
+for (var i = 0; i &lt; length; i++) {
+  // Do something with yourArray[i].
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get the current year in JavaScript · jsdigest</title>
+<meta name="description" content="How do I get the current year in JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Get the current year in JavaScript</h1>
+    <div class="q-meta big"><span class="score hot" title="1641 votes">1.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/683553/satch3000" rel="noopener">Satch3000</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">date</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/6002254/get-the-current-year-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I get the current year in JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2733 votes">2.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/98048/jason-harwig" rel="noopener">Jason Harwig</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6002276" rel="noopener">原文 ↗</a></div><div class="prose"><p>Create a <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Date/Date" rel="noreferrer"><code>new Date()</code></a></strong> object and call <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Date/getFullYear" rel="noreferrer"><code>getFullYear()</code></a></strong>:</p>
+<pre><code>new Date().getFullYear()  // returns the current year
+</code></pre>
+<hr />
+<p><strong>Example usage:</strong> a page footer that always shows the current year:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>document.getElementById("year").innerHTML = new Date().getFullYear();</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>footer {
+  text-align: center;
+  font-family: sans-serif;
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;footer&gt;
+    © &lt;span id="year"&gt;&lt;/span&gt; by Stack Overflow
+&lt;/footer&gt;</code></pre>
+</div>
+</div>
+</p>
+<p>See also, the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Date/Date" rel="noreferrer"><code>Date()</code></a> constructor's <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Date#static_methods" rel="noreferrer">full list of methods</a></strong>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="316 votes">316</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/683233/sourav" rel="noopener">Sourav</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6002265" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>// Return today's date and time
+var currentTime = new Date()
+
+// returns the month (from 0 to 11)
+var month = currentTime.getMonth() + 1
+
+// returns the day of the month (from 1 to 31)
+var day = currentTime.getDate()
+
+// returns the year (four digits)
+var year = currentTime.getFullYear()
+
+// write output MM/dd/yyyy
+document.write(month + "/" + day + "/" + year)
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="128 votes">128</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4286794/parth-jasani" rel="noopener">Parth Jasani</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/36995995" rel="noopener">原文 ↗</a></div><div class="prose"><p>Here is another method to get date</p>
+
+<pre><code>new Date().getDate()          // Get the day as a number (1-31)
+new Date().getDay()           // Get the weekday as a number (0-6)
+new Date().getFullYear()      // Get the four digit year (yyyy)
+new Date().getHours()         // Get the hour (0-23)
+new Date().getMilliseconds()  // Get the milliseconds (0-999)
+new Date().getMinutes()       // Get the minutes (0-59)
+new Date().getMonth()         // Get the month (0-11)
+new Date().getSeconds()       // Get the seconds (0-59)
+new Date().getTime()          // Get the time (milliseconds since January 1, 1970)
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

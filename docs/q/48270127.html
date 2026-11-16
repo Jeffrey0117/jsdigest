@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Can (a== 1 &amp;&amp; a ==2 &amp;&amp; a==3) ever evaluate to true? · jsdigest</title>
+<meta name="description" content="Moderator note: Please resist the urge to edit the code or remove this notice. The pattern of whitespace may be part of the question and therefore should not b…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Can (a== 1 &amp;&amp; a ==2 &amp;&amp; a==3) ever evaluate to true?</h1>
+    <div class="q-meta big"><span class="score hot" title="2703 votes">2.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1165332/dimpu-aravind-buddha" rel="noopener">Dimpu Aravind Buddha</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">ecmascript-6</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/48270127/can-a-1-a-2-a-3-ever-evaluate-to-true" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><blockquote>
+<p><strong>Moderator note:</strong> Please resist the urge to edit the code or remove this notice. The pattern of whitespace may be part of the question and therefore should not be tampered with unnecessarily. If you are in the &quot;whitespace is insignificant&quot; camp, you should be able to accept the code as is.</p>
+</blockquote>
+<p>How is it ever possible that <code>(a== 1 &amp;&amp; a ==2 &amp;&amp; a==3)</code> could evaluate to <code>true</code> in JavaScript?</p>
+<p>This is an interview question asked by a major tech company. We never write such code in our day-to-day job.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3506 votes">3.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/400654/user400654" rel="noopener">user400654</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/48270314" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you take advantage of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#Loose_equality_using" rel="nofollow noreferrer">how <code>==</code> works</a>, you could simply create an object with a custom <code>toString</code> (or <code>valueOf</code>) function that changes what it returns each time it is used such that it satisfies all three conditions.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const a = {
+  i: 1,
+  toString: function () {
+    return a.i++;
+  }
+}
+
+if(a == 1 &amp;&amp; a == 2 &amp;&amp; a == 3) {
+  console.log('Hello World!');
+}</code></pre>
+</div>
+</div>
+</p>
+<hr />
+<p>The reason this works is due to the use of the loose equality operator. When using loose equality, if one of the operands is of a different type than the other, the engine will attempt to convert one to the other. In the case of an object on the left and a number on the right, it will attempt to convert the object to a number by first calling <code>valueOf</code> if it is callable, and failing that, it will call <code>toString</code>. I used <code>toString</code> in this case simply because it's what came to mind, <code>valueOf</code> would make more sense. If I instead returned a string from <code>toString</code>, the engine would have then attempted to convert the string to a number giving us the same end result, though with a slightly longer path.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="2164 votes">2.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/781965/jeff" rel="noopener">Jeff</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/48274520" rel="noopener">原文 ↗</a></div><div class="prose"><p>I couldn't resist - the other answers are undoubtedly true, but you really can't walk past the following code:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var aﾠ = 1;
+var a = 2;
+var ﾠa = 3;
+if(aﾠ==1 &amp;&amp; a== 2 &amp;&amp;ﾠa==3) {
+    console.log("Why hello there!")
+}</code></pre>
+</div>
+</div>
+</p>
+
+<p>Note the weird spacing in the <code>if</code> statement (that I copied from your question). It is the half-width Hangul (that's Korean for those not familiar) which is an Unicode space character that is not interpreted by ECMA script as a space character - this means that it is a valid character for an identifier. Therefore there are three completely different variables, one with the Hangul after the a, one with it before and the last one with just a. Replacing the space with <code>_</code> for readability, the same code would look like this:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var a_ = 1;
+var a = 2;
+var _a = 3;
+if(a_==1 &amp;&amp; a== 2 &amp;&amp;_a==3) {
+    console.log("Why hello there!")
+}</code></pre>
+</div>
+</div>
+</p>
+
+<p>Check out <a href="https://mothereff.in/js-variables#%EF%BE%A0%E1%85%A0%E1%85%9F" rel="noreferrer">the validation on Mathias' variable name validator</a>. If that weird spacing was actually included in their question, I feel sure that it's a hint for this kind of answer.</p>
+
+<p>Don't do this. Seriously.</p>
+
+<p>Edit: It has come to my attention that (although not allowed to start a variable) the <a href="https://en.wikipedia.org/wiki/Zero-width_joiner" rel="noreferrer">Zero-width joiner</a> and <a href="https://en.wikipedia.org/wiki/Zero-width_non-joiner" rel="noreferrer">Zero-width non-joiner</a> characters are also permitted in variable names - see <a href="https://reverseengineering.stackexchange.com/q/53">Obfuscating JavaScript with zero-width characters - pros and cons?</a>.</p>
+
+<p>This would look like the following:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var a= 1;
+var a‍= 2; //one zero-width character
+var a‍‍= 3; //two zero-width characters (or you can use the other one)
+if(a==1&amp;&amp;a‍==2&amp;&amp;a‍‍==3) {
+    console.log("Why hello there!")
+}</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="649 votes">649</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/5260024/jonas-wilms" rel="noopener">Jonas Wilms</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/48270313" rel="noopener">原文 ↗</a></div><div class="prose"><p>IT IS POSSIBLE!</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var i = 0;
+
+with({
+  get a() {
+    return ++i;
+  }
+}) {
+  if (a == 1 &amp;&amp; a == 2 &amp;&amp; a == 3)
+    console.log("wohoo");
+}</code></pre>
+</div>
+</div>
+</p>
+
+<p>This uses a getter inside of a <code>with</code> statement to let <code>a</code> evaluate to three different values.</p>
+
+<p>... this still does not mean this should be used in real code...</p>
+
+<p>Even worse, this trick will also work with the use of <code>===</code>.</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>  var i = 0;
+
+  with({
+    get a() {
+      return ++i;
+    }
+  }) {
+    if (a !== a)
+      console.log("yep, this is printed.");
+  }</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

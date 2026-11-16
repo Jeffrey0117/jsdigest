@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I redirect to another webpage? · jsdigest</title>
+<meta name="description" content="How can I redirect the user from one page to another using jQuery or pure JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I redirect to another webpage?</h1>
+    <div class="q-meta big"><span class="score hot" title="7693 votes">7.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/44984/venkatachalam" rel="noopener">venkatachalam</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">http-redirect</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/503093/how-do-i-redirect-to-another-webpage" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How can I redirect the user from one page to another using jQuery or pure JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="16471 votes">16k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/8985/ryan-mcgeary" rel="noopener">Ryan McGeary</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/506004" rel="noopener">原文 ↗</a></div><div class="prose"><h2>One does not simply redirect using jQuery</h2>
+<p>jQuery is not necessary, and <a href="https://developer.mozilla.org/en-US/docs/Web/API/Location/replace" rel="noreferrer"><code>window.location.replace(...)</code></a> will best simulate an HTTP redirect.</p>
+<p><code>window.location.replace(...)</code> is better than using <code>window.location.href</code>, because <code>replace()</code> does not keep the originating page in the session history, meaning the user won't get stuck in a never-ending back-button fiasco.</p>
+<p>If you want to simulate someone clicking on a link, use <code>location.href</code></p>
+<p>If you want to simulate an HTTP redirect, use <code>location.replace</code></p>
+<p><strong>For example:</strong></p>
+<pre><code>// similar behavior as an HTTP redirect
+window.location.replace(&quot;https://stackoverflow.com&quot;);
+
+// similar behavior as clicking on a link
+window.location.href = &quot;https://stackoverflow.com&quot;;
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1837 votes">1.8k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/61337/boris-gu%c3%a9ry" rel="noopener">Boris Gu&amp;#233;ry</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1638449" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>WARNING:</strong> This answer has merely been provided as a possible solution; it is obviously <em>not</em> the best solution, as it requires jQuery. Instead, prefer the pure JavaScript solution.</p>
+<pre class="lang-js prettyprint-override"><code>$(location).prop('href', 'http://stackoverflow.com')
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="844 votes">844</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1492009/mark-pieszak-trilon-io" rel="noopener">Mark Pieszak - Trilon.io</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11690095" rel="noopener">原文 ↗</a></div><div class="prose"><h1>Standard &quot;vanilla&quot; JavaScript way to redirect a page</h1>
+<pre><code>window.location.href = 'newPage.html';
+</code></pre>
+<h2>Or more simply:  (since <code>window</code> is Global)</h2>
+<pre><code>location.href = 'newPage.html';
+</code></pre>
+<hr />
+<blockquote>
+<p><strong>If you are here because you are <em>losing</em> HTTP_REFERER when redirecting, keep reading:</strong></p>
+<p>(Otherwise ignore this last part)</p>
+</blockquote>
+<hr />
+<p>The following section is for those using <code>HTTP_REFERER</code> as one of many security measures (although it isn't a great protective measure). If you're using <a href="http://en.wikipedia.org/wiki/Internet_Explorer_8" rel="noreferrer">Internet Explorer 8</a> or lower, these variables get lost when using any form of JavaScript page redirection (location.href,  etc.).</p>
+<p>Below we are going to implement an alternative for <strong>IE8 &amp; lower</strong> so that we don't lose HTTP_REFERER. Otherwise, you can almost always simply use <code>window.location.href</code>.</p>
+<p>Testing against <code>HTTP_REFERER</code> (URL pasting, session, etc.) <em>can</em> help tell whether a request is legitimate.
+<em>(<strong>Note:</strong> there are also ways to work-around / spoof these referrers, as noted by droop's link in the comments)</em></p>
+<hr />
+<p>Simple cross-browser testing solution (fallback to window.location.href for Internet Explorer 9+ and all other browsers)</p>
+<p><strong>Usage: <code>redirect('anotherpage.aspx');</code></strong></p>
+<pre><code>function redirect (url) {
+    var ua        = navigator.userAgent.toLowerCase(),
+        isIE      = ua.indexOf('msie') !== -1,
+        version   = parseInt(ua.substr(4, 2), 10);
+
+    // Internet Explorer 8 and lower
+    if (isIE &amp;&amp; version &lt; 9) {
+        var link = document.createElement('a');
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+    }
+
+    // All other browsers can use the standard window.location.href (they don't lose HTTP_REFERER like Internet Explorer 8 &amp; lower does)
+    else { 
+        window.location.href = url; 
+    }
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

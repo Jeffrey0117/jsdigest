@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I refresh a page using JavaScript? · jsdigest</title>
+<meta name="description" content="How do I refresh a page using JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I refresh a page using JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="2763 votes">2.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/505762/luca" rel="noopener">luca</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">refresh</span><span class="tag">reload</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/5404839/how-do-i-refresh-a-page-using-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I refresh a page using JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4208 votes">4.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/333426/roy" rel="noopener">Roy</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5404869" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use <a href="https://developer.mozilla.org/en-US/docs/Web/API/Location/reload" rel="noreferrer"><code>location.reload()</code></a>.</p>
+<p>For example, to reload whenever an element with <code>id=&quot;something&quot;</code> is clicked:</p>
+<pre><code>$('#something').click(function() {
+    location.reload();
+});
+</code></pre>
+<p>The <code>reload()</code> function takes an optional parameter that can be set to <code>true</code> to force a reload from the server rather than the cache. The parameter defaults to <code>false</code>, so by default the page may reload from the browser's cache.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="523 votes">523</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1420197/ionic%c4%83-biz%c4%83u" rel="noopener">Ionică Bizău</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/17259514" rel="noopener">原文 ↗</a></div><div class="prose"><p>There are <strike>multiple</strike> unlimited ways to refresh a page with JavaScript:</p>
+
+<ol>
+<li><code>location.reload()</code></li>
+<li><code>history.go(0)</code></li>
+<li><code>location.href = location.href</code></li>
+<li><code>location.href = location.pathname</code></li>
+<li><code>location.replace(location.pathname)</code></li>
+<li><p><code>location.reload(false)</code> </p>
+
+<blockquote>
+  <p>If we needed to pull the document from
+   the web-server again (such as where the document contents
+   change dynamically) we would pass the argument as <code>true</code>.</p>
+</blockquote></li>
+</ol>
+
+<p>You can continue the list being creative:</p>
+
+<ul>
+<li><code>window.location = window.location</code></li>
+<li><code>window.self.window.self.window.window.location = window.location</code></li>
+<li><a href="http://www.phpied.com/files/location-location/location-location.html" rel="noreferrer">...and other 534 ways</a></li>
+</ul>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var methods = [
+  "location.reload()",
+  "history.go(0)",
+  "location.href = location.href",
+  "location.href = location.pathname",
+  "location.replace(location.pathname)",
+  "location.reload(false)"
+];
+
+var $body = $("body");
+for (var i = 0; i &lt; methods.length; ++i) {
+  (function(cMethod) {
+    $body.append($("&lt;button&gt;", {
+      text: cMethod
+    }).on("click", function() {
+      eval(cMethod); // don't blame me for using eval
+    }));
+  })(methods[i]);
+}</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>button {
+  background: #2ecc71;
+  border: 0;
+  color: white;
+  font-weight: bold;
+  font-family: "Monaco", monospace;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.5s ease;
+  margin: 2px;
+}
+button:hover {
+  background: #27ae60;
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"&gt;&lt;/script&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="486 votes">486</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/671047/thorben" rel="noopener">Thorben</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5404867" rel="noopener">原文 ↗</a></div><div class="prose"><p>This works on <a href="https://caniuse.com/mdn-api_location_reload" rel="noreferrer">all browsers</a>:</p>
+<pre><code>location.reload();
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

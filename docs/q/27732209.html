@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turning off an ESLint rule for a specific line · jsdigest</title>
+<meta name="description" content="In order to turn off a linting rule for a particular line in JSHint, we use the following rule: /* jshint ignore:start*/ $scope.someVar = ConstructorFunction()…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Turning off an ESLint rule for a specific line</h1>
+    <div class="q-meta big"><span class="score hot" title="2071 votes">2.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/2117019/runtimezero" rel="noopener">runtimeZero</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jshint</span><span class="tag">eslint</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/27732209/turning-off-an-eslint-rule-for-a-specific-line" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>In order to turn off a linting rule for a particular line in JSHint, we use the following rule:</p>
+<pre><code>/* jshint ignore:start*/
+$scope.someVar = ConstructorFunction();
+/* jshint ignore:end */
+</code></pre>
+<p>Is there an equivalent of the above for ESLint?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3241 votes">3.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/275501/goofballlogic" rel="noopener">goofballLogic</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/29592334" rel="noopener">原文 ↗</a></div><div class="prose"><p>To disable the next line:</p>
+<pre><code>// eslint-disable-next-line no-use-before-define
+var thing = new Thing();
+</code></pre>
+<p>Or use the single line syntax:</p>
+<pre><code>var thing = new Thing(); // eslint-disable-line no-use-before-define
+</code></pre>
+<p>See the <a href="https://eslint.org/docs/latest/use/configure/rules#using-configuration-comments-1" rel="noreferrer">ESLint documentation</a>.</p>
+<hr />
+<p>Thanks to <a href="https://stackoverflow.com/questions/27732209/turning-off-eslint-rule-for-a-specific-line#comment57636051_29592334">KhalilRavanna's comment</a>:</p>
+<blockquote>
+<p>if you don't care about specificity you can just do //eslint-disable-line and it appears to disable all rules for the given line</p>
+</blockquote>
+<pre><code>var thing = new Thing() // eslint-disable-line
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="719 votes">719</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1048479/nick-tomlin" rel="noopener">Nick Tomlin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/27732264" rel="noopener">原文 ↗</a></div><div class="prose"><p>Later versions of ESLint have now been updated with a better way disable a single line:</p>
+<pre><code>// eslint-disable-next-line $rulename
+</code></pre>
+<p>See <a href="https://stackoverflow.com/a/29592334/437">goofballLogic's excellent answer</a>.</p>
+<p>Note though, the above is not working for jsx eg React web applications.</p>
+<h3>For older versions of ESLint</h3>
+<p>You can use the following <a href="https://eslint.org/docs/latest/use/configure/rules#using-configuration-comments-1" rel="nofollow noreferrer">pair of disable/ enable comments</a>. Please note only the <code>/*eslint ... */</code> syntax is working; <code>//eslint ...</code> is <em><strong>not</strong></em> working.</p>
+<pre><code>/* eslint-disable */
+alert('suppress all warnings between comments')
+/* eslint-enable */
+
+/* eslint-disable eqeqeq */
+alert('suppress specific warning eg eqeqeq between comments')
+/* eslint-enable eqeqeq */
+</code></pre>
+<hr />
+<p>To disable a <em>specific warning</em>, e.g., <code>eqeqeq</code> for an entire file, you can <a href="https://eslint.org/docs/latest/use/configure/rules#using-configuration-comments" rel="nofollow noreferrer">include a comment at the top of the file</a>:</p>
+<pre><code>/* eslint eqeqeq:0 */
+</code></pre>
+<p>And when using multi-rule to ignore, list them <em><strong>on one line</strong></em>, separated with a space:</p>
+<pre><code>/* eslint jsx-a11y/alt-text:0 react/jsx-no-duplicate-props:0 */
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="277 votes">277</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/142714/darren-shewry" rel="noopener">Darren Shewry</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/34678386" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can also disable a <strong>specific rule/rules</strong> (rather than all) by specifying them in the enable (open) and disable (close) blocks:</p>
+<pre><code>/* eslint-disable no-alert, no-console */
+
+alert('foo');
+console.log('bar');
+
+/* eslint-enable no-alert */
+</code></pre>
+<p>Via <a href="http://eslint.org/docs/user-guide/configuring.html#configuring-rules" rel="nofollow noreferrer">goofballMagic's link</a>.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

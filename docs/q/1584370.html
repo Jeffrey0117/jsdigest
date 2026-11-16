@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to merge two arrays in JavaScript and de-duplicate items · jsdigest</title>
+<meta name="description" content="I have two JavaScript arrays: var array1 = [&quot;Vijendra&quot;,&quot;Singh&quot;]; var array2 = [&quot;Singh&quot;, &quot;Shakya&quot;]; I want the output to be: var array3 = [&quot;Vijendra&quot;,&quot;Singh&quot;,&quot;S…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to merge two arrays in JavaScript and de-duplicate items</h1>
+    <div class="q-meta big"><span class="score hot" title="2033 votes">2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/165873/vijjendra" rel="noopener">Vijjendra</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">merge</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1584370/how-to-merge-two-arrays-in-javascript-and-de-duplicate-items" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have two JavaScript arrays:</p>
+
+<pre><code>var array1 = ["Vijendra","Singh"];
+var array2 = ["Singh", "Shakya"];
+</code></pre>
+
+<p>I want the output to be:</p>
+
+<pre><code>var array3 = ["Vijendra","Singh","Shakya"];
+</code></pre>
+
+<p>The output array should have repeated words removed.</p>
+
+<p>How do I merge two arrays in JavaScript so that I get only the unique items from each array in the same order they were inserted into the original arrays?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2351 votes">2.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/41983/liranuna" rel="noopener">LiraNuna</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1584377" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>To just merge the arrays (without removing duplicates)</p>
+<h3>ES5 version use <code>Array.concat</code>:</h3>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var array1 = ["Vijendra", "Singh"];
+var array2 = ["Singh", "Shakya"];
+
+array1 = array1.concat(array2);
+
+console.log(array1);</code></pre>
+</div>
+</div>
+</p>
+<h2>2023 update</h2>
+<p>The original answer was from years ago. ES6 is fully supported and IE is finally dead. Here's the simplest way to merge primitive and object arrays:</p>
+<pre class="lang-js prettyprint-override"><code>const merge = (a, b, predicate = (a, b) =&gt; a === b) =&gt; {
+    const c = [...a]; // copy to avoid side effects
+    // add all items from B to copy C if they're not already present
+    b.forEach((bItem) =&gt; (c.some((cItem) =&gt; predicate(bItem, cItem)) ? null : c.push(bItem)))
+    return c;
+}
+
+merge(['a', 'b', 'c'], ['c', 'x', 'd']);
+// =&gt; ['a', 'b', 'c', 'x', 'd']
+
+merge([{id: 1}, {id: 2}], [{id: 2}, {id: 3}], (a, b) =&gt; a.id === b.id);
+// [{id: 1}, {id: 2}, {id: 3}]
+</code></pre>
+<h2>Original answer</h2>
+<h3>ES6 version use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment" rel="noreferrer">destructuring</a></h3>
+<pre><code>const array1 = [&quot;Vijendra&quot;,&quot;Singh&quot;];
+const array2 = [&quot;Singh&quot;, &quot;Shakya&quot;];
+const array3 = [...array1, ...array2];
+</code></pre>
+<p>Since there is no 'built in' way to remove duplicates (<a href="https://262.ecma-international.org/14.0/#sec-array.prototype.foreach" rel="noreferrer">ECMA-262</a> actually has <code>Array.forEach</code> which would be great for this), we have to do it manually. Note that this pollutes the <code>Array</code> prototype, use with caution.</p>
+<pre><code>Array.prototype.unique = function() {
+    var a = this.concat();
+    for(var i=0; i&lt;a.length; ++i) {
+        for(var j=i+1; j&lt;a.length; ++j) {
+            if(a[i] === a[j])
+                a.splice(j--, 1);
+        }
+    }
+
+    return a;
+};
+</code></pre>
+<p>Then, to use it:</p>
+<pre><code>var array1 = [&quot;Vijendra&quot;,&quot;Singh&quot;];
+var array2 = [&quot;Singh&quot;, &quot;Shakya&quot;];
+// Merges both arrays and gets unique items
+var array3 = array1.concat(array2).unique(); 
+</code></pre>
+<p>This will also preserve the order of the arrays (i.e, no sorting needed).</p>
+<p>Since many people are annoyed about prototype augmentation of <code>Array.prototype</code> and <code>for in</code> loops, here is a less invasive way to use it:</p>
+<pre><code>function arrayUnique(array) {
+    var a = array.concat();
+    for(var i=0; i&lt;a.length; ++i) {
+        for(var j=i+1; j&lt;a.length; ++j) {
+            if(a[i] === a[j])
+                a.splice(j--, 1);
+        }
+    }
+
+    return a;
+}
+
+var array1 = [&quot;Vijendra&quot;,&quot;Singh&quot;];
+var array2 = [&quot;Singh&quot;, &quot;Shakya&quot;];
+    // Merges both arrays and gets unique items
+var array3 = arrayUnique(array1.concat(array2));
+</code></pre>
+<p>For those who are fortunate enough to work with browsers where ES5 is available, you can use <code>Object.defineProperty</code> like this:</p>
+<pre><code>Object.defineProperty(Array.prototype, 'unique', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: function() {
+        var a = this.concat();
+        for(var i=0; i&lt;a.length; ++i) {
+            for(var j=i+1; j&lt;a.length; ++j) {
+                if(a[i] === a[j])
+                    a.splice(j--, 1);
+            }
+        }
+
+        return a;
+    }
+});
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="665 votes">665</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/997941/gijsjanb" rel="noopener">GijsjanB</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10499519" rel="noopener">原文 ↗</a></div><div class="prose"><p>With Underscore.js or Lo-Dash you can do:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>console.log(_.union([1, 2, 3], [101, 2, 1, 10], [2, 1]));</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js"&gt;&lt;/script&gt;</code></pre>
+</div>
+</div>
+</p>
+
+<p><a href="http://underscorejs.org/#union" rel="noreferrer">http://underscorejs.org/#union</a></p>
+
+<p><a href="http://lodash.com/docs#union" rel="noreferrer">http://lodash.com/docs#union</a></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="477 votes">477</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/747579/abdennour-toumi" rel="noopener">Abdennour TOUMI</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/38940354" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>[...array1,...array2] //   =&gt;  don't remove duplication 
+</code></pre>
+<p><strong>OR</strong></p>
+<pre><code>[...new Set([...array1 ,...array2])]; //   =&gt; remove duplication
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

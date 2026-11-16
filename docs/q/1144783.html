@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I replace all occurrences of a string? · jsdigest</title>
+<meta name="description" content="Given a string: string = &quot;Test abc test test abc test test test abc test test abc&quot;; This seems to only remove the first occurrence of abc in the string above:…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I replace all occurrences of a string?</h1>
+    <div class="q-meta big"><span class="score hot" title="5519 votes">5.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/49153/ali" rel="noopener">Ali</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">string</span><span class="tag">replace</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1144783/how-do-i-replace-all-occurrences-of-a-string" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Given a string:</p>
+<pre><code>string = &quot;Test abc test test abc test test test abc test test abc&quot;;
+</code></pre>
+<p>This seems to only remove the first occurrence of <code>abc</code> in the string above:</p>
+<pre><code>string = string.replace('abc', '');
+</code></pre>
+<p>How do I replace <em>all</em> occurrences of it?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2411 votes">2.4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2214/matthew-crumley" rel="noopener">Matthew Crumley</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1145525" rel="noopener">原文 ↗</a></div><div class="prose"><p>In the latest versions of most popular browsers, you can use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replaceAll" rel="noreferrer"><code>replaceAll</code></a>
+as shown here:</p>
+<pre class="lang-js prettyprint-override"><code>let result = &quot;1 abc 2 abc 3&quot;.replaceAll(&quot;abc&quot;, &quot;xyz&quot;);
+// `result` is &quot;1 xyz 2 xyz 3&quot;
+</code></pre>
+<p>But check <a href="https://caniuse.com/?search=replaceAll" rel="noreferrer">Can I use</a> or another compatibility table first to make sure the browsers you're targeting have added support for it first.</p>
+<hr />
+<p>For Node.js and compatibility with older/non-current browsers:</p>
+<p><strong>Note: Don't use the following solution in performance critical code.</strong></p>
+<p>As an alternative to regular expressions for a simple literal string, you could use</p>
+<pre class="lang-js prettyprint-override"><code>str = &quot;Test abc test test abc test...&quot;.split(&quot;abc&quot;).join(&quot;&quot;);
+</code></pre>
+<p>The general pattern is</p>
+<pre class="lang-js prettyprint-override"><code>str.split(search).join(replacement)
+</code></pre>
+<p>This used to be faster in some cases than using <code>replaceAll</code> and a regular expression, but that doesn't seem to be the case anymore in modern browsers.</p>
+<p>Benchmark: <a href="https://jsben.ch/TZYzj" rel="noreferrer">https://jsben.ch/TZYzj</a></p>
+<h3>Conclusion:</h3>
+<p>If you have a performance-critical use case (e.g., processing hundreds of strings), use the regular expression method. But for most typical use cases, this is well worth not having to worry about special characters.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="5257 votes">5.3k</span>
+    <span class="a-by">by user21926</span>
+    <a class="a-src" href="https://stackoverflow.com/a/1144788" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>As of August 2020:</strong> <a href="https://www.caniuse.com/mdn-javascript_builtins_string_replaceall" rel="noreferrer">Modern browsers have support</a> for the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replaceAll" rel="noreferrer"><code>String.replaceAll()</code> method</a> defined by the ECMAScript 2021 language specification.</p>
+<hr />
+<p><strong>For older/legacy browsers:</strong></p>
+<pre class="lang-js prettyprint-override"><code>function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&amp;'); // $&amp; means the whole matched string
+}
+
+function replaceAll(str, find, replace) {
+  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+}
+</code></pre>
+<p>Here is how this answer evolved:</p>
+<pre class="lang-js prettyprint-override"><code>str = str.replace(/abc/g, '');
+</code></pre>
+<p>In response to comment &quot;what's if 'abc' is passed as a variable?&quot;:</p>
+<pre class="lang-js prettyprint-override"><code>var find = 'abc';
+var re = new RegExp(find, 'g');
+
+str = str.replace(re, '');
+</code></pre>
+<p>In response to <a href="https://stackoverflow.com/users/49153/click-upvote">Click Upvote</a>'s comment, you could simplify it even more:</p>
+<pre class="lang-js prettyprint-override"><code>function replaceAll(str, find, replace) {
+  return str.replace(new RegExp(find, 'g'), replace);
+}
+</code></pre>
+<p><strong>Note:</strong> Regular expressions contain special (meta) characters, and as such it is dangerous to blindly pass an argument in the <code>find</code> function above without pre-processing it to escape those characters.  This is covered in the <a href="https://developer.mozilla.org/en-US/" rel="noreferrer">Mozilla Developer Network</a>'s <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping" rel="noreferrer">JavaScript Guide on Regular Expressions</a>, where they present the following utility function (which has changed at least twice since this answer was originally written, so make sure to check the MDN site for potential updates):</p>
+<pre class="lang-js prettyprint-override"><code>function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&amp;'); // $&amp; means the whole matched string
+}
+</code></pre>
+<p>So in order to make the <code>replaceAll()</code> function above safer, it could be modified to the following if you also include <code>escapeRegExp</code>:</p>
+<pre class="lang-js prettyprint-override"><code>function replaceAll(str, find, replace) {
+  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+}
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="2537 votes">2.5k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1359785/cory-gross" rel="noopener">Cory Gross</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/17606289" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>For the sake of completeness, I got to thinking about which method I should use to do this. There are basically two ways to do this as suggested by the other answers on this page.</p>
+
+<p><strong>Note:</strong> In general, extending the built-in prototypes in JavaScript is generally not recommended. I am providing as extensions on the String prototype simply for purposes of illustration, showing different implementations of a hypothetical standard method on the <code>String</code> built-in prototype.</p>
+
+<hr>
+
+<h3>Regular Expression Based Implementation</h3>
+
+<pre><code>String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
+</code></pre>
+
+<h3>Split and Join (Functional) Implementation</h3>
+
+<pre><code>String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
+</code></pre>
+
+<hr>
+
+<p>Not knowing too much about how regular expressions work behind the scenes in terms of efficiency, I tended to lean toward the split and join implementation in the past without thinking about performance. When I did wonder which was more efficient, and by what margin, I used it as an excuse to find out.</p>
+
+<p>On my Chrome Windows&nbsp;8 machine, <strong>the regular expression based implementation is the fastest</strong>, with the <strong>split and join implementation being 53% slower</strong>. Meaning the regular expressions are twice as fast for the lorem ipsum input I used.</p>
+
+<p>Check out this <a href="http://jsben.ch/#/LFfWA" rel="noreferrer"><strong>benchmark</strong></a> running these two implementations against each other.</p>
+
+<hr>
+
+<p>As noted in the comment below by @ThomasLeduc and others, there could be an issue with the regular expression-based implementation if <code>search</code> contains certain characters which are reserved as <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_special_characters" rel="noreferrer">special characters in regular expressions</a>. The implementation assumes that the caller will escape the string beforehand or will only pass strings that are without the characters in the table in <em><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_special_characters" rel="noreferrer">Regular Expressions</a></em> (MDN).</p>
+
+<p>MDN also provides an implementation to escape our strings. It would be nice if this was also standardized as <code>RegExp.escape(str)</code>, but alas, it does not exist:</p>
+
+<pre><code>function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&amp;"); // $&amp; means the whole matched string
+}
+</code></pre>
+
+<p>We could call <code>escapeRegExp</code> within our <code>String.prototype.replaceAll</code> implementation, however, I'm not sure how much this will affect the performance (potentially even for strings for which the escape is not needed, like all alphanumeric strings).</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

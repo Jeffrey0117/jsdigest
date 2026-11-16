@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abort Ajax requests using jQuery · jsdigest</title>
+<meta name="description" content="Is it possible that using jQuery, I cancel/abort an Ajax request that I have not yet received the response from?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Abort Ajax requests using jQuery</h1>
+    <div class="q-meta big"><span class="score hot" title="2006 votes">2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/47831/lukewm" rel="noopener">lukewm</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">ajax</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/446594/abort-ajax-requests-using-jquery" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Is it possible that using jQuery, I <strong>cancel/abort an Ajax request</strong> that I have not yet received the response from?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1866 votes">1.9k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/12161/meouw" rel="noopener">meouw</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/446626" rel="noopener">原文 ↗</a></div><div class="prose"><p>Most of the jQuery Ajax methods return an XMLHttpRequest (or the equivalent) object, so you can just use <code>abort()</code>.</p>
+
+<p>See the documentation:</p>
+
+<ul>
+<li><a href="http://msdn.microsoft.com/en-us/library/ms535920%28VS.85%29.aspx" rel="noreferrer">abort Method</a> (<a href="http://en.wikipedia.org/wiki/Microsoft_Developer_Network" rel="noreferrer">MSDN</a>). Cancels the current HTTP request.</li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/abort" rel="noreferrer">abort()</a> (<a href="http://en.wikipedia.org/wiki/Mozilla_Developer_Network" rel="noreferrer">MDN</a>). If the request has been sent already, this method will abort the request.</li>
+</ul>
+
+
+
+<pre><code>var xhr = $.ajax({
+    type: "POST",
+    url: "some.php",
+    data: "name=John&amp;location=Boston",
+    success: function(msg){
+       alert( "Data Saved: " + msg );
+    }
+});
+
+//kill the request
+xhr.abort()
+</code></pre>
+
+<p><strong>UPDATE:</strong>
+As of jQuery 1.5 the returned object is a wrapper for the native XMLHttpRequest object called jqXHR. This object appears to expose all of the native properties and methods so the above example still works. See <em><a href="http://api.jquery.com/jQuery.ajax/#jqXHR" rel="noreferrer">The jqXHR Object</a></em> (jQuery API documentation).</p>
+
+<p><strong>UPDATE 2:</strong>
+As of jQuery 3, the ajax method now returns a promise with extra methods (like abort), so the above code still works, though the object being returned is not an <code>xhr</code> any more. See the <a href="http://blog.jquery.com/2016/01/14/jquery-3-0-beta-released/" rel="noreferrer">3.0 blog here</a>. </p>
+
+<p><strong>UPDATE 3</strong>: <code>xhr.abort()</code> still works on jQuery 3.x. Don't assume the <em>update 2</em> is correct. <a href="https://github.com/jquery/jquery/issues/2084#issuecomment-308173243" rel="noreferrer">More info on jQuery Github repository</a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="123 votes">123</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/12950/tvanfosson" rel="noopener">tvanfosson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/446622" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can't recall the request but you can set a timeout value after which the response will be ignored.  See this <a href="http://docs.jquery.com/Ajax/jQuery.ajax#options" rel="noreferrer">page</a> for jquery AJAX options.  I believe that your error callback will be called if the timeout period is exceeded.  There is already a default timeout on every AJAX request.</p>
+
+<p>You can also use the <a href="https://developer.mozilla.org/en/DOM/XMLHttpRequest#abort%28%29" rel="noreferrer">abort()</a> method on the request object but, while it will cause the client to stop listening for the event, it <strike>may</strike> probably will not stop the server from processing it.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="82 votes">82</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1298034/tei" rel="noopener">Tei</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/9906646" rel="noopener">原文 ↗</a></div><div class="prose"><p>Save the calls you make in an array, then call <code>xhr.abort()</code> on each.</p>
+<p><strong>HUGE CAVEAT</strong>: You can abort a request, but that's only the client side. The server side could still be processing the request. If you are using something like PHP or ASP with session data, the session data is locked until the ajax has finished. So, to allow the user to continue browsing the website, you have to call <strong><code>session_write_close()</code></strong>. This saves the session and unlocks it so that other pages waiting to continue will proceed. Without this, several pages can be waiting for the lock to be removed.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

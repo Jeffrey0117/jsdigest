@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I convert a string to boolean in JavaScript? · jsdigest</title>
+<meta name="description" content="Can I convert a string representing a boolean value (e.g., &#39;true&#39;, &#39;false&#39;) into an intrinsic type in JavaScript? I have a hidden form in HTML that is updated…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I convert a string to boolean in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="3624 votes">3.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/4599/kevin" rel="noopener">Kevin</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">boolean-expression</span><span class="tag">boolean-operations</span><span class="tag">string-conversion</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/263965/how-can-i-convert-a-string-to-boolean-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Can I convert a string representing a boolean value (e.g., 'true', 'false') into an intrinsic type in JavaScript?</p>
+<p>I have a hidden form in HTML that is updated based on a user's selection within a list. This form contains some fields which represent boolean values and are dynamically populated with an intrinsic boolean value. However, once this value is placed into the hidden input field it becomes a string.</p>
+<p>The only way I could find to determine the field's boolean value, once it was converted into a string, was to depend upon the literal value of its string representation.</p>
+<pre><code>var myValue = document.myForm.IS_TRUE.value;
+var isTrueSet = myValue == 'true';
+</code></pre>
+<p>Is there a better way to accomplish this?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5093 votes">5.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/27225/guinaps" rel="noopener">guinaps</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/264037" rel="noopener">原文 ↗</a></div><div class="prose"><h2>Do:</h2>
+<pre class="lang-js prettyprint-override"><code>var isTrueSet = (myValue === 'true');
+</code></pre>
+<p>Use the strict equality operator (<code>===</code>), which doesn't make any implicit type conversions when the compared variables have different types.</p>
+<p>This will set <code>isTrueSet</code> to a boolean <code>true</code> if the string is &quot;true&quot; and boolean <code>false</code> if it is string &quot;false&quot; or not set at all.</p>
+<p>For making it case-insensitive, try:</p>
+<pre class="lang-js prettyprint-override"><code>var isTrueSet = /^true$/i.test(myValue);
+// or
+var isTrueSet = (myValue?.toLowerCase?.() === 'true');
+// or
+var isTrueSet = (String(myValue).toLowerCase() === 'true');
+</code></pre>
+<h2>Don't:</h2>
+<p>You should <strong>be cautious about using these two methods</strong> for your specific needs.</p>
+<pre class="lang-js prettyprint-override"><code>var myBool = Boolean(&quot;false&quot;); // evaluates to true
+var myBool = !!&quot;false&quot;; // evaluates to true
+</code></pre>
+<p>Any string which isn't the empty string will evaluate to <code>true</code> by using them. Although they're the cleanest methods I can think of concerning to boolean conversion, I think they're not what you're looking for.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="876 votes">876</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/451139/luke" rel="noopener">Luke</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/7833897" rel="noopener">原文 ↗</a></div><div class="prose"><h1>Warning</h1>
+
+<p>This highly upvoted legacy answer is technically correct but only covers a very specific scenario, when your string value is EXACTLY <code>"true"</code> or <code>"false"</code>.</p>
+
+<p>An invalid json string passed into these functions below <strong>WILL throw an exception</strong>.</p>
+
+<hr>
+
+<p><strong>Original answer:</strong></p>
+
+<p>How about?</p>
+
+<pre><code>JSON.parse("True".toLowerCase());
+</code></pre>
+
+<p>or with jQuery</p>
+
+<pre><code>$.parseJSON("TRUE".toLowerCase());
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="301 votes">301</span>
+    <span class="a-by">by Steven</span>
+    <a class="a-src" href="https://stackoverflow.com/a/1414175" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>const stringToBoolean = (stringValue) =&gt; {
+    switch(stringValue?.toLowerCase()?.trim()){
+        case &quot;true&quot;: 
+        case &quot;yes&quot;: 
+        case &quot;1&quot;: 
+          return true;
+
+        case &quot;false&quot;: 
+        case &quot;no&quot;: 
+        case &quot;0&quot;: 
+        case null: 
+        case undefined:
+          return false;
+
+        default: 
+          return JSON.parse(stringValue);
+    }
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

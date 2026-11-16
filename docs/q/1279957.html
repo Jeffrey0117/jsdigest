@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to move an element into another element · jsdigest</title>
+<meta name="description" content="I would like to move one DIV element inside another. For example, I want to move this (including all children): &lt;div id=&quot;source&quot;&gt; ... &lt;/div&gt; into this: &lt;div id…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to move an element into another element</h1>
+    <div class="q-meta big"><span class="score hot" title="1938 votes">1.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/134484/mark-richman" rel="noopener">Mark Richman</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">html</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1279957/how-to-move-an-element-into-another-element" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I would like to move one DIV element inside another. For example, I want to move this (including all children):</p>
+<pre class="lang-html prettyprint-override"><code>&lt;div id=&quot;source&quot;&gt;
+  ...
+&lt;/div&gt;
+</code></pre>
+<p>into this:</p>
+<pre class="lang-html prettyprint-override"><code>&lt;div id=&quot;destination&quot;&gt;
+  ...
+&lt;/div&gt;
+</code></pre>
+<p>so that I have this:</p>
+<pre class="lang-html prettyprint-override"><code>&lt;div id=&quot;destination&quot;&gt;
+  &lt;div id=&quot;source&quot;&gt;
+    ...
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1955 votes">2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/34211/andrew-hare" rel="noopener">Andrew Hare</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1279963" rel="noopener">原文 ↗</a></div><div class="prose"><p>You may want to use the <a href="http://api.jquery.com/appendTo/" rel="noreferrer"><code>appendTo</code></a> function (which adds to the end of the element):</p>
+
+<pre><code>$("#source").appendTo("#destination");
+</code></pre>
+
+<p>Alternatively you could use the <a href="http://api.jquery.com/prependTo/" rel="noreferrer"><code>prependTo</code></a> function (which adds to the beginning of the element):</p>
+
+<pre><code>$("#source").prependTo("#destination");
+</code></pre>
+
+<hr>
+
+<p>Example:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>$("#appendTo").click(function() {
+  $("#moveMeIntoMain").appendTo($("#main"));
+});
+$("#prependTo").click(function() {
+  $("#moveMeIntoMain").prependTo($("#main"));
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>#main {
+  border: 2px solid blue;
+  min-height: 100px;
+}
+
+.moveMeIntoMain {
+  border: 1px solid red;
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;div id="main"&gt;main&lt;/div&gt;
+&lt;div id="moveMeIntoMain" class="moveMeIntoMain"&gt;move me to main&lt;/div&gt;
+
+&lt;button id="appendTo"&gt;appendTo main&lt;/button&gt;
+&lt;button id="prependTo"&gt;prependTo main&lt;/button&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1036 votes">1k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1502613/alejandro-illecas" rel="noopener">Alejandro Illecas</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/19802593" rel="noopener">原文 ↗</a></div><div class="prose"><p>My solution:</p>
+<p><em>Move</em>:</p>
+<pre><code>jQuery(&quot;#NodesToMove&quot;).detach().appendTo('#DestinationContainerNode')
+</code></pre>
+<p><em>copy</em>:</p>
+<pre><code>jQuery(&quot;#NodesToMove&quot;).appendTo('#DestinationContainerNode')
+</code></pre>
+<p>Note the usage of .detach(). When copying, be careful that you are not duplicating IDs.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="167 votes">167</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2005622/ali-bassam" rel="noopener">Ali Bassam</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/33724397" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use a <a href="https://en.wikipedia.org/wiki/Vanilla_software" rel="noreferrer">vanilla JavaScript</a> solution:</p>
+<pre><code>// Declare a fragment:
+var fragment = document.createDocumentFragment();
+
+// Append desired element to the fragment:
+fragment.appendChild(document.getElementById('source'));
+
+// Append fragment to desired element:
+document.getElementById('destination').appendChild(fragment);
+</code></pre>
+<p><strong><a href="https://jsfiddle.net/AliBassam/eyepyzrp/" rel="noreferrer">Check it out.</a></strong></p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

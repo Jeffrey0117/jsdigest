@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaScript equivalent to printf/String.Format · jsdigest</title>
+<meta name="description" content="I&#39;m looking for a good JavaScript equivalent of the C/PHP printf() or for C#/Java programmers, String.Format() ( IFormatProvider for .NET). My basic requiremen…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>JavaScript equivalent to printf/String.Format</h1>
+    <div class="q-meta big"><span class="score hot" title="2478 votes">2.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/21574/chris-s" rel="noopener">Chris S</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">printf</span><span class="tag">string.format</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm looking for a good JavaScript equivalent of the C/PHP <code>printf()</code> or for C#/Java programmers, <code>String.Format()</code> (<code>IFormatProvider</code> for .NET).</p>
+
+<p>My basic requirement is a thousand separator format for numbers for now, but something that handles lots of combinations (including dates) would be good.</p>
+
+<p>I realize Microsoft's <a href="http://en.wikipedia.org/wiki/Ajax_%28programming%29" rel="noreferrer">Ajax</a> library provides a version of <code>String.Format()</code>, but we don't want the entire overhead of that framework.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1663 votes">1.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/53114/gumbo" rel="noopener">Gumbo</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/610415" rel="noopener">原文 ↗</a></div><div class="prose"><h2>Current JavaScript</h2>
+<p>From ES6 on you could use template strings:</p>
+<pre><code>let soMany = 10;
+console.log(`This is ${soMany} times easier!`);
+// &quot;This is 10 times easier!&quot;
+</code></pre>
+<p>See Kim's <a href="https://stackoverflow.com/a/32202320/2430448">answer</a> below for details.</p>
+<hr />
+<h2>Older answer</h2>
+<p>Try <a href="https://github.com/alexei/sprintf.js" rel="noreferrer">sprintf() for JavaScript</a>.</p>
+<hr />
+<p>If you really want to do a simple format method on your own, don’t do the replacements successively but do them simultaneously.</p>
+<p>Because most of the other proposals that are mentioned fail when a replace string of previous replacement does also contain a format sequence like this:</p>
+<pre><code>&quot;{0}{1}&quot;.format(&quot;{1}&quot;, &quot;{0}&quot;)
+</code></pre>
+<p>Normally you would expect the output to be <code>{1}{0}</code> but the actual output is <code>{1}{1}</code>. So do a simultaneous replacement instead like in <a href="https://stackoverflow.com/questions/610406/javascript-printf-string-format/4673436#4673436">fearphage’s suggestion</a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1512 votes">1.5k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2733/fearphage" rel="noopener">fearphage</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4673436" rel="noopener">原文 ↗</a></div><div class="prose"><p>Building on the previously suggested solutions:</p>
+
+<pre class="lang-js prettyprint-override"><code>// First, checks if it isn't implemented yet.
+if (!String.prototype.format) {
+  String.prototype.format = function() {
+    var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) { 
+      return typeof args[number] != 'undefined'
+        ? args[number]
+        : match
+      ;
+    });
+  };
+}
+</code></pre>
+
+<p><code>"{0} is dead, but {1} is alive! {0} {2}".format("ASP", "ASP.NET")</code></p>
+
+<p>outputs</p>
+
+<blockquote>
+  <p>ASP is dead, but ASP.NET is alive! ASP {2}</p>
+</blockquote>
+
+<hr>
+
+<p>If you prefer not to modify <code>String</code>'s prototype:</p>
+
+<pre class="lang-js prettyprint-override"><code>if (!String.format) {
+  String.format = function(format) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return format.replace(/{(\d+)}/g, function(match, number) { 
+      return typeof args[number] != 'undefined'
+        ? args[number] 
+        : match
+      ;
+    });
+  };
+}
+</code></pre>
+
+<p>Gives you the much more familiar:</p>
+
+<p><code>String.format('{0} is dead, but {1} is alive! {0} {2}', 'ASP', 'ASP.NET');</code></p>
+
+<p>with the same result:</p>
+
+<blockquote>
+  <p>ASP is dead, but ASP.NET is alive! ASP {2}</p>
+</blockquote>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="678 votes">678</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2285405/gabriel-nahmias" rel="noopener">Gabriel Nahmias</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/18234317" rel="noopener">原文 ↗</a></div><div class="prose"><p>It's funny because Stack Overflow actually has their own formatting function for the <code>String</code> prototype called <code>formatUnicorn</code>. Try it! Go into the console and type something like:</p>
+<pre><code>&quot;Hello, {name}, are you feeling {adjective}?&quot;.formatUnicorn({name:&quot;Gabriel&quot;, adjective: &quot;OK&quot;});
+</code></pre>
+<p><img src="https://i.sstatic.net/jYeIc.png" alt="Firebug" /></p>
+<p>You get this output:</p>
+<p><code>Hello, Gabriel, are you feeling OK?</code></p>
+<p>You can use objects, arrays, and strings as arguments! I got its code and reworked it to produce a new version of <code>String.prototype.format</code>:</p>
+<pre class="lang-js prettyprint-override"><code>String.prototype.formatUnicorn = String.prototype.formatUnicorn ||
+function () {
+    &quot;use strict&quot;;
+    var str = this.toString();
+    if (arguments.length) {
+        var t = typeof arguments[0];
+        var key;
+        var args = (&quot;string&quot; === t || &quot;number&quot; === t) ?
+            Array.prototype.slice.call(arguments)
+            : arguments[0];
+
+        for (key in args) {
+            str = str.replace(new RegExp(&quot;\\{&quot; + key + &quot;\\}&quot;, &quot;gi&quot;), args[key]);
+        }
+    }
+
+    return str;
+};
+</code></pre>
+<p>Note the clever <code>Array.prototype.slice.call(arguments)</code> call -- that means if you throw in arguments that are strings or numbers, not a single JSON-style object, you get C#'s <a href="https://msdn.microsoft.com/en-us/library/system.string.format(v=vs.110).aspx#Starting" rel="noreferrer"><code>String.Format</code></a> behavior almost exactly.</p>
+<pre><code>&quot;a{0}bcd{1}ef&quot;.formatUnicorn(&quot;FOO&quot;, &quot;BAR&quot;); // yields &quot;aFOObcdBARef&quot;
+</code></pre>
+<p>That's because <code>Array</code>'s <code>slice</code> will force whatever's in <code>arguments</code> into an <code>Array</code>, whether it was originally or not, and the <code>key</code> will be the index (0, 1, 2...) of each array element coerced into a string (eg, &quot;0&quot;, so <code>&quot;\\{0\\}&quot;</code> for your first regexp pattern).</p>
+<p>Neat.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

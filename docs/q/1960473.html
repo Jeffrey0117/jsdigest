@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get all unique values in a JavaScript array (remove duplicates) · jsdigest</title>
+<meta name="description" content="I have an array of numbers that I need to make sure are unique. I found the code snippet below on the Internet, and it works great until the array has a zero i…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Get all unique values in a JavaScript array (remove duplicates)</h1>
+    <div class="q-meta big"><span class="score hot" title="2926 votes">2.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/145346/mottie" rel="noopener">Mottie</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">unique</span><span class="tag">arrays</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1960473/get-all-unique-values-in-a-javascript-array-remove-duplicates" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have an array of numbers that I need to make sure are unique. I found the code snippet below on the Internet, and it works great until the array has a zero in it. I found <a href="https://stackoverflow.com/questions/1890203">this other script</a> here on Stack Overflow that looks almost exactly like it, but it doesn't fail.</p>
+<p>How can I determine where the prototype script is going wrong?</p>
+<pre><code>Array.prototype.getUnique = function() {
+  var o = {}, a = [], i, e;
+  for (i = 0; e = this[i]; i++) {o[e] = 1};
+  for (e in o) {a.push (e)};
+  return a;
+}
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4735 votes">4.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/496587/tlindig" rel="noopener">TLindig</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/14438954" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>With <em>JavaScript 1.6</em> / <em>ECMAScript 5</em> you can use the native <a href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/filter" rel="noreferrer" title="filter"><code>filter</code></a> method of an Array in the following way to get an array with unique values:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function onlyUnique(value, index, array) {
+  return array.indexOf(value) === index;
+}
+
+// usage example:
+var a = ['a', 1, 'a', 2, '1'];
+var unique = a.filter(onlyUnique);
+
+console.log(unique); // ['a', 1, 2, '1']</code></pre>
+</div>
+</div>
+</p>
+<p>The native method <code>filter</code> will loop through the array and leave only those entries that pass the given callback function <code>onlyUnique</code>.</p>
+<p><code>onlyUnique</code> checks, if the given value is the first occurring. If not, it must be a duplicate and will not be copied.</p>
+<p>This solution works without any extra library like jQuery or prototype.js.</p>
+<p>It works for arrays with mixed value types too.</p>
+<p>For old Browsers (&lt;ie9), that do not support the native methods <code>filter</code> and <code>indexOf</code> you can find work arounds in the MDN documentation for <a href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/filter" rel="noreferrer" title="filter">filter</a> and <a href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf" rel="noreferrer">indexOf</a>.</p>
+<p>If you want to keep the last occurrence of a value, simply replace <code>indexOf</code> with <code>lastIndexOf</code>.</p>
+<p>With ES6 this can be shorten to:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// usage example:
+var myArray = ['a', 1, 'a', 2, '1'];
+var unique = myArray.filter((value, index, array) =&gt; array.indexOf(value) === index);
+
+console.log(unique); // unique is ['a', 1, 2, '1']</code></pre>
+</div>
+</div>
+</p>
+<p>Thanks to <a href="https://stackoverflow.com/users/124119/camilo-martin">Camilo Martin</a> for hint in comment.</p>
+<p>ES6 has a native object <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set" rel="noreferrer"><code>Set</code></a> to store unique values. To get an array with unique values you could now do this:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var myArray = ['a', 1, 'a', 2, '1'];
+
+let unique = [...new Set(myArray)];
+
+console.log(unique); // unique is ['a', 1, 2, '1']</code></pre>
+</div>
+</div>
+</p>
+<p>The constructor of <code>Set</code> takes an iterable object, like an Array, and the spread operator <code>...</code> transform the set back into an Array. Thanks to <a href="https://stackoverflow.com/users/1737158/lukas-liesis">Lukas Liese</a> for hint in comment.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1940 votes">1.9k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/844322/a-t" rel="noopener">A.T.</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/33121880" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>Updated answer for ES6/ES2015</strong>: Using the <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Set" rel="noreferrer">Set</a> and <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Operators/Spread_operator" rel="noreferrer">the spread operator</a> (thanks <a href="https://stackoverflow.com/users/1647737/le-m">le-m</a>), the single line solution is:</p>
+<pre><code>let uniqueItems = [...new Set(items)]
+</code></pre>
+<p>Which returns</p>
+<pre><code>[4, 5, 6, 3, 2, 23, 1]
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="384 votes">384</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/5372400/max-makhrov" rel="noopener">Max Makhrov</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/43046408" rel="noopener">原文 ↗</a></div><div class="prose"><p>I split all answers to 4 possible solutions:</p>
+<ol>
+<li>Use object <code>{ }</code> to prevent duplicates</li>
+<li>Use helper array <code>[ ]</code></li>
+<li>Use <code>filter + indexOf</code></li>
+<li>Bonus! ES6 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/Set" rel="noreferrer"><code>Set</code></a> constructor.</li>
+</ol>
+<p>Here's sample codes found in answers:</p>
+<h1>Use object <code>{ }</code> to prevent duplicates</h1>
+<pre><code>function uniqueArray1( ar ) {
+  var j = {};
+
+  ar.forEach( function(v) {
+    j[v+ '::' + typeof v] = v;
+  });
+
+  return Object.keys(j).map(function(v){
+    return j[v];
+  });
+} 
+</code></pre>
+<h1>Use helper array <code>[ ]</code></h1>
+<pre><code>function uniqueArray2(arr) {
+    var a = [];
+    for (var i=0, l=arr.length; i&lt;l; i++)
+        if (a.indexOf(arr[i]) === -1 &amp;&amp; arr[i] !== '')
+            a.push(arr[i]);
+    return a;
+}
+</code></pre>
+<h1>Use <code>filter + indexOf</code></h1>
+<pre><code>function uniqueArray3(a) {
+  function onlyUnique(value, index, self) { 
+      return self.indexOf(value) === index;
+  }
+  
+  // usage
+  var unique = a.filter( onlyUnique ); // returns ['a', 1, 2, '1']
+  
+  return unique;
+}
+</code></pre>
+<h1>Use <strong>ES6</strong> <code>[...new Set(a)]</code></h1>
+<pre><code>function uniqueArray4(a) {
+  return [...new Set(a)];
+}
+</code></pre>
+<p>And I wondered which one is faster. I've made <a href="https://docs.google.com/spreadsheets/d/1-Vr4dD0GE0dv1PN9Ng6SyNwn8A407L1zw9uE1cBMwjQ/edit#gid=0" rel="noreferrer">sample Google Sheet</a> to test functions. Note: ECMA 6 is not avaliable in Google Sheets, so I can't test it.</p>
+<p>Here's the result of tests:
+<a href="https://i.sstatic.net/EqG6p.png" rel="noreferrer"><img src="https://i.sstatic.net/EqG6p.png" alt="enter image description here" /></a></p>
+<p>I expected to see that code using object <code>{ }</code> will win because it uses hash. So I'm glad that tests showed the best results for this algorithm in Chrome and IE. Thanks to @rab for <a href="https://stackoverflow.com/a/29327129/5372400">the code</a>.</p>
+<h2>Update 2020</h2>
+<p>Google Script enabled ES6 Engine. Now I tested the last code with <code>Set</code> and it appeared faster than the object method.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

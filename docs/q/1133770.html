@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I convert a string to an integer in JavaScript? · jsdigest</title>
+<meta name="description" content="How do I convert a string to an integer in JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I convert a string to an integer in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="2601 votes">2.6k</span><span class="q-by">asked by anonymous</span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">string</span><span class="tag">integer</span><span class="tag">data-conversion</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1133770/how-can-i-convert-a-string-to-an-integer-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I convert a string to an integer in JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3129 votes">3.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/61027/nosredna" rel="noopener">Nosredna</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1133814" rel="noopener">原文 ↗</a></div><div class="prose"><p>The simplest way would be to use the native <code>Number</code> function:</p>
+<pre><code>var x = Number(&quot;1000&quot;)
+</code></pre>
+<p>If that doesn't work for you, then there are the <strong>parseInt</strong>, <strong>unary plus</strong>, <strong>parseFloat with floor</strong>, and <strong>Math.round</strong> methods.</p>
+<h3>parseInt()</h3>
+<pre><code>var x = parseInt(&quot;1000&quot;, 10); // You want to use radix 10
+    // So you get a decimal number even with a leading 0 and an old browser ([IE8, Firefox 20, Chrome 22 and older][1])
+</code></pre>
+<h3>Unary plus</h3>
+<p>If your string is already in the form of an integer:</p>
+<pre><code>var x = +&quot;1000&quot;;
+</code></pre>
+<h3>floor()</h3>
+<p>If your string is or might be a float and you want an integer:</p>
+<pre><code>var x = Math.floor(&quot;1000.01&quot;); // floor() automatically converts string to number
+</code></pre>
+<p>Or, if you're going to be using Math.floor several times:</p>
+<pre><code>var floor = Math.floor;
+var x = floor(&quot;1000.01&quot;);
+</code></pre>
+<h3>parseFloat()</h3>
+<p>If you're the type who forgets to put the radix in when you call parseInt, you can use parseFloat and round it however you like. Here I use floor.</p>
+<pre><code>var floor = Math.floor;
+var x = floor(parseFloat(&quot;1000.01&quot;));
+</code></pre>
+<h3>round()</h3>
+<p>Interestingly, Math.round (like Math.floor) will do a string to number conversion, so if you want the number rounded (or if you have an integer in the string), this is a great way, maybe my favorite:</p>
+<pre><code>var round = Math.round;
+var x = round(&quot;1000&quot;); // Equivalent to round(&quot;1000&quot;, 0)
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="306 votes">306</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/116838/zanoni" rel="noopener">Zanoni</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1133780" rel="noopener">原文 ↗</a></div><div class="prose"><p>Try parseInt function:</p>
+
+<pre><code>var number = parseInt("10");
+</code></pre>
+
+<p>But there is a problem. If you try to convert "010" using parseInt function, it detects as octal number, and will return number 8. So, you need to specify a radix (from 2 to 36). In this case base 10.</p>
+
+<pre><code>parseInt(string, radix)
+</code></pre>
+
+<p>Example:</p>
+
+<pre><code>var result = parseInt("010", 10) == 10; // Returns true
+
+var result = parseInt("010") == 10; // Returns false
+</code></pre>
+
+<p>Note that <code>parseInt</code> ignores bad data after parsing anything valid.<br>
+This guid will parse as 51:</p>
+
+<pre><code>var result = parseInt('51e3daf6-b521-446a-9f5b-a1bb4d8bac36', 10) == 51; // Returns true
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="175 votes">175</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/412335/kybernetikos" rel="noopener">kybernetikos</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/20513389" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>There are two main ways to convert a string to a number in JavaScript.  One way is to parse it and the other way is to change its type to a Number.  All of the tricks in the other answers (e.g., unary plus) involve implicitly coercing the type of the string to a number.  You can also do the same thing explicitly with the Number function.</p>
+<p><strong>Parsing</strong></p>
+<pre><code>const parsed = parseInt(&quot;97&quot;, 10);
+</code></pre>
+<p>parseInt and parseFloat are the two functions used for parsing strings to numbers.  Parsing will stop silently if it hits a character it doesn't recognize, which can be useful for parsing strings like &quot;92px&quot;, but it's also somewhat dangerous since it won't give you any kind of error on bad input, instead you'll get back NaN unless the string starts with a number. The whitespace at the beginning of the string is ignored.  Here's an example of it doing something different from what you want, and giving no indication that anything went wrong:</p>
+<pre><code>const widgetsSold = parseInt(&quot;97,800&quot;, 10); // widgetsSold is now 97
+</code></pre>
+<p>It's good practice to always specify the radix as the second argument.  In older browsers, if the string started with a 0, it would be interpreted as octal if the radix wasn't specified which took a lot of people by surprise.  The behavior for hexadecimal is triggered by having the string start with 0x if no radix is specified, e.g., <code>0xff</code>. The standard actually changed with <a href="https://en.wikipedia.org/wiki/ECMAScript#5th_Edition_%E2%80%93_ECMAScript_2009" rel="noreferrer">ECMAScript 5</a>, so modern browsers no longer trigger octal when there's a leading 0 if no radix has been specified.  parseInt understands radixes up to base 36, in which case both upper and lower case letters are treated as equivalent.</p>
+<p><strong>Changing the Type of a String to a Number</strong></p>
+<p>All of the other tricks mentioned above that don't use parseInt, involve implicitly coercing the string into a number.  I prefer to do this explicitly,</p>
+<pre><code>var cast = Number(&quot;97&quot;);
+</code></pre>
+<p>This has different behavior to the parse methods (although it still ignores whitespace).  It's more strict: if it doesn't understand the whole of the string than it returns <code>NaN</code>, so you can't use it for strings like <code>97px</code>.  Since you want a primitive number rather than a Number wrapper object, make sure you don't put <code>new</code> in front of the Number function.</p>
+<p>Obviously, converting to a Number gives you a value that might be a float rather than an integer, so if you want an integer, you need to modify it.  There are a few ways of doing this:</p>
+<pre><code>var rounded = Math.floor(Number(&quot;97.654&quot;));  // other options are Math.ceil, Math.round
+var fixed = Number(&quot;97.654&quot;).toFixed(0); // rounded rather than truncated
+var bitwised = Number(&quot;97.654&quot;)|0;  // do not use for large numbers
+</code></pre>
+<p>Any bitwise operator (here I've done a bitwise or, but you could also do double negation as in an earlier answer or a bit shift) will convert the value to a 32 bit integer, and most of them will convert to a signed integer.  Note that this <strong>will not do want you want for large integers</strong>.  If the integer cannot be represented in 32 bits, it will wrap.</p>
+<pre><code>~~&quot;3000000000.654&quot; === -1294967296
+// This is the same as
+Number(&quot;3000000000.654&quot;)|0
+&quot;3000000000.654&quot; &gt;&gt;&gt; 0 === 3000000000 // unsigned right shift gives you an extra bit
+&quot;300000000000.654&quot; &gt;&gt;&gt; 0 === 3647256576 // but still fails with larger numbers
+</code></pre>
+<p>To work correctly with larger numbers, you should use the rounding methods</p>
+<pre><code>Math.floor(&quot;3000000000.654&quot;) === 3000000000
+// This is the same as
+Math.floor(Number(&quot;3000000000.654&quot;))
+</code></pre>
+<p>Bear in mind that coercion understands exponential notation and Infinity, so <code>2e2</code> is <code>200</code> rather than NaN, while the parse methods don't.</p>
+<p><strong>Custom</strong></p>
+<p>It's unlikely that either of these methods do exactly what you want.  For example, usually I would want an error thrown if parsing fails, and I don't need support for Infinity, exponentials or leading whitespace.  Depending on your use case, sometimes it makes sense to write a custom conversion function.</p>
+<p>Always check that the output of Number or one of the parse methods is the sort of number you expect.  You will almost certainly want to use <code>isNaN</code> to make sure the number is not NaN (usually the only way you find out that the parse failed).</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What does &quot;javascript:void(0)&quot; mean? · jsdigest</title>
+<meta name="description" content="&lt;a href=&quot;javascript:void(0)&quot; id=&quot;loginlink&quot;&gt;login&lt;/a&gt; I&#39;ve seen such href s many times, but I don&#39;t know what exactly that means.">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What does &quot;javascript:void(0)&quot; mean?</h1>
+    <div class="q-meta big"><span class="score hot" title="1812 votes">1.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/104015/omg" rel="noopener">omg</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">void</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1291942/what-does-javascriptvoid0-mean" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><pre class="lang-html prettyprint-override"><code>&lt;a href=&quot;javascript:void(0)&quot; id=&quot;loginlink&quot;&gt;login&lt;/a&gt;
+</code></pre>
+<p>I've seen such <code>href</code>s many times, but I don't know what exactly that means.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1337 votes">1.3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/47738/rahul" rel="noopener">rahul</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1291950" rel="noopener">原文 ↗</a></div><div class="prose"><blockquote>
+  <p>The <code>void</code> operator evaluates the given
+  expression and then returns <code>undefined</code>.</p>
+  
+  <p>The <code>void</code> operator is often used merely
+  to obtain the <code>undefined</code> primitive
+  value, usually using “<code>void(0)</code>” (which
+  is equivalent to “<code>void 0</code>”). In these
+  cases, the global variable <a href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/undefined" rel="noreferrer"><code>undefined</code></a>
+  can be used instead (assuming it has
+  not been assigned to a non-default
+  value).</p>
+</blockquote>
+
+<p>An explanation is provided here: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/void" rel="noreferrer"><code>void</code> operator</a>.</p>
+
+<p>The reason you’d want to do this with the <code>href</code> of a link is that normally, a <code>javascript:</code> URL will redirect the browser to a plain text version of the result of evaluating that JavaScript. But if the result is <code>undefined</code>, then the browser stays on the same page. <code>void(0)</code> is just a short and simple script that evaluates to <code>undefined</code>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="534 votes">534</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/18936/bobince" rel="noopener">bobince</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1293130" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>In addition to the technical answer, <code>javascript:void</code> means the author is Doing It Wrong.</p>
+
+<p>There is no good reason to use a <code>javascript:</code> pseudo-URL(*). In practice it will cause confusion or errors should anyone try things like ‘bookmark link’, ‘open link in a new tab’, and so on. This happens quite a lot now people have got used to middle-click-for-new-tab: it looks like a link, you want to read it in a new tab, but it turns out to be not a real link at all, and gives unwanted results like a blank page or a JS error when middle-clicked.</p>
+
+<p><code>&lt;a href="#"&gt;</code> is a common alternative which might arguably be less bad. However you must remember to <code>return false</code> from your <code>onclick</code> event handler to prevent the link being followed and scrolling up to the top of the page.</p>
+
+<p>In some cases there may be an actual useful place to point the link to. For example if you have a control you can click on that opens up a previously-hidden <code>&lt;div id="foo"&gt;</code>, it makes some sense to use <code>&lt;a href="#foo"&gt;</code> to link to it. Or if there is a non-JavaScript way of doing the same thing (for example, ‘thispage.php?show=foo’ that sets foo visible to begin with), you can link to that.</p>
+
+<p>Otherwise, if a link points only to some script, it is not really a link and should not be marked up as such. The usual approach would be to add the <code>onclick</code> to a <code>&lt;span&gt;</code>, <code>&lt;div&gt;</code>, or an <code>&lt;a&gt;</code> without an <code>href</code> and style it in some way to make it clear you can click on it. This is what StackOverflow [did at the time of writing; now it uses <code>href="#"</code>].</p>
+
+<p>The disadvantage of this is that you lose keyboard control, since you can't tab onto a span/div/bare-a or activate it with space. Whether this is actually a disadvantage depends on what sort of action the element is intended to take. You can, with some effort, attempt to mimic the keyboard interactability by adding a <code>tabIndex</code> to the element, and listening for a Space keypress. But it's never going to 100% reproduce the real browser behaviour, not least because different browsers can respond to the keyboard differently (not to mention non-visual browsers).</p>
+
+<p>If you really want an element that isn't a link but which can be activated as normal by mouse or keyboard, what you want is a <code>&lt;button type="button"&gt;</code> (or <code>&lt;input type="button"&gt;</code> is just as good, for simple textual contents). You can always use CSS to restyle it so it looks more like a link than a button, if you want. But since it behaves like a button, that's how really you should mark it up.</p>
+
+<p>(*: in site authoring, anyway. Obviously they are useful for bookmarklets. <code>javascript:</code> pseudo-URLs are a conceptual bizarreness: a locator that doesn't point to a location, but instead calls active code inside the current location. They have caused massive security problems for both browsers and webapps, and should never have been invented by Netscape.)</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="157 votes">157</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/154152/noon-silk" rel="noopener">Noon Silk</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1291944" rel="noopener">原文 ↗</a></div><div class="prose"><p>It means it’ll do nothing. It’s an attempt to have the link not ‘navigate’ anywhere. But it’s not the right way.</p>
+
+<p>You should actually just <code>return false</code> in the <code>onclick</code> event, like so:</p>
+
+<pre class="lang-html prettyprint-override"><code>&lt;a href="#"&gt;hello&lt;/a&gt;
+</code></pre>
+
+<p>Typically it’s used if the link is doing some ‘JavaScript-y’ thing. Like posting an AJAX form, or swapping an image, or whatever. In that case you just make whatever function is being called return <code>false</code>.</p>
+
+<p>To make your website completely awesome, however, generally you’ll include a link that does the same action, if the person browsing it chooses not to run JavaScript.</p>
+
+<pre class="lang-html prettyprint-override"><code>&lt;a href="backup_page_displaying_image.aspx"
+  &gt;hello&lt;/a&gt;
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

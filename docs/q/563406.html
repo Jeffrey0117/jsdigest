@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to add days to Date? · jsdigest</title>
+<meta name="description" content="How to add days to current Date using JavaScript? Does JavaScript have a built in function like .NET&#39;s AddDay() ?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to add days to Date?</h1>
+    <div class="q-meta big"><span class="score hot" title="1799 votes">1.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/12872/ashesh" rel="noopener">Ashesh</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">date</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/563406/how-to-add-days-to-date" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How to add days to current <code>Date</code> using JavaScript? Does JavaScript have a built in function like .NET's <code>AddDay()</code>?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1857 votes">1.9k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/17516/anthonywjones" rel="noopener">AnthonyWJones</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/563442" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can create one using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/setDate#description" rel="noreferrer">
+Date.prototype.setDate()</a>:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>Date.prototype.addDays = function(days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
+
+var date = new Date();
+
+console.log(date.addDays(5));</code></pre>
+</div>
+</div>
+</p>
+<p>This takes care of automatically incrementing the month if necessary, as noted <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/setDate#description" rel="noreferrer">here</a>. For example:</p>
+<p><strong>8/31</strong> + 1 day will become <strong>9/1</strong>.</p>
+<p>The problem with using <code>setDate</code> directly is that it's a mutator and that sort of thing is best avoided. ECMA saw fit to treat <code>Date</code> as a mutable class rather than an immutable structure.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1175 votes">1.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/787757/sparebytes" rel="noopener">sparebytes</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/19691491" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>Correct Answer</strong>:</p>
+<pre><code>function addDays(date, days) {
+  var result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+</code></pre>
+<p><strong>Incorrect Answer</strong>:</p>
+<p>This answer <em>sometimes</em> provides the correct result but very often returns the wrong year and month. The only time this answer works is when the date that you are adding days to happens to have the current year and month.</p>
+<pre><code>// Don't do it this way!
+function addDaysWRONG(date, days) {
+  var result = new Date(); // not instatiated with date!!! DANGER
+  result.setDate(date.getDate() + days);
+  return result;
+}
+</code></pre>
+<p><strong>Proof / Example</strong></p>
+<p><a href="http://jsfiddle.net/sparebytes/XrWzq/" rel="noreferrer">Check this JsFiddle</a></p>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="false" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// Correct
+function addDays(date, days) {
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+}
+
+// Bad Year/Month
+function addDaysWRONG(date, days) {
+    var result = new Date();
+    result.setDate(date.getDate() + days);
+    return result;
+}
+
+// Bad during DST
+function addDaysDstFail(date, days) {
+    var dayms = (days * 24 * 60 * 60 * 1000);
+    return new Date(date.getTime() + dayms);    
+}
+
+// TEST
+function formatDate(date) {
+    return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+}
+
+$('tbody tr td:first-child').each(function () {
+    var $in = $(this);
+    var $out = $('&lt;td/&gt;').insertAfter($in).addClass("answer");
+    var $outFail = $('&lt;td/&gt;').insertAfter($out);
+    var $outDstFail = $('&lt;td/&gt;').insertAfter($outFail);
+    var date = new Date($in.text());
+    var correctDate = formatDate(addDays(date, 1));
+    var failDate = formatDate(addDaysWRONG(date, 1));
+    var failDstDate = formatDate(addDaysDstFail(date, 1));
+
+    $out.text(correctDate);
+    $outFail.text(failDate);
+    $outDstFail.text(failDstDate);
+    $outFail.addClass(correctDate == failDate ? "right" : "wrong");
+    $outDstFail.addClass(correctDate == failDstDate ? "right" : "wrong");
+});</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>body {
+    font-size: 14px;
+}
+
+table {
+    border-collapse:collapse;
+}
+table, td, th {
+    border:1px solid black;
+}
+td {
+    padding: 2px;
+}
+
+.wrong {
+    color: red;
+}
+.right {
+    color: green;
+}
+.answer {
+    font-weight: bold;
+}</code></pre>
+<pre class="snippet-code-html lang-html prettyprint-override"><code>&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;table&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;th colspan="4"&gt;DST Dates&lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th&gt;Input&lt;/th&gt;
+            &lt;th&gt;+1 Day&lt;/th&gt;
+            &lt;th&gt;+1 Day Fail&lt;/th&gt;
+            &lt;th&gt;+1 Day DST Fail&lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;03/10/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;11/03/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;03/09/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;11/02/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;03/08/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;11/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th colspan="4"&gt;2013&lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th&gt;Input&lt;/th&gt;
+            &lt;th&gt;+1 Day&lt;/th&gt;
+            &lt;th&gt;+1 Day Fail&lt;/th&gt;
+            &lt;th&gt;+1 Day DST Fail&lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;01/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;02/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;03/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;04/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;05/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;06/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;07/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;08/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;09/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;10/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;11/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;12/01/2013&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th colspan="4"&gt;2014&lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th&gt;Input&lt;/th&gt;
+            &lt;th&gt;+1 Day&lt;/th&gt;
+            &lt;th&gt;+1 Day Fail&lt;/th&gt;
+            &lt;th&gt;+1 Day DST Fail&lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;01/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;02/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;03/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;04/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;05/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;06/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;07/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;08/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;09/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;10/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;11/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;12/01/2014&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th colspan="4"&gt;2015&lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th&gt;Input&lt;/th&gt;
+            &lt;th&gt;+1 Day&lt;/th&gt;
+            &lt;th&gt;+1 Day Fail&lt;/th&gt;
+            &lt;th&gt;+1 Day DST Fail&lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;01/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;02/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;03/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;04/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;05/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;06/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;07/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;08/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;09/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;10/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;11/01/2015&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;12/01/2015&lt;/td&gt;&lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+</div>
+</div>
+</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="315 votes">315</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3043/joel-coehoorn" rel="noopener">Joel Coehoorn</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/563420" rel="noopener">原文 ↗</a></div><div class="prose"><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var today = new Date();
+var tomorrow = new Date();
+tomorrow.setDate(today.getDate()+1);
+console.log(today);
+console.log(tomorrow);</code></pre>
+</div>
+</div>
+</p>
+<p>Be careful, because this can be tricky.  When setting <code>tomorrow</code>, it only works because its current value matches the year and month for <code>today</code>.  However, setting to a date number like &quot;32&quot; normally will still work just fine to move it to the next month.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

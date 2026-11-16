@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search an array of JavaScript objects for an object with a matching value · jsdigest</title>
+<meta name="description" content="I&#39;ve got an array: myArray = [{&#39;id&#39;:&#39;73&#39;,&#39;foo&#39;:&#39;bar&#39;},{&#39;id&#39;:&#39;45&#39;,&#39;foo&#39;:&#39;bar&#39;}, etc.] I&#39;m unable to change the structure of the array. I&#39;m being passed an id of…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Search an array of JavaScript objects for an object with a matching value</h1>
+    <div class="q-meta big"><span class="score hot" title="2161 votes">2.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/614566/thugsb" rel="noopener">thugsb</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">javascript-objects</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/7364150/search-an-array-of-javascript-objects-for-an-object-with-a-matching-value" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I've got an array:</p>
+
+<pre><code>myArray = [{'id':'73','foo':'bar'},{'id':'45','foo':'bar'}, etc.]
+</code></pre>
+
+<p>I'm unable to change the structure of the array. I'm being passed an id of <code>45</code>, and I want to get <code>'bar'</code> for that object in the array. </p>
+
+<p>How do I do this in JavaScript or using jQuery?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2212 votes">2.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3853934/micha%c5%82-per%c5%82akowski" rel="noopener">Michał Perłakowski</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/35398031" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use the <code>find()</code> method:</p>
+<pre><code>myArray.find(x =&gt; x.id === '45').foo;
+</code></pre>
+<p>From <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find" rel="noreferrer">MDN</a>:</p>
+<blockquote>
+<p>The <code>find()</code> method returns the first value in the array, if an element in the array satisfies the provided testing function. Otherwise <code>undefined</code> is returned.</p>
+</blockquote>
+<hr />
+<p>If you want to find its <em>index</em> instead, use <code>findIndex()</code>:</p>
+<pre><code>myArray.findIndex(x =&gt; x.id === '45');
+</code></pre>
+<p>From <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex" rel="noreferrer">MDN</a>:</p>
+<blockquote>
+<p>The <code>findIndex()</code> method returns the index of the first element in the array that satisfies the provided testing function. Otherwise -1 is returned.</p>
+</blockquote>
+<hr />
+<p>If you want to get an array of matching elements, use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter" rel="noreferrer"><code>filter()</code></a> method instead:</p>
+<pre><code>myArray.filter(x =&gt; x.id === '45');
+</code></pre>
+<p>This will return an array of objects. If you want to get an array of <code>foo</code> properties, you can do this with the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map" rel="noreferrer"><code>map()</code></a> method:</p>
+<pre><code>myArray.filter(x =&gt; x.id === '45').map(x =&gt; x.foo);
+</code></pre>
+<hr />
+<p>Side note: methods like <code>find()</code> or <code>filter()</code>, and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions" rel="noreferrer">arrow functions</a> are not supported by older browsers (like IE), so if you want to support these browsers, you should transpile your code using <a href="https://babeljs.io/" rel="noreferrer">Babel</a> (with the <a href="https://babeljs.io/docs/usage/polyfill/" rel="noreferrer">polyfill</a>).</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1502 votes">1.5k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/69083/guffa" rel="noopener">Guffa</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/7364307" rel="noopener">原文 ↗</a></div><div class="prose"><p>As you are already using jQuery, you can use the <a href="http://api.jquery.com/jQuery.grep/" rel="noreferrer">grep</a> function which is intended for searching an array:</p>
+
+<pre><code>var result = $.grep(myArray, function(e){ return e.id == id; });
+</code></pre>
+
+<p>The result is an array with the items found. If you know that the object is always there and that it only occurs once, you can just use <code>result[0].foo</code> to get the value. Otherwise you should check the length of the resulting array. Example:</p>
+
+<pre><code>if (result.length === 0) {
+  // no result found
+} else if (result.length === 1) {
+  // property found, access the foo property using result[0].foo
+} else {
+  // multiple items found
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="382 votes">382</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/34088/aaron-digulla" rel="noopener">Aaron Digulla</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/7364247" rel="noopener">原文 ↗</a></div><div class="prose"><p>Another solution is to create a lookup object:</p>
+
+<pre><code>var lookup = {};
+for (var i = 0, len = array.length; i &lt; len; i++) {
+    lookup[array[i].id] = array[i];
+}
+
+... now you can use lookup[id]...
+</code></pre>
+
+<p>This is especially interesting if you need to do many lookups.</p>
+
+<p>This won't need much more memory since the IDs and objects will be shared.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

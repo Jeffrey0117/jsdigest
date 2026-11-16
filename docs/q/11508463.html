@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaScript set object key by variable · jsdigest</title>
+<meta name="description" content="I am building some objects in JavaScript and pushing those objects into an array, I am storing the key I want to use in a variable then creating my objects lik…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>JavaScript set object key by variable</h1>
+    <div class="q-meta big"><span class="score hot" title="1748 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/702638/hunter-mcmillen" rel="noopener">Hunter McMillen</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/11508463/javascript-set-object-key-by-variable" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I am building some objects in JavaScript and pushing those objects into an array, I am storing the key I want to use in a variable then creating my objects like so:</p>
+
+<pre><code>var key = "happyCount";
+myArray.push( { key : someValueArray } );
+</code></pre>
+
+<p>but when I try to examine my array of objects for every object the key is <code>"key"</code> instead of the value of the variable key. Is there any way to set the value of the key from a variable? </p>
+
+<p>Fiddle for better explanation:
+<a href="http://jsfiddle.net/Fr6eY/3/" rel="noreferrer">http://jsfiddle.net/Fr6eY/3/</a></p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3088 votes">3.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/206403/gen-eric" rel="noopener">gen_Eric</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11508490" rel="noopener">原文 ↗</a></div><div class="prose"><p>You need to make the object first, then use <code>[]</code> to set it.</p>
+<pre><code>var key = &quot;happyCount&quot;;
+var obj = {};
+
+obj[key] = someValueArray;
+myArray.push(obj);
+</code></pre>
+<hr />
+<p>UPDATE 2021:</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#computed_property_names" rel="noreferrer">Computed property names</a> feature was introduced in ECMAScript 2015 (ES6) that allows you to dynamically compute the names of the object properties in JavaScript object literal notation.</p>
+<pre><code>const yourKeyVariable = &quot;happyCount&quot;;
+const someValueArray= [...];
+
+const obj = {
+    [yourKeyVariable]: someValueArray,
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="633 votes">633</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1188322/kiranvj" rel="noopener">kiranvj</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11508530" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>In ES6, you can do like this.</strong></p>
+<pre><code>var key = &quot;name&quot;;
+var person = {[key]:&quot;John&quot;}; // same as var person = {&quot;name&quot; : &quot;John&quot;}
+console.log(person); // should print  Object { name=&quot;John&quot;}
+</code></pre>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>    var key = "name";
+    var person = {[key]:"John"};
+    console.log(person); // should print  Object { name="John"}</code></pre>
+</div>
+</div>
+</p>
+<p>Its called <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#computed_property_names" rel="noreferrer">Computed Property Names</a>, its implemented using bracket notation( square brackets) <code>[]</code></p>
+<p>Example: <code>{ [variableName] : someValue }</code></p>
+<blockquote>
+<p>Starting with ECMAScript 2015, the object initializer syntax also
+supports computed property names. That allows you to put an expression
+in brackets [], that will be computed and used as the property name.</p>
+</blockquote>
+<p><strong>For ES5, try something like this</strong></p>
+<pre><code>var yourObject = {};
+
+yourObject[yourKey] = &quot;yourValue&quot;;
+
+console.log(yourObject );
+</code></pre>
+<p><strong>example:</strong></p>
+<pre><code>var person = {};
+var key = &quot;name&quot;;
+
+person[key] /* this is same as person.name */ = &quot;John&quot;;
+
+console.log(person); // should print  Object { name=&quot;John&quot;}
+</code></pre>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>    var person = {};
+    var key = "name";
+    
+    person[key] /* this is same as person.name */ = "John";
+    
+    console.log(person); // should print  Object { name="John"}</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="29 votes">29</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/20576394/underflow" rel="noopener">underflow</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/75340291" rel="noopener">原文 ↗</a></div><div class="prose"><h1>The Reality</h1>
+<p>The problem in JS is simply that:</p>
+<pre><code>{ x: 2 }
+</code></pre>
+<p>is THE SAME as:</p>
+<pre><code>{ &quot;x&quot;: 2 }
+</code></pre>
+<p>(even if you have <code>x</code> a variable defined!)</p>
+<h1>Solution</h1>
+<p>Add square brackets <kbd>[</kbd><kbd>]</kbd> around the <strong>identifier</strong> of the key:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var key = "happyCount";
+myArray.push( { [key] : someValueArray } );</code></pre>
+</div>
+</div>
+</p>
+<p>(Nowadays the keyword <code>var</code> is not much used, so please use instead <code>const</code> or <code>let</code>)</p>
+<h2>tldr;</h2>
+<p><a href="https://i.sstatic.net/Wb4uy.png" rel="noreferrer"><img src="https://i.sstatic.net/Wb4uy.png" alt="enter image description here" /></a></p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

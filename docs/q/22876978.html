@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loop inside React JSX · jsdigest</title>
+<meta name="description" content="I&#39;m trying to do something like the following in React JSX (where ObjectRow is a separate component): &lt;tbody&gt; for (var i=0; i &lt; numrows; i++) { &lt;ObjectRow/&gt; }…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Loop inside React JSX</h1>
+    <div class="q-meta big"><span class="score hot" title="2104 votes">2.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/652693/b-robster" rel="noopener">B Robster</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">reactjs</span><span class="tag">jsx</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/22876978/loop-inside-react-jsx" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm trying to do something like the following in React JSX (where ObjectRow is a separate component):</p>
+<pre><code>&lt;tbody&gt;
+    for (var i=0; i &lt; numrows; i++) {
+        &lt;ObjectRow/&gt;
+    } 
+&lt;/tbody&gt;
+</code></pre>
+<p>I realize and understand why this isn't valid JSX, since JSX maps to function calls. However, coming from template land and being new to JSX, I am unsure how I would achieve the above (adding a component multiple times).</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1830 votes">1.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/49485/sophie-alpert" rel="noopener">Sophie Alpert</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/22877049" rel="noopener">原文 ↗</a></div><div class="prose"><p>Think of it like you're just calling JavaScript functions. You can't use a <code>for</code> loop where the arguments to a function call would go:</p>
+<pre><code>return tbody(
+    for (let i = 0; i &lt; numrows; i++) {
+        ObjectRow()
+    } 
+)
+</code></pre>
+<p>See how the function <code>tbody</code> is being passed a <code>for</code> loop as an argument – leading to a syntax error.</p>
+<p>But you can make an array, and then pass that in as an argument:</p>
+<pre><code>const rows = [];
+for (let i = 0; i &lt; numrows; i++) {
+    rows.push(ObjectRow());
+}
+return tbody(rows);
+</code></pre>
+<hr />
+<p>You can basically use the same structure when working with JSX:</p>
+<pre><code>const rows = [];
+for (let i = 0; i &lt; numrows; i++) {
+    // note: we are adding a key prop here to allow react to uniquely identify each
+    // element in this array. see: https://reactjs.org/docs/lists-and-keys.html
+    rows.push(&lt;ObjectRow key={i} /&gt;);
+}
+return &lt;tbody&gt;{rows}&lt;/tbody&gt;;
+</code></pre>
+<p>Incidentally, my JavaScript example is almost exactly what that example of JSX transforms into. Play around with <a href="https://babeljs.io/repl" rel="noreferrer">Babel REPL</a> to get a feel for how JSX works.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1201 votes">1.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1074592/brigand" rel="noopener">Brigand</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/22877110" rel="noopener">原文 ↗</a></div><div class="prose"><p>I am not sure if this will work for your situation, but often <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map" rel="noreferrer">map</a> is a good answer.</p>
+<p>If this was your code with the <em>for</em> loop:</p>
+<pre><code>&lt;tbody&gt;
+    for (var i=0; i &lt; objects.length; i++) {
+        &lt;ObjectRow obj={objects[i]} key={i}&gt;
+    }
+&lt;/tbody&gt;
+</code></pre>
+<p>You could write it like this with <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map" rel="noreferrer">map</a>:</p>
+<pre><code>&lt;tbody&gt;
+    {objects.map(function(object, i){
+        return &lt;ObjectRow obj={object} key={i} /&gt;;
+    })}
+&lt;/tbody&gt;
+</code></pre>
+<p>ES6 syntax:</p>
+<pre><code>&lt;tbody&gt;
+    {objects.map((object, i) =&gt; &lt;ObjectRow obj={object} key={i} /&gt;)}
+&lt;/tbody&gt;
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="762 votes">762</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1034448/jmm" rel="noopener">JMM</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/29629588" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>If you don't already have an array to <code>map()</code> like @FakeRainBrigand's answer, and want to inline this so the source layout corresponds to the output closer than @SophieAlpert's answer:</p>
+
+<h1>With ES2015 (ES6) syntax (spread and arrow functions)</h1>
+
+<p><a href="http://plnkr.co/edit/mfqFWODVy8dKQQOkIEGV?p=preview" rel="noreferrer">http://plnkr.co/edit/mfqFWODVy8dKQQOkIEGV?p=preview</a></p>
+
+<pre class="lang-js prettyprint-override"><code>&lt;tbody&gt;
+  {[...Array(10)].map((x, i) =&gt;
+    &lt;ObjectRow key={i} /&gt;
+  )}
+&lt;/tbody&gt;
+</code></pre>
+
+<p>Re: transpiling with Babel, its <a href="https://babeljs.io/docs/advanced/caveats/" rel="noreferrer">caveats page</a> says that <code>Array.from</code> is required for spread, but at present (<code>v5.8.23</code>) that does not seem to be the case when spreading an actual <code>Array</code>. I have a <a href="https://github.com/babel/babel.github.io/pull/392" rel="noreferrer">documentation issue</a> open to clarify that. But use at your own risk or polyfill.</p>
+
+<h1>Vanilla ES5</h1>
+
+<h2><code>Array.apply</code></h2>
+
+<pre><code>&lt;tbody&gt;
+  {Array.apply(0, Array(10)).map(function (x, i) {
+    return &lt;ObjectRow key={i} /&gt;;
+  })}
+&lt;/tbody&gt;
+</code></pre>
+
+<h2>Inline IIFE</h2>
+
+<p><a href="http://plnkr.co/edit/4kQjdTzd4w69g8Suu2hT?p=preview" rel="noreferrer">http://plnkr.co/edit/4kQjdTzd4w69g8Suu2hT?p=preview</a></p>
+
+<pre class="lang-js prettyprint-override"><code>&lt;tbody&gt;
+  {(function (rows, i, len) {
+    while (++i &lt;= len) {
+      rows.push(&lt;ObjectRow key={i} /&gt;)
+    }
+    return rows;
+  })([], 0, 10)}
+&lt;/tbody&gt;
+</code></pre>
+
+<h2>Combination of techniques from other answers</h2>
+
+<p>Keep the source layout corresponding to the output, but make the inlined part more compact:</p>
+
+<pre class="lang-js prettyprint-override"><code>render: function () {
+  var rows = [], i = 0, len = 10;
+  while (++i &lt;= len) rows.push(i);
+
+  return (
+    &lt;tbody&gt;
+      {rows.map(function (i) {
+        return &lt;ObjectRow key={i} index={i} /&gt;;
+      })}
+    &lt;/tbody&gt;
+  );
+}
+</code></pre>
+
+<h1>With ES2015 syntax &amp; <code>Array</code> methods</h1>
+
+<p>With <code>Array.prototype.fill</code> you could do this as an alternative to using spread as illustrated above:</p>
+
+<pre class="lang-js prettyprint-override"><code>&lt;tbody&gt;
+  {Array(10).fill(1).map((el, i) =&gt;
+    &lt;ObjectRow key={i} /&gt;
+  )}
+&lt;/tbody&gt;
+</code></pre>
+
+<p>(I think you could actually omit any argument to <code>fill()</code>, but I'm not 100% on that.) Thanks to @FakeRainBrigand for correcting my mistake in an earlier version of the <code>fill()</code> solution (see revisions).</p>
+
+<h1><code>key</code></h1>
+
+<p>In all cases the <code>key</code> attr alleviates a warning with the development build, but isn't accessible in the child. You can pass an extra attr if you want the index available in the child. See <a href="https://facebook.github.io/react/docs/lists-and-keys.html" rel="noreferrer">Lists and Keys</a> for discussion.</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

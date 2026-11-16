@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Difference between == and === in JavaScript · jsdigest</title>
+<meta name="description" content="What is the difference between == and === in JavaScript? I have also seen != and !== operators. Are there more such operators?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Difference between == and === in JavaScript</h1>
+    <div class="q-meta big"><span class="score hot" title="1711 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/51570/shiva" rel="noopener">Shiva</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">comparison-operators</span><span class="tag">equality-operator</span><span class="tag">identity-operator</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/523643/difference-between-and-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What is the difference between <code>==</code> and <code>===</code> in JavaScript?  I have also seen <code>!=</code> and <code>!==</code> operators.  Are there more such operators?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1210 votes">1.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/39428/jack-sleight" rel="noopener">Jack Sleight</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/523647" rel="noopener">原文 ↗</a></div><div class="prose"><p><code>===</code> and <code>!==</code> are strict comparison operators:</p>
+<blockquote>
+<p>JavaScript has both strict and
+type-converting equality comparison.
+For <code>strict</code> equality the objects being
+compared must have the same type and:</p>
+<ul>
+<li>Two strings are strictly equal when they have the same sequence of
+characters, same length, and same
+characters in corresponding positions.</li>
+<li>Two numbers are strictly equal when they are numerically equal (have
+the same number value). <code>NaN</code> is not
+equal to anything, including <code>NaN</code>.
+Positive and negative zeros are equal
+to one another.</li>
+<li>Two Boolean operands are strictly equal if both are true or
+both are false.</li>
+<li>Two objects are strictly equal if they refer to the same <code>Object</code>.</li>
+<li><code>Null</code> and <code>Undefined</code> types are <code>==</code> (but not <code>===</code>). [I.e. (<code>Null==Undefined</code>) is <code>true</code> but (<code>Null===Undefined</code>) is <code>false</code>]</li>
+</ul>
+</blockquote>
+<p><a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Operators/Comparison_Operators" rel="noreferrer">Comparison Operators - MDC</a></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="2042 votes">2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3445/sdfx" rel="noopener">sdfx</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/523650" rel="noopener">原文 ↗</a></div><div class="prose"><p>Take a look here: <a href="http://longgoldenears.blogspot.com/2007/09/triple-equals-in-javascript.html" rel="noreferrer">http://longgoldenears.blogspot.com/2007/09/triple-equals-in-javascript.html</a></p>
+<p>The 3 equal signs mean &quot;equality without type coercion&quot;. Using the triple equals, the values must be equal in type as well.</p>
+<pre><code>0 == false   // true
+0 === false  // false, because they are of a different type
+1 == &quot;1&quot;     // true, automatic type conversion for value only
+1 === &quot;1&quot;    // false, because they are of a different type
+null == undefined // true
+null === undefined // false
+'0' == false // true
+'0' === false // false
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

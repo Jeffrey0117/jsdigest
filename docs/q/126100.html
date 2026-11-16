@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to efficiently count the number of keys/properties of an object in JavaScript · jsdigest</title>
+<meta name="description" content="What’s the fastest way to count the number of keys/properties of an object? Is it possible to do this without iterating over the object, i.e., without doing: v…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to efficiently count the number of keys/properties of an object in JavaScript</h1>
+    <div class="q-meta big"><span class="score hot" title="2046 votes">2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/11543/mjs" rel="noopener">mjs</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">performance</span><span class="tag">properties</span><span class="tag">count</span><span class="tag">key</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/126100/how-to-efficiently-count-the-number-of-keys-properties-of-an-object-in-javascrip" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What’s the fastest way to count the number of keys/properties of an object? Is it possible to do this without iterating over the object, i.e., without doing:</p>
+<pre><code>var count = 0;
+for (k in myobj) if (myobj.hasOwnProperty(k)) ++count;
+</code></pre>
+<p>(Firefox did provide a magic <code>__count__</code> property, but this was removed somewhere around version 4.)</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3212 votes">3.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/7012/avi-flax" rel="noopener">Avi Flax</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4889658" rel="noopener">原文 ↗</a></div><div class="prose"><p>To do this in any <em><a href="https://en.wikipedia.org/wiki/ECMAScript#5th_Edition" rel="noreferrer">ES5</a>-compatible environment</em>, such as <a href="http://nodejs.org" rel="noreferrer">Node.js</a>, Chrome, <a href="https://en.wikipedia.org/wiki/Internet_Explorer_9" rel="noreferrer">Internet Explorer 9+</a>, Firefox 4+, or Safari 5+:</p>
+<pre class="lang-js prettyprint-override"><code>Object.keys(obj).length
+</code></pre>
+<ul>
+<li><a href="https://kangax.github.io/compat-table/es5/" rel="noreferrer">Browser compatibility</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys" rel="noreferrer">Object.keys documentation</a> (includes a method you can add to non-ES5 browsers)</li>
+</ul>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="166 votes">166</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/288264/renaat-de-muynck" rel="noopener">Renaat De Muynck</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5675579" rel="noopener">原文 ↗</a></div><div class="prose"><p>You could use this code:</p>
+
+<pre><code>if (!Object.keys) {
+    Object.keys = function (obj) {
+        var keys = [],
+            k;
+        for (k in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, k)) {
+                keys.push(k);
+            }
+        }
+        return keys;
+    };
+}
+</code></pre>
+
+<p>Then you can use this in older browsers as well:</p>
+
+<pre><code>var len = Object.keys(obj).length;
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="144 votes">144</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/255961/studgeek" rel="noopener">studgeek</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6019605" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you are using <a href="http://underscorejs.org/" rel="nofollow noreferrer">Underscore.js</a> you can use <a href="http://underscorejs.org/#size" rel="nofollow noreferrer">_.size</a> (<a href="https://stackoverflow.com/questions/126100/how-to-efficiently-count-the-number-of-keys-properties-of-an-object-in-javascrip#comment7517359_6019605">thanks douwe</a>):</p>
+<pre><code>_.size(obj)
+</code></pre>
+<p>Alternatively you can also use <a href="http://underscorejs.org/#keys" rel="nofollow noreferrer">_.keys</a> which might be clearer for some:</p>
+<pre><code>_.keys(obj).length
+</code></pre>
+<p>I highly recommend Underscore.js. It's a tight library for doing lots of basic things. Whenever possible, they match <a href="https://en.wikipedia.org/wiki/ECMAScript#5th_Edition" rel="nofollow noreferrer">ECMAScript 5</a> and defer to the native implementation.</p>
+<p>Otherwise I support <a href="https://stackoverflow.com/questions/126100/how-to-efficiently-count-the-number-of-keys-properties-of-an-object-in-javascrip/4889658#4889658">Avi Flax' answer</a>. I edited it to add a link to the <a href="https://en.wikipedia.org/wiki/MDN_Web_Docs" rel="nofollow noreferrer">MDC</a> documentation which includes the keys() method you can add to non-ECMAScript 5 browsers.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

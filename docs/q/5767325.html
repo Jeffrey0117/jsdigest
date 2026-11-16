@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I remove a specific item from an array in JavaScript? · jsdigest</title>
+<meta name="description" content="How do I remove a specific value from an array? Something like: array.remove(value); Constraints: I have to use core JavaScript. Frameworks are not allowed.">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I remove a specific item from an array in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="12260 votes">12k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/364969/walker" rel="noopener">Walker</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/5767325/how-can-i-remove-a-specific-item-from-an-array-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I remove a specific value from an array? Something like:</p>
+<pre class="lang-js prettyprint-override"><code>array.remove(value);
+</code></pre>
+<p>Constraints: I have to use <strong>core</strong> JavaScript. Frameworks are not allowed.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="17046 votes">17k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/613430/tom-wadley" rel="noopener">Tom Wadley</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5767357" rel="noopener">原文 ↗</a></div><div class="prose"><p>Find the <code>index</code> of the array element you want to remove using <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf" rel="noreferrer"><code>indexOf</code></a>, and then remove that index with <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/splice" rel="noreferrer"><code>splice</code></a>.</p>
+<blockquote>
+<p>The splice() method changes the contents of an array by removing
+existing elements and/or adding new elements.</p>
+</blockquote>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const array = [2, 5, 9];
+
+console.log(array);
+
+const index = array.indexOf(5);
+if (index &gt; -1) { // only splice array when item is found
+  array.splice(index, 1); // 2nd parameter means remove one item only
+}
+
+// array = [2, 9]
+console.log(array);</code></pre>
+</div>
+</div>
+</p>
+<p>The second parameter of <code>splice</code> is the number of elements to remove. Note that <code>splice</code> modifies the array in place and returns a new array containing the elements that have been removed.</p>
+<hr />
+<p>For completeness, here are functions. The first function removes only a single occurrence (e.g., removing the first match of <code>5</code> from <code>[2,5,9,1,5,8,5]</code>), while the second function removes all occurrences:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function removeItemOnce(arr, value) {
+  var index = arr.indexOf(value);
+  if (index &gt; -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
+}
+
+function removeItemAll(arr, value) {
+  var i = 0;
+  while (i &lt; arr.length) {
+    if (arr[i] === value) {
+      arr.splice(i, 1);
+    } else {
+      ++i;
+    }
+  }
+  return arr;
+}
+// Usage
+console.log(removeItemOnce([2,5,9,1,5,8,5], 5))
+console.log(removeItemAll([2,5,9,1,5,8,5], 5))</code></pre>
+</div>
+</div>
+</p>
+<p>In TypeScript, these functions can stay type-safe with a type parameter:</p>
+<pre class="lang-js prettyprint-override"><code>function removeItem&lt;T&gt;(arr: Array&lt;T&gt;, value: T): Array&lt;T&gt; {
+  const index = arr.indexOf(value);
+  if (index &gt; -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="2621 votes">2.6k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3120495/ujeenator" rel="noopener">ujeenator</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/20690490" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><ul>
+<li>Do it simple, intuitive and explicit (<a href="https://en.wikipedia.org/wiki/Occam%27s_razor" rel="noreferrer">Occam's razor</a>)</li>
+<li>Do it immutable (original array stays unchanged)</li>
+<li>Do it with standard JavaScript functions, if your browser doesn't support them - <strong>use polyfill</strong></li>
+</ul>
+<p>In this code example I use <strong><code>array.filter(...)</code></strong> function to remove unwanted items from an array. This function doesn't change the original array and creates a new one. If your browser doesn't support this function (e.g. Internet Explorer before version 9, or Firefox before version 1.5), consider <a href="https://github.com/zloirock/core-js#ecmascript-array" rel="noreferrer"><strong>polyfilling with <code>core-js</code></strong></a>.</p>
+<p>Be mindful though, creating a new array every time takes a big performance hit. If the list is very large (think 10k+ items) then consider using other methods.</p>
+<h2>Removing item (ECMA-262 Edition 5 code AKA old style JavaScript)</h2>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var value = 3
+
+var arr = [1, 2, 3, 4, 5, 3]
+
+arr = arr.filter(function(item) {
+    return item !== value
+})
+
+console.log(arr)
+// [ 1, 2, 4, 5 ]</code></pre>
+</div>
+</div>
+</p>
+<h2>Removing item (ECMAScript 6 code)</h2>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>let value = 3
+
+let arr = [1, 2, 3, 4, 5, 3]
+
+arr = arr.filter(item =&gt; item !== value)
+
+console.log(arr)
+// [ 1, 2, 4, 5 ]</code></pre>
+</div>
+</div>
+</p>
+<p><strong>IMPORTANT</strong> ECMAScript 6 <code>() =&gt; {}</code> arrow function syntax is not supported in Internet Explorer at all, Chrome before version 45, Firefox before version 22, and Safari before version 10. To use ECMAScript 6 syntax in old browsers you can use <a href="https://babeljs.io/" rel="noreferrer">BabelJS</a>.</p>
+<hr />
+<h2>Removing multiple items (ECMAScript 7 code)</h2>
+<p>An additional advantage of this method is that you can remove multiple items
+<div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>let forDeletion = [2, 3, 5]
+
+let arr = [1, 2, 3, 4, 5, 3]
+
+arr = arr.filter(item =&gt; !forDeletion.includes(item))
+// !!! Read below about array.includes(...) support !!!
+
+console.log(arr)
+// [ 1, 4 ]</code></pre>
+</div>
+</div>
+</p>
+<p><strong>IMPORTANT</strong> <code>array.includes(...)</code> function is not supported in Internet Explorer at all, Chrome before version 47, Firefox before version 43, Safari before version 9, and Edge before version 14 but you can <a href="https://github.com/zloirock/core-js#ecmascript-array" rel="noreferrer"><strong>polyfill with <code>core-js</code></strong></a>.</p>
+<h2>Removing multiple items (in the future, maybe)</h2>
+<p>If the <a href="https://github.com/tc39/proposal-bind-operator" rel="noreferrer">&quot;This-Binding Syntax&quot;</a> proposal is ever accepted, you'll be able to do this:
+<div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// array-lib.js
+
+export function remove(...forDeletion) {
+    return this.filter(item =&gt; !forDeletion.includes(item))
+}
+
+// main.js
+
+import { remove } from './array-lib.js'
+
+let arr = [1, 2, 3, 4, 5, 3]
+
+// :: This-Binding Syntax Proposal
+// using "remove" function as "virtual method"
+// without extending Array.prototype
+arr = arr::remove(2, 3, 5)
+
+console.log(arr)
+// [ 1, 4 ]</code></pre>
+</div>
+</div>
+</p>
+<p><a href="https://babeljs.io/repl/#?browsers=chrome%20%3E%2050&amp;build=&amp;builtIns=false&amp;corejs=3.21&amp;spec=false&amp;loose=false&amp;code_lz=AQ4MwVwOwYwFwJYHsrAE4FMC2SBuGAKAOhLCTQBEMAbDRFASmAG8AoUD9OiNVOACwQBnImATU4GNAQSSswALwA-YAEIylGnWRQiCWNQgATDEJlyGDdqAC-rayFpxgAQzRpFwANoBGADTAAEwBAMwBACwBAKyhALr2HAD0icAAXKnAACqCQgC0AEL6RvoA5sAAygCeUHAuAB7AAApoSAAOSEIu1A7AycAQQqVcOPjg0PA6rkLAAES4CGhwEF3AWHT8SEYzPW4eCq7u6ZgjhMHAYcBRVj0wKEJItETUSCUEu1ZJKV7A_sDhwLEgA&amp;debug=false&amp;forceAllTransforms=false&amp;shippedProposals=false&amp;circleciRepo=&amp;evaluate=true&amp;fileSize=false&amp;timeTravel=false&amp;sourceType=module&amp;lineWrap=false&amp;presets=es2015%2Creact%2Cstage-0%2Cstage-2&amp;prettier=false&amp;targets=&amp;version=7.17.9&amp;externalPlugins=&amp;assumptions=%7B%7D" rel="noreferrer"><strong>Try it yourself in BabelJS :)</strong></a></p>
+<p><strong>Reference</strong></p>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes" rel="noreferrer">Array.prototype.includes</a></li>
+<li><a href="https://vanslaars.io/articles/create-pipe-function" rel="noreferrer">Functional composition</a></li>
+</ul>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1803 votes">1.8k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/546661/peter-olson" rel="noopener">Peter Olson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5767335" rel="noopener">原文 ↗</a></div><div class="prose"><p>I don't know how you are expecting <code>array.remove(int)</code> to behave. There are three possibilities I can think of that you might be wanting.</p>
+<p>To remove an element of an array at an index <code>i</code>:</p>
+<pre><code>array.splice(i, 1);
+</code></pre>
+<p>If you want to remove every element with value <code>number</code> from the array:</p>
+<pre><code>for(var i = array.length - 1; i &gt;= 0; i--) {
+    if(array[i] === number) {
+       array.splice(i, 1);
+    }
+}
+</code></pre>
+<p>If you just want to make the element at index <code>i</code> no longer exist, but you don't want the indexes of the other elements to change:</p>
+<pre><code>delete array[i];
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

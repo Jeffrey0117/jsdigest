@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why does my JavaScript code receive a &quot;No &#39;Access-Control-Allow-Origin&#39; header is present on the requested resource&quot; error, while Postman does not? · jsdigest</title>
+<meta name="description" content="Mod note : This question is about why XMLHttpRequest / fetch /etc. on the browser are subject to the Same Access Policy restrictions (you get errors mentioning…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Why does my JavaScript code receive a &quot;No &#39;Access-Control-Allow-Origin&#39; header is present on the requested resource&quot; error, while Postman does not?</h1>
+    <div class="q-meta big"><span class="score hot" title="3369 votes">3.4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/2140160/mr-jedi" rel="noopener">Mr Jedi</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">cors</span><span class="tag">postman</span><span class="tag">same-origin-policy</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/20035101/why-does-my-javascript-code-receive-a-no-access-control-allow-origin-header-i" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><blockquote>
+<p><strong>Mod note</strong>: This question is about why <code>XMLHttpRequest</code>/<code>fetch</code>/etc. on the browser are subject to the Same Access Policy restrictions (you get errors mentioning CORB or CORS) while Postman is not. This question is <strong>not</strong> about how to fix a &quot;No 'Access-Control-Allow-Origin'...&quot; error. It's about why they happen.</p>
+</blockquote>
+<blockquote>
+<p><strong>Please stop posting</strong>:</p>
+<ul>
+<li>CORS configurations for every language/framework under the sun. Instead <a href="https://stackoverflow.com/search?q=how+to+enable+CORS+is%3Aquestion&amp;mixed=1">find your relevant language/framework's question</a>.</li>
+<li>3rd party services that allow a request to circumvent CORS</li>
+<li>Command line options for turning off CORS for various browsers</li>
+</ul>
+</blockquote>
+<hr />
+<p>I am trying to do authorization using <a href="http://en.wikipedia.org/wiki/JavaScript" rel="noreferrer">JavaScript</a> by connecting to the <a href="http://en.wikipedia.org/wiki/Representational_state_transfer#RESTful_web_services" rel="noreferrer">RESTful</a> <a href="http://en.wikipedia.org/wiki/Application_programming_interface" rel="noreferrer">API</a> built-in <a href="https://en.wikipedia.org/wiki/Flask_%28web_framework%29" rel="noreferrer">Flask</a>. However, when I make the request, I get the following error:</p>
+<pre class="lang-js prettyprint-override"><code>XMLHttpRequest cannot load http://myApiUrl/login. 
+No 'Access-Control-Allow-Origin' header is present on the requested resource. 
+Origin 'null' is therefore not allowed access.
+</code></pre>
+<p>I know that the API or remote resource must set the header, but why did it work when I made the request via the Chrome extension <a href="https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop" rel="noreferrer">Postman</a>?</p>
+<p>This is the request code:</p>
+<pre class="lang-js prettyprint-override"><code>$.ajax({
+  type: 'POST',
+  dataType: 'text',
+  url: api,
+  username: 'user',
+  password: 'pass',
+  crossDomain: true,
+  xhrFields: {
+    withCredentials: true,
+  },
+})
+  .done(function (data) {
+    console.log('done');
+  })
+  .fail(function (xhr, textStatus, errorThrown) {
+    alert(xhr.responseText);
+    alert(textStatus);
+  });
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1685 votes">1.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1426743/md-sahib-bin-mahboob" rel="noopener">MD. Sahib Bin Mahboob</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/20035319" rel="noopener">原文 ↗</a></div><div class="prose"><p>If I understood it right you are doing an <a href="http://en.wikipedia.org/wiki/XMLHttpRequest" rel="noreferrer">XMLHttpRequest</a> to a different domain than your page is on. So the browser is blocking it as it usually allows a request in the same origin for security reasons. You need to do something different when you want to do a cross-domain request.</p>
+<p>When you are using Postman they are not restricted by this policy. Quoted from <em><a href="https://developer.chrome.com/docs/extensions/mv2/xhr/" rel="noreferrer">Cross-Origin XMLHttpRequest</a></em>:</p>
+<blockquote>
+<p>Regular web pages can use the XMLHttpRequest object to send and receive data from remote servers, but they're limited by the same origin policy. Extensions aren't so limited. An extension can talk to remote servers outside of its origin, as long as it first requests cross-origin permissions.</p>
+</blockquote>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="375 votes">375</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/348589/shady-mohamed-sherif" rel="noopener">Shady Mohamed Sherif</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/27280939" rel="noopener">原文 ↗</a></div><div class="prose"><blockquote>
+<p><strong>WARNING:</strong> Using <code>Access-Control-Allow-Origin: *</code> can make your API/website vulnerable to <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery" rel="noreferrer">cross-site request forgery</a> (CSRF) attacks. Make certain you <a href="https://stackoverflow.com/questions/43154170/is-it-safe-to-enable-cors-to-for-a-public-and-readonly-webservice">understand the risks</a> before using this code.</p>
+</blockquote>
+<p>It's very simple to solve if you are using <a href="http://en.wikipedia.org/wiki/PHP" rel="noreferrer">PHP</a>. Just add the following script in the beginning of your PHP page which handles the request:</p>
+<pre class="lang-php prettyprint-override"><code>&lt;?php header('Access-Control-Allow-Origin: *'); ?&gt;
+</code></pre>
+<p>If you are using <a href="https://en.wikipedia.org/wiki/Node-RED" rel="noreferrer">Node-red</a> you have to allow <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing" rel="noreferrer">CORS</a> in the <code>node-red/settings.js</code> file by un-commenting the following lines:</p>
+<pre><code>// The following property can be used to configure cross-origin resource sharing
+// in the HTTP nodes.
+// See https://github.com/troygoode/node-cors#configuration-options for
+// details on its contents. The following is a basic permissive set of options:
+httpNodeCors: {
+  origin: &quot;*&quot;,
+  methods: &quot;GET,PUT,POST,DELETE&quot;
+},
+</code></pre>
+<p>If you are using <a href="http://flask.pocoo.org/" rel="noreferrer">Flask</a> same as the question; you have first to install <code>flask-cors</code></p>
+<pre class="lang-none prettyprint-override"><code>pip install -U flask-cors
+</code></pre>
+<p>Then include the Flask <em>cors</em> package in your application.</p>
+<pre><code>from flask_cors import CORS
+</code></pre>
+<p>A simple application will look like:</p>
+<pre><code>from flask import Flask
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route(&quot;/&quot;)
+def helloWorld():
+  return &quot;Hello, cross-origin-world!&quot;
+</code></pre>
+<p>For more details, you can check the <a href="https://flask-cors.readthedocs.io/en/latest/" rel="noreferrer">Flask documentation</a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="109 votes">109</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4812677/george" rel="noopener">George</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/41121827" rel="noopener">原文 ↗</a></div><div class="prose"><p>Because <br/>
+<strong>$.ajax({type: &quot;POST&quot;</strong> - calls <strong>OPTIONS</strong> <br/>
+<strong>$.post(</strong> - calls <strong>POST</strong> <br/></p>
+<p>Both are different. <a href="https://stackoverflow.com/tags/postman/info">Postman</a> calls &quot;POST&quot; properly, but when we call it, it will be &quot;OPTIONS&quot;.</p>
+<p><strong>For C# web services - <a href="https://en.wikipedia.org/wiki/ASP.NET_MVC_Framework#Apache_License_2.0_release" rel="noreferrer">Web API</a></strong></p>
+<p>Please add the following code in your <em>web.config</em> file under the &lt;system.webServer&gt; tag. This will work:</p>
+<pre class="lang-xml prettyprint-override"><code>&lt;httpProtocol&gt;
+    &lt;customHeaders&gt;
+        &lt;add name=&quot;Access-Control-Allow-Origin&quot; value=&quot;*&quot; /&gt;
+    &lt;/customHeaders&gt;
+&lt;/httpProtocol&gt;
+</code></pre>
+<p>Please make sure you are not doing any mistake in the Ajax call.</p>
+<h3>jQuery</h3>
+<pre><code>$.ajax({
+    url: 'http://mysite.microsoft.sample.xyz.com/api/mycall',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    type: &quot;POST&quot;, /* or type:&quot;GET&quot; or type:&quot;PUT&quot; */
+    dataType: &quot;json&quot;,
+    data: {
+    },
+    success: function (result) {
+        console.log(result);
+    },
+    error: function () {
+        console.log(&quot;error&quot;);
+    }
+});
+</code></pre>
+<p><strong>Note:</strong> If you are looking for downloading content <strong>from a third-party website</strong> then <strong>this will not help you</strong>.  You can try the following code, but not JavaScript.</p>
+<pre class="lang-none prettyprint-override"><code>System.Net.WebClient wc = new System.Net.WebClient();
+string str = wc.DownloadString(&quot;http://mysite.microsoft.sample.xyz.com/api/mycall&quot;);
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

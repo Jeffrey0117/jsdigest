@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to extend an existing JavaScript array with another array, without creating a new array · jsdigest</title>
+<meta name="description" content="There doesn&#39;t seem to be a way to extend an existing JavaScript array with another array, i.e. to emulate Python&#39;s extend method. I want to achieve the followi…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to extend an existing JavaScript array with another array, without creating a new array</h1>
+    <div class="q-meta big"><span class="score hot" title="1524 votes">1.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/18745/dzinx" rel="noopener">Dzinx</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">concatenation</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>There doesn't seem to be a way to extend an existing JavaScript array with another array, i.e. to emulate Python's <code>extend</code> method.</p>
+
+<p>I want to achieve the following:</p>
+
+<pre><code>&gt;&gt;&gt; a = [1, 2]
+[1, 2]
+&gt;&gt;&gt; b = [3, 4, 5]
+[3, 4, 5]
+&gt;&gt;&gt; SOMETHING HERE
+&gt;&gt;&gt; a
+[1, 2, 3, 4, 5]
+</code></pre>
+
+<p>I know there's a <code>a.concat(b)</code> method, but it creates a new array instead of simply extending the first one. I'd like an algorithm that works efficiently when <code>a</code> is significantly larger than <code>b</code> (i.e. one that does not copy <code>a</code>).</p>
+
+<p><sub><em><strong>Note:</strong> This is <strong>not a duplicate of <a href="https://stackoverflow.com/questions/351409/appending-to-array">How to append something to an array?</a></strong> -- the goal here is to add the whole contents of one array to the other, and to do it "in place", i.e. without copying all elements of the extended array.</em></sub></p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2203 votes">2.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/18745/dzinx" rel="noopener">Dzinx</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1374131" rel="noopener">原文 ↗</a></div><div class="prose"><p>The <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push" rel="noreferrer"><code>.push</code></a> method can take multiple arguments. You can use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator" rel="noreferrer">spread operator</a> to pass all the elements of the second array as arguments to <code>.push</code>:</p>
+
+<pre><code>&gt;&gt;&gt; a.push(...b)
+</code></pre>
+
+<p>If your browser does not support ECMAScript 6, you can use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply" rel="noreferrer"><code>.apply</code></a> instead:</p>
+
+<pre><code>&gt;&gt;&gt; a.push.apply(a, b)
+</code></pre>
+
+<p>Or perhaps, if you think it's clearer:</p>
+
+<pre><code>&gt;&gt;&gt; Array.prototype.push.apply(a,b)
+</code></pre>
+
+<p>Please note that all these solutions will fail with a stack overflow error if array <code>b</code> is too long (trouble starts at about 100,000 elements, depending on the browser).<br>
+If you cannot guarantee that <code>b</code> is short enough, you should use a standard loop-based technique described in the other answer.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="369 votes">369</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/179978/odinho-velmont" rel="noopener">odinho - Velmont</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/31521404" rel="noopener">原文 ↗</a></div><div class="prose"><p><sub><strong>Update 2018</strong>: <a href="https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating#35223022">A better answer is a newer one of mine</a>: <code>a.push(...b)</code>. Don't upvote this one anymore, as it never really answered the question, but it was a 2015 hack around first-hit-on-Google :)</sub></p>
+
+<hr>
+
+<p>For those that simply searched for "JavaScript array extend" and got here, you can very well use <code>Array.concat</code>.</p>
+
+<pre><code>var a = [1, 2, 3];
+a = a.concat([5, 4, 3]);
+</code></pre>
+
+<p>Concat will return a copy the new array, as thread starter didn't want. But you might not care (certainly for most kind of uses this will be fine).</p>
+
+<hr>
+
+<p>There's also some nice ECMAScript 6 sugar for this in the form of the spread operator:</p>
+
+<pre><code>const a = [1, 2, 3];
+const b = [...a, 5, 4, 3];
+</code></pre>
+
+<p>(It also copies.)</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="240 votes">240</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1280629/jcdude" rel="noopener">jcdude</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/17368101" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>You should use a loop-based technique. Other answers on this page that are based on using <code>.apply</code> can fail for large arrays.</p>
+
+<p>A fairly terse loop-based implementation is:</p>
+
+<pre><code>Array.prototype.extend = function (other_array) {
+    /* You should include a test to check whether other_array really is an array */
+    other_array.forEach(function(v) {this.push(v)}, this);
+}
+</code></pre>
+
+<p>You can then do the following:</p>
+
+<pre><code>var a = [1,2,3];
+var b = [5,4,3];
+a.extend(b);
+</code></pre>
+
+<p><a href="https://stackoverflow.com/a/1374131/1280629">DzinX's answer</a> (using push.apply) and other <code>.apply</code> based methods fail when the array that we are appending is large (tests show that for me large is > 150,000 entries approx in Chrome, and > 500,000 entries in Firefox). You can see this error occurring in <a href="http://jsperf.com/array-extending-push-vs-concat" rel="noreferrer">this jsperf</a>.</p>
+
+<p>An error occurs because the call stack size is exceeded when 'Function.prototype.apply' is called with a large array as the second argument. (MDN has a note on the dangers of exceeding call stack size using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply" rel="noreferrer">Function.prototype.apply</a> - see the section titled "apply and built-in functions".)</p>
+
+<p>For a speed comparison with other answers on this page, check out <a href="http://jsperf.com/array-extending-push-vs-concat/18" rel="noreferrer">this jsperf</a> (thanks to EaterOfCode). The loop-based implementation is similar in speed to using <code>Array.push.apply</code>, but tends to be a little slower than <code>Array.slice.apply</code>.</p>
+
+<p>Interestingly, if the array you are appending is sparse, the <code>forEach</code> based method above can take advantage of the sparsity and outperform the <code>.apply</code> based methods; check out <a href="http://jsperf.com/array-extending-push-vs-concat/5" rel="noreferrer">this jsperf</a> if you want to test this for yourself.</p>
+
+<p>By the way, do not be tempted (as I was!) to further shorten the forEach implementation to:</p>
+
+<pre><code>Array.prototype.extend = function (array) {
+    array.forEach(this.push, this);
+}
+</code></pre>
+
+<p>because this produces garbage results! Why? Because <code>Array.prototype.forEach</code> provides three arguments to the function it calls - these are: (element_value, element_index, source_array). All of these will be pushed onto your first array for every iteration of <code>forEach</code> if you use "forEach(this.push, this)"!</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

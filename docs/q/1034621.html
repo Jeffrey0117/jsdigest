@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get the current URL with JavaScript? · jsdigest</title>
+<meta name="description" content="All I want is to get the website URL. Not the URL as taken from a link. On the page loading I need to be able to grab the full, current URL of the website and…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Get the current URL with JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="3847 votes">3.8k</span><span class="q-by">asked by dougoftheabaci</span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">url</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1034621/get-the-current-url-with-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>All I want is to get the website URL. Not the URL as taken from a link. On the page loading I need to be able to grab the full, current URL of the website and set it as a variable to do with as I please.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4601 votes">4.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4833/volkerk" rel="noopener">VolkerK</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1034642" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use:</p>
+<pre class="lang-none prettyprint-override"><code>window.location.href
+</code></pre>
+<p>As noted in the comments, the line below works, but breaks if you have a frame, image, or form with <code>name=&quot;URL&quot;</code>.</p>
+<pre class="lang-none prettyprint-override"><code>document.URL
+</code></pre>
+<p>See <strong><a href="https://web.archive.org/web/20170327080647/http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-46183437" rel="noreferrer">URL of type DOMString, readonly</a></strong>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="917 votes">917</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2218452/nikhil-agrawal" rel="noopener">Nikhil Agrawal</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/20746566" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>URL Info Access</strong></p>
+<p>JavaScript provides you with many methods to retrieve and change the current URL, which is displayed in the browser's address bar. All these methods use the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Location" rel="noreferrer"><code>Location</code> object</a>, which is a property of the <code>Window</code> object. You can read the current <code>Location</code> object by reading <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/location" rel="noreferrer"><code>window.location</code></a>:</p>
+<pre class="lang-js prettyprint-override"><code>let currentLocation = window.location;
+</code></pre>
+<p><strong>Basic URL Structure</strong></p>
+<pre class="lang-none prettyprint-override"><code>&lt;protocol&gt;//&lt;hostname&gt;:&lt;port&gt;/&lt;pathname&gt;&lt;search&gt;&lt;hash&gt;
+</code></pre>
+<ul>
+<li><p><strong>protocol:</strong> Specifies the protocol name be used to access the resource on the Internet. (HTTP (without SSL) or HTTPS (with SSL))</p>
+</li>
+<li><p><strong>hostname:</strong> Host name specifies the host that owns the resource. For example, <code>www.stackoverflow.com</code>. A server provides services using the name of the host.</p>
+</li>
+<li><p><strong>port:</strong> A port number used to recognize a specific process to which an Internet or other network message is to be forwarded when it arrives at a server.</p>
+</li>
+<li><p><strong>pathname:</strong> The path gives info about the specific resource within the host that the Web client wants to access. For example, <code>/index.html</code>.</p>
+</li>
+<li><p><strong>search:</strong> A query string follows the path component, and provides a string of information that the resource can utilize for some purpose (for example, as parameters for a search or as data to be processed).</p>
+</li>
+<li><p><strong>hash:</strong> The anchor portion of a URL, includes the hash sign (#).</p>
+</li>
+</ul>
+<p>With these <code>Location</code> object properties you can access all of these URL components and what they can set or return:</p>
+<ul>
+<li><strong>href</strong> - the entire URL - i.e. <code>window.location.href</code></li>
+<li><strong>protocol</strong> - the protocol of the URL</li>
+<li><strong>host</strong> - the hostname and port of the URL</li>
+<li><strong>hostname</strong> - the hostname of the URL</li>
+<li><strong>port</strong> - the port number the server uses for the URL</li>
+<li><strong>pathname</strong> - the path name of the URL</li>
+<li><strong>search</strong> - the query portion of the URL</li>
+<li><strong>hash</strong> - the anchor portion of the URL</li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Location/origin" rel="noreferrer"><strong>origin</strong></a> - the <code>window.location.protocol + '//' + window.location.host</code></li>
+</ul>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="342 votes">342</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/48015/christoph" rel="noopener">Christoph</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1034697" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use <code>window.location</code> for read and write access to the <a href="https://developer.mozilla.org/En/DOM/Window.location#Location_object" rel="noreferrer">location object</a> associated with the current frame. If you just want to get the address as a read-only string, you may use <code>document.URL</code>, which should contain the same value as <code>window.location.href</code>.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

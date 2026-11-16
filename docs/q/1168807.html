@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I add a key/value pair to a JavaScript object? · jsdigest</title>
+<meta name="description" content="Here is my object literal: var obj = {key1: value1, key2: value2}; How can I add field key3 with value3 to the object?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I add a key/value pair to a JavaScript object?</h1>
+    <div class="q-meta big"><span class="score hot" title="1999 votes">2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/95267/james-skidmore" rel="noopener">James Skidmore</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">object-literal</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1168807/how-can-i-add-a-key-value-pair-to-a-javascript-object" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Here is my object literal:</p>
+
+<pre><code>var obj = {key1: value1, key2: value2};
+</code></pre>
+
+<p>How can I add field <code>key3</code> with <code>value3</code> to the object?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3049 votes">3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/58808/ionu%c8%9b-g-stan" rel="noopener">Ionuț G. Stan</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1168814" rel="noopener">原文 ↗</a></div><div class="prose"><p>There are two ways to add new <strong>properties</strong> to an object:</p>
+
+<pre><code>var obj = {
+    key1: value1,
+    key2: value2
+};
+</code></pre>
+
+<h3>Using dot notation:</h3>
+
+<pre><code>obj.key3 = "value3";
+</code></pre>
+
+<h3>Using square bracket notation:</h3>
+
+<pre><code>obj["key3"] = "value3";
+</code></pre>
+
+<p>The first form is used when you know the name of the property. The second form is used when the name of the property is dynamically determined. Like in this example:</p>
+
+<pre><code>var getProperty = function (propertyName) {
+    return obj[propertyName];
+};
+
+getProperty("key1");
+getProperty("key2");
+getProperty("key3");
+</code></pre>
+
+<hr>
+
+<p>A <em>real</em> JavaScript array can be constructed using either:</p>
+
+<h3>The Array literal notation:</h3>
+
+<pre><code>var arr = [];
+</code></pre>
+
+<h3>The Array constructor notation:</h3>
+
+<pre><code>var arr = new Array();
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="689 votes">689</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/6314667/7vujy0f0hy" rel="noopener">7vujy0f0hy</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/47116829" rel="noopener">原文 ↗</a></div><div class="prose"><h1>Year 2017 answer: <code>Object.assign()</code></h1>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign" rel="noreferrer">Object.assign(dest, src1, src2, ...)</a> merges objects.</p>
+<p>It overwrites <code>dest</code> with properties and values of (however many) source objects, then returns <code>dest</code>.</p>
+<blockquote>
+<p>The <code>Object.assign()</code> method is used to copy the values of all enumerable own properties from one or more source objects to a target object. It will return the target object.</p>
+</blockquote>
+<h3>Live example</h3>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var obj = {key1: "value1", key2: "value2"};
+Object.assign(obj, {key3: "value3"});
+
+document.body.innerHTML = JSON.stringify(obj);</code></pre>
+</div>
+</div>
+</p>
+<h1>Year 2018 answer: object spread operator <code>{...}</code></h1>
+<pre><code>obj = {...obj, ...pair, scalar};
+</code></pre>
+<p>From <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator#Spread_in_object_literals" rel="noreferrer">MDN</a>:</p>
+<blockquote>
+<p>It copies own enumerable properties from a provided object onto a new object.</p>
+<p>Shallow-cloning (excluding prototype) or merging of objects is now possible using a shorter syntax than <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign" rel="noreferrer"><code>Object.assign()</code></a>.</p>
+<p>Note that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign" rel="noreferrer"><code>Object.assign()</code></a> triggers <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/set" rel="noreferrer">setters</a> whereas spread syntax doesn’t.</p>
+</blockquote>
+<h3>Live example</h3>
+<p>It works in current Chrome and current Firefox. They say it doesn’t work in current Edge.</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var obj = {key1: "value1", key2: "value2"};
+var pair = {key3: "value3"};
+var scalar = "value4"
+obj = {...obj, ...pair, scalar};
+
+document.body.innerHTML = JSON.stringify(obj);</code></pre>
+</div>
+</div>
+</p>
+<h1>Year 2019 answer</h1>
+<p><s><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Assignment_Operators#Object_assignment" rel="noreferrer">Object assignment operator</a> <code>+=</code>:</p>
+<pre><code>obj += {key3: &quot;value3&quot;};
+</code></pre>
+<p></s>Oops... I got carried away. Smuggling information from the future is illegal. Duly obscured!</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="113 votes">113</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/417822/sir-nathan-stassen" rel="noopener">Sir.Nathan Stassen</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/27111393" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>I have grown fond of the <a href="https://lodash.com" rel="noreferrer">LoDash</a> / <a href="http://underscorejs.org/" rel="noreferrer">Underscore</a> when writing larger projects.</p>
+
+<p>Adding by <code>obj['key']</code> or <code>obj.key</code> are all solid pure JavaScript answers. However both of LoDash and Underscore libraries do provide many additional convenient functions when working with Objects and Arrays in general.</p>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push" rel="noreferrer"><code>.push()</code> is for Arrays</a>, not for <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object#Methods" rel="noreferrer">objects</a>.</p>
+
+<p>Depending what you are looking for, there are two specific functions that may be nice to utilize and give functionality similar to the the feel of <code>arr.push()</code>. For more info check the docs, they have some great examples there.</p>
+
+<h1><a href="https://lodash.com/docs#merge" rel="noreferrer">_.merge</a> (Lodash only)</h1>
+
+<p>The second object will overwrite or add to the base object.
+<code>undefined</code> values are not copied.</p>
+
+<pre><code>var obj = {key1: "value1", key2: "value2"};
+var obj2 = {key2:"value4", key3: "value3", key4: undefined};
+_.merge(obj, obj2);
+console.log(obj);
+// → {key1: "value1", key2: "value4", key3: "value3"} 
+</code></pre>
+
+<h1><a href="https://lodash.com/docs#assign" rel="noreferrer">_.extend / _.assign</a></h1>
+
+<p>The second object will overwrite or add to the base object.
+<code>undefined</code> will be copied.</p>
+
+<pre><code>var obj = {key1: "value1", key2: "value2"};
+var obj2 = {key2:"value4", key3: "value3", key4: undefined};
+_.extend(obj, obj2);
+console.log(obj);
+// → {key1: "value1", key2: "value4", key3: "value3", key4: undefined}
+</code></pre>
+
+<h1><a href="https://lodash.com/docs#defaults" rel="noreferrer">_.defaults</a></h1>
+
+<p>The second object contains defaults that will be added to base object if they don't exist.
+<code>undefined</code> values will be copied if key already exists.</p>
+
+<pre><code>var obj = {key3: "value3", key5: "value5"};
+var obj2 = {key1: "value1", key2:"value2", key3: "valueDefault", key4: "valueDefault", key5: undefined};
+_.defaults(obj, obj2);
+console.log(obj);
+// → {key3: "value3", key5: "value5", key1: "value1", key2: "value2", key4: "valueDefault"}
+</code></pre>
+
+<h1><a href="http://api.jquery.com/jquery.extend/" rel="noreferrer">$.extend</a></h1>
+
+<p>In addition, it may be worthwhile mentioning jQuery.extend, it functions similar to _.merge and may be a better option if you already are using jQuery.</p>
+
+<p>The second object will overwrite or add to the base object.
+<code>undefined</code> values are not copied.</p>
+
+<pre><code>var obj = {key1: "value1", key2: "value2"};
+var obj2 = {key2:"value4", key3: "value3", key4: undefined};
+$.extend(obj, obj2); 
+console.log(obj);
+// → {key1: "value1", key2: "value4", key3: "value3"}
+</code></pre>
+
+<h1><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign" rel="noreferrer">Object.assign()</a></h1>
+
+<p>It may be worth mentioning the ES6/ ES2015 Object.assign, it functions similar to _.merge and may be the best option if you already are using an ES6/ES2015 polyfill like <a href="https://github.com/babel-plugins/babel-plugin-object-assign" rel="noreferrer">Babel</a> if you want to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill" rel="noreferrer">polyfill yourself</a>.</p>
+
+<p>The second object will overwrite or add to the base object.
+<code>undefined</code> will be copied.</p>
+
+<pre><code>var obj = {key1: "value1", key2: "value2"};
+var obj2 = {key2:"value4", key3: "value3", key4: undefined};
+Object.assign(obj, obj2); 
+console.log(obj);
+// → {key1: "value1", key2: "value4", key3: "value3", key4: undefined}
+</code></pre>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

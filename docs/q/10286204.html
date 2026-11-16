@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is the &quot;right&quot; JSON date format? · jsdigest</title>
+<meta name="description" content="I&#39;ve seen so many different standards for the JSON date format: &quot;\&quot;\\/Date(1335205592410)\\/\&quot;&quot; .NET JavaScriptSerializer &quot;\&quot;\\/Date(1335205592410-0500)\\/\&quot;&quot;…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What is the &quot;right&quot; JSON date format?</h1>
+    <div class="q-meta big"><span class="score hot" title="1583 votes">1.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1041321/kamyar-nazeri" rel="noopener">Kamyar Nazeri</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">json</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/10286204/what-is-the-right-json-date-format" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I've seen so many different standards for the JSON date format:</p>
+
+<pre><code>"\"\\/Date(1335205592410)\\/\""         .NET JavaScriptSerializer
+"\"\\/Date(1335205592410-0500)\\/\""    .NET DataContractJsonSerializer
+"2012-04-23T18:25:43.511Z"              JavaScript built-in JSON object
+"2012-04-21T18:25:43-05:00"             ISO 8601
+</code></pre>
+
+<p>Which one is the right one? Or best? Is there any sort of standard on this?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2542 votes">2.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/878969/funroll" rel="noopener">funroll</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/15952652" rel="noopener">原文 ↗</a></div><div class="prose"><p><a href="http://json.org/" rel="noreferrer" title="JSON definition">JSON</a> itself <strong>does not</strong> specify how dates should be represented, but JavaScript does.</p>
+<p>You <em>should</em> use the format emitted by <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date" rel="noreferrer" title="MDN documentation for JavaScript Date"><code>Date</code></a>'s <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toJSON" rel="noreferrer" title="MDN documentation for toJSON()"><code>toJSON</code></a> method:</p>
+<p><code>2012-04-23T18:25:43.511Z</code></p>
+<p>Here's why:</p>
+<ol>
+<li><p>It's human readable but also succinct</p>
+</li>
+<li><p>It sorts correctly</p>
+</li>
+<li><p>It includes fractional seconds, which can help re-establish chronology</p>
+</li>
+<li><p>It conforms to <a href="http://en.wikipedia.org/wiki/ISO_8601" rel="noreferrer" title="ISO8601 on Wikipedia">ISO 8601</a></p>
+</li>
+<li><p>ISO 8601 has been well-established internationally for more than a decade</p>
+</li>
+<li><p>ISO 8601 is endorsed by <a href="http://www.w3.org/TR/NOTE-datetime" rel="noreferrer" title="W3C datetime">W3C</a>, <a href="https://www.rfc-editor.org/rfc/rfc3339" rel="noreferrer" title="RFC3339 on IETF">RFC3339</a>, and <a href="http://xkcd.com/1179/" rel="noreferrer" title="XKCD comic about ISO8601">XKCD</a></p>
+</li>
+</ol>
+<p><strong>That being said</strong>, every date library ever written can understand &quot;milliseconds since 1970&quot;. So for easy portability, <a href="https://stackoverflow.com/a/10286228/1850609">ThiefMaster</a> is right.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="162 votes">162</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/298479/thiefmaster" rel="noopener">ThiefMaster</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10286228" rel="noopener">原文 ↗</a></div><div class="prose"><p>JSON does not know anything about dates. What .NET does is a non-standard hack/extension.</p>
+
+<p>I would use a format that can be easily converted to a <code>Date</code> object in JavaScript, i.e. one that can be passed to <a href="https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Date" rel="noreferrer"><code>new Date(...)</code></a>. The easiest and probably most portable format is the timestamp containing milliseconds since 1970.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="66 votes">66</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1831/russ-cam" rel="noopener">Russ Cam</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10286243" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>There is no right format</strong>; The <strong><a href="http://www.json.org/" rel="noreferrer">JSON specification</a></strong> does not specify a format for exchanging dates which is why there are so many different ways to do it.</p>
+
+<p><strong>The best format is arguably a date represented in <a href="http://www.w3.org/TR/NOTE-datetime" rel="noreferrer">ISO 8601 format</a></strong> (<a href="https://en.m.wikipedia.org/wiki/ISO_8601" rel="noreferrer">see Wikipedia</a>); it is a well known and widely used format and can be handled across many different languages, making it very well suited for interoperability. If you have control over the generated json, for example, you provide data to other systems in json format, choosing 8601 as the date interchange format is a good choice.</p>
+
+<p>If you do not have control over the generated json, for example, you are the consumer of json from several different existing systems, the best way of handling this is to have a date parsing utility function to handle the different formats expected.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

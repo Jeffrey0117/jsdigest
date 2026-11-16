@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I loop through or enumerate a JavaScript object? · jsdigest</title>
+<meta name="description" content="I have a JavaScript object like the following: var p = { &quot;p1&quot;: &quot;value1&quot;, &quot;p2&quot;: &quot;value2&quot;, &quot;p3&quot;: &quot;value3&quot; }; How do I loop through all of p &#39;s elements ( p1 , p2…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I loop through or enumerate a JavaScript object?</h1>
+    <div class="q-meta big"><span class="score hot" title="3627 votes">3.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1312208/tanmoy" rel="noopener">Tanmoy</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">loops</span><span class="tag">for-loop</span><span class="tag">each</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/684672/how-do-i-loop-through-or-enumerate-a-javascript-object" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have a JavaScript object like the following:</p>
+<pre><code>var p = {
+    &quot;p1&quot;: &quot;value1&quot;,
+    &quot;p2&quot;: &quot;value2&quot;,
+    &quot;p3&quot;: &quot;value3&quot;
+};
+</code></pre>
+<p>How do I loop through all of <code>p</code>'s elements (<code>p1</code>, <code>p2</code>, <code>p3</code>...) and get their keys and values?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5196 votes">5.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4465/levik" rel="noopener">levik</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/684692" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in" rel="noreferrer"><code>for-in</code></a> loop as shown by others. However, you also have to make sure that the key you get is an actual property of an object, and doesn't come from the prototype.</p>
+<p><strong>Here is the snippet:</strong>
+<div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var p = {
+    "p1": "value1",
+    "p2": "value2",
+    "p3": "value3"
+};
+
+for (var key in p) {
+    if (p.hasOwnProperty(key)) {
+        console.log(key + " -&gt; " + p[key]);
+    }
+}</code></pre>
+</div>
+</div>
+</p>
+<p><strong>For-of with Object.keys() alternative:</strong></p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var p = {
+    0: "value1",
+    "b": "value2",
+    key: "value3"
+};
+
+for (var key of Object.keys(p)) {
+    console.log(key + " -&gt; " + p[key])
+}</code></pre>
+</div>
+</div>
+</p>
+<p>Notice the use of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of" rel="noreferrer"><code>for-of</code></a> instead of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in" rel="noreferrer"><code>for-in</code></a>, if not used it will return undefined on named properties, and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys" rel="noreferrer"><code>Object.keys()</code></a> ensures the use of only the object's own properties without the whole prototype-chain properties</p>
+<p><strong>Using the new <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries" rel="noreferrer"><code>Object.entries()</code></a> method:</strong></p>
+<p><strong>Note:</strong> This method is not supported natively by Internet Explorer. You may consider using a Polyfill for older browsers.</p>
+<pre class="lang-js prettyprint-override"><code>const p = {
+    &quot;p1&quot;: &quot;value1&quot;,
+    &quot;p2&quot;: &quot;value2&quot;,
+    &quot;p3&quot;: &quot;value3&quot;
+};
+
+for (const [key, value] of Object.entries(p)) {
+  console.log(`${key}: ${value}`);
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1385 votes">1.4k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/717950/axel-rauschmayer" rel="noopener">Axel Rauschmayer</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5737136" rel="noopener">原文 ↗</a></div><div class="prose"><p>Under ECMAScript 5, you can combine <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys" rel="noreferrer"><code>Object.keys()</code></a> and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach" rel="noreferrer"><code>Array.prototype.forEach()</code></a>:</p>
+
+<pre><code>var obj = { first: "John", last: "Doe" };
+
+Object.keys(obj).forEach(function(key) {
+    console.log(key, obj[key]);
+});
+</code></pre>
+
+<p>ECMAScript 6 adds <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of" rel="noreferrer"><code>for...of</code></a>:</p>
+
+<pre><code>for (const key of Object.keys(obj)) {
+    console.log(key, obj[key]);
+}
+</code></pre>
+
+<p>ECMAScript 8 adds <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries" rel="noreferrer"><code>Object.entries()</code></a> which avoids having to look up each value in the original object:</p>
+
+<pre><code>Object.entries(obj).forEach(
+    ([key, value]) =&gt; console.log(key, value)
+);
+</code></pre>
+
+<p>You can combine <code>for...of</code>, destructuring, and <code>Object.entries</code>:</p>
+
+<pre><code>for (const [key, value] of Object.entries(obj)) {
+    console.log(key, value);
+}
+</code></pre>
+
+<p>Both <code>Object.keys()</code> and <code>Object.entries()</code> iterate properties in the same order as a <code>for...in</code> loop <em>but ignore the prototype chain</em>. Only the object's own enumerable properties are iterated.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="381 votes">381</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/44084/andreas-grech" rel="noopener">Andreas Grech</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/684693" rel="noopener">原文 ↗</a></div><div class="prose"><p>You have to use the <strong>for-in loop</strong></p>
+
+<p>But be very careful when using this kind of loop, because this will <strong>loop all the properties along the prototype chain</strong>.</p>
+
+<p>Therefore, when using for-in loops, always make use of the <code>hasOwnProperty</code> method to determine if the current property in iteration is really a property of the object you're checking on:</p>
+
+<pre><code>for (var prop in p) {
+    if (!p.hasOwnProperty(prop)) {
+        //The current property is not a direct property of p
+        continue;
+    }
+    //Do your logic with the property here
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

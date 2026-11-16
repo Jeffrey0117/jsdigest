@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I check if a string is a valid number? · jsdigest</title>
+<meta name="description" content="I&#39;m hoping there&#39;s something in the same conceptual space as the old VB6 IsNumeric() function?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I check if a string is a valid number?</h1>
+    <div class="q-meta big"><span class="score hot" title="2053 votes">2.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/19074/electrons-ahoy" rel="noopener">Electrons_Ahoy</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">validation</span><span class="tag">numeric</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/175739/how-can-i-check-if-a-string-is-a-valid-number" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm hoping there's something in the same conceptual space as the old VB6 <code>IsNumeric()</code> function?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3318 votes">3.3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/17121/dan" rel="noopener">Dan</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/175787" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>2nd October 2020:</strong> note that many bare-bones approaches are fraught with subtle bugs (eg. whitespace, implicit partial parsing, radix, coercion of arrays etc.) that many of the answers here fail to take into account. The following implementation might work for you, but note that it does not cater for number separators other than the decimal point &quot;<code>.</code>&quot;:</p>
+<pre class="lang-js prettyprint-override"><code>function isNumeric(str) {
+  if (typeof str != &quot;string&quot;) return false // we only process strings!  
+  return !isNaN(str) &amp;&amp; // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+         !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
+</code></pre>
+<hr />
+<h2>To check if a variable (including a string) is a number, check if it is not a number:</h2>
+<p>This works regardless of whether the variable content is a string or number.</p>
+<pre><code>isNaN(num)         // returns true if the variable does NOT contain a valid number
+</code></pre>
+<h3>Examples</h3>
+<pre><code>isNaN(123)         // false
+isNaN('123')       // false
+isNaN('1e10000')   // false (This translates to Infinity, which is a number)
+isNaN('foo')       // true
+isNaN('10px')      // true
+isNaN('')          // false
+isNaN(' ')         // false
+isNaN(false)       // false
+</code></pre>
+<p>Of course, you can negate this if you need to. For example, to implement the <code>IsNumeric</code> example you gave:</p>
+<pre><code>function isNumeric(num){
+  return !isNaN(num)
+}
+</code></pre>
+<h2>To convert a string containing a number into a number:</h2>
+<p>Only works if the string <em>only</em> contains numeric characters, else it returns <code>NaN</code>.</p>
+<pre><code>+num               // returns the numeric value of the string, or NaN 
+                   // if the string isn't purely numeric characters
+</code></pre>
+<h3>Examples</h3>
+<pre><code>+'12'              // 12
++'12.'             // 12
++'12..'            // NaN
++'.12'             // 0.12
++'..12'            // NaN
++'foo'             // NaN
++'12px'            // NaN
+</code></pre>
+<h2>To convert a string loosely to a number</h2>
+<p>Useful for converting '12px' to 12, for example:</p>
+<pre><code>parseInt(num)      // extracts a numeric value from the 
+                   // start of the string, or NaN.
+</code></pre>
+<h3>Examples</h3>
+<pre><code>parseInt('12')     // 12
+parseInt('aaa')    // NaN
+parseInt('12px')   // 12
+parseInt('foo2')   // NaN      These last three may
+parseInt('12a5')   // 12       be different from what
+parseInt('0x10')   // 16       you expected to see.
+</code></pre>
+<h2>Floats</h2>
+<p>Bear in mind that, unlike <code>+num</code>, <code>parseInt</code> (as the name suggests) will convert a float into an integer by chopping off everything following the decimal point (if you want to use <code>parseInt()</code> <em>because of</em> this behaviour, <a href="https://parsebox.io/dthree/gyeveeygrngl" rel="noreferrer">you're probably better off using another method instead</a>):</p>
+<pre><code>+'12.345'          // 12.345
+parseInt(12.345)   // 12
+parseInt('12.345') // 12
+</code></pre>
+<h2>Empty strings</h2>
+<p>Empty strings may be a little counter-intuitive. <code>+num</code> converts empty strings or strings with spaces to zero, and <code>isNaN()</code> assumes the same:</p>
+<pre><code>+''                // 0
++'   '             // 0
+isNaN('')          // false
+isNaN('   ')       // false
+</code></pre>
+<p>But <code>parseInt()</code> does not agree:</p>
+<pre><code>parseInt('')       // NaN
+parseInt('   ')    // NaN
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="241 votes">241</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2211053/gavin" rel="noopener">Gavin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/24457420" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you're just trying to check if a string is a whole number (no decimal places), regex is a good way to go. Other methods such as <code>isNaN</code> are too complicated for something so simple.</p>
+<pre class="lang-js prettyprint-override"><code>function isNumeric(value) {
+    return /^-?\d+$/.test(value);
+}
+
+console.log(isNumeric('abcd'));         // false
+console.log(isNumeric('123a'));         // false
+console.log(isNumeric('1'));            // true
+console.log(isNumeric('1234567890'));   // true
+console.log(isNumeric('-23'));          // true
+console.log(isNumeric(1234));           // true
+console.log(isNumeric(1234n));          // true
+console.log(isNumeric('123.4'));        // false
+console.log(isNumeric(''));             // false
+console.log(isNumeric(undefined));      // false
+console.log(isNumeric(null));           // false
+</code></pre>
+<p>To only allow <em>positive</em> whole numbers use this:</p>
+<pre class="lang-js prettyprint-override"><code>function isNumeric(value) {
+    return /^\d+$/.test(value);
+}
+
+console.log(isNumeric('123'));          // true
+console.log(isNumeric('-23'));          // false
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="103 votes">103</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4947422/hamzeen-hameem" rel="noopener">Hamzeen Hameem</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/52986361" rel="noopener">原文 ↗</a></div><div class="prose"><p>The accepted answer for this question has quite a few flaws (as highlighted by couple of other users). This is one of the easiest &amp; proven way to approach it in javascript:</p>
+
+<pre><code>function isNumeric(n) {
+  return !isNaN(parseFloat(n)) &amp;&amp; isFinite(n);
+}
+</code></pre>
+
+<p>Below are some good test cases:</p>
+
+<pre><code>console.log(isNumeric(12345678912345678912)); // true
+console.log(isNumeric('2 '));                 // true
+console.log(isNumeric('-32.2 '));             // true
+console.log(isNumeric(-32.2));                // true
+console.log(isNumeric(undefined));            // false
+
+// the accepted answer fails at these tests:
+console.log(isNumeric(''));                   // false
+console.log(isNumeric(null));                 // false
+console.log(isNumeric([]));                   // false
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

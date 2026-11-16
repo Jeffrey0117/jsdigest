@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What does &quot;use strict&quot; do in JavaScript, and what is the reasoning behind it? · jsdigest</title>
+<meta name="description" content="Recently, I ran some of my JavaScript code through Crockford&#39;s JSLint , and it gave the following error: Problem at line 1 character 1: Missing &quot;use strict&quot; st…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What does &quot;use strict&quot; do in JavaScript, and what is the reasoning behind it?</h1>
+    <div class="q-meta big"><span class="score hot" title="8548 votes">8.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/25847/mark-rogers" rel="noopener">Mark Rogers</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">syntax</span><span class="tag">jslint</span><span class="tag">use-strict</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1335851/what-does-use-strict-do-in-javascript-and-what-is-the-reasoning-behind-it" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Recently, I ran some of my JavaScript code through Crockford's <a href="http://www.jslint.com/" rel="noreferrer">JSLint</a>, and it gave the following error:</p>
+<blockquote>
+<p>Problem at line 1 character 1: Missing &quot;use strict&quot; statement.</p>
+</blockquote>
+<p>Doing some searching, I realized that some people add <code>&quot;use strict&quot;;</code> into their JavaScript code. Once I added the statement, the error stopped appearing. Unfortunately, Google did not reveal much of the history behind this string statement. Certainly it must have something to do with how the JavaScript is interpreted by the browser, but I have no idea what the effect would be.</p>
+<p>So what is <code>&quot;use strict&quot;;</code> all about, what does it imply, and is it still relevant?</p>
+<p>Do any of the current browsers respond to the <code>&quot;use strict&quot;;</code> string or is it for future use?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5530 votes">5.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/138475/pascal-martin" rel="noopener">Pascal MARTIN</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1335881" rel="noopener">原文 ↗</a></div><div class="prose"><h2>Update for ES6 modules</h2>
+<p>Inside <a href="https://caniuse.com/#feat=es6-module" rel="noreferrer">native ECMAScript modules</a> (with <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/import" rel="noreferrer"><code>import</code></a> and <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/export" rel="noreferrer"><code>export</code></a> statements) and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes" rel="noreferrer">ES6 classes</a>, strict mode is always enabled and cannot be disabled.</p>
+<h2>Original answer</h2>
+<p>This article about Javascript Strict Mode might interest you: <a href="https://johnresig.com/blog/ecmascript-5-strict-mode-json-and-more/" rel="noreferrer">John Resig - ECMAScript 5 Strict Mode, JSON, and More</a></p>
+<p>To quote some interesting parts:</p>
+<blockquote>
+<p>Strict Mode is a new feature in ECMAScript 5 that allows you to place a program, or a function, in a &quot;strict&quot; operating context. This strict context prevents certain actions from being taken and throws more exceptions.</p>
+</blockquote>
+<p>And:</p>
+<blockquote>
+<p>Strict mode helps out in a couple ways:</p>
+<ul>
+<li>It catches some common coding bloopers, throwing exceptions.</li>
+<li>It prevents, or throws errors, when relatively &quot;unsafe&quot; actions are taken (such as gaining access to the global object).</li>
+<li>It disables features that are confusing or poorly thought out.</li>
+</ul>
+</blockquote>
+<p>Also note you can apply &quot;strict mode&quot; to the whole file... Or you can use it only for a specific function <em>(still quoting from John Resig's article)</em>:</p>
+<pre class="lang-js prettyprint-override"><code>// Non-strict code...
+
+(function(){
+  &quot;use strict&quot;;
+
+  // Define your library strictly...
+})();
+
+// Non-strict code...
+</code></pre>
+<p>Which might be helpful if you have to mix old and new code ;-)</p>
+<p>So, I suppose it's a bit like the <a href="https://perldoc.perl.org/strict" rel="noreferrer"><code>&quot;use strict&quot;</code></a> you can use in Perl <em>(hence the name?)</em>: it helps you make fewer errors, by detecting more things that could lead to breakages.</p>
+<p>Strict mode is now <a href="https://caniuse.com/use-strict" rel="noreferrer">supported by all major browsers</a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1446 votes">1.4k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/8590/seth" rel="noopener">seth</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1335875" rel="noopener">原文 ↗</a></div><div class="prose"><p>It's a new feature of ECMAScript 5. John Resig wrote up <a href="https://johnresig.com/blog/ecmascript-5-strict-mode-json-and-more/" rel="noreferrer">a nice summary</a> of it.</p>
+<p>It's just a string you put in your JavaScript files (either at the top of your file or inside of a function) that looks like this:</p>
+<pre><code>&quot;use strict&quot;;
+</code></pre>
+<p>Putting it in your code now shouldn't cause any problems with current browsers as it's just a string. It may cause problems with your code in the future if your code violates the pragma.  For instance, if you currently have <code>foo = &quot;bar&quot;</code> without defining <code>foo</code> first, your code will start failing...which is a good thing in my opinion.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="886 votes">886</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/223656/gprasant" rel="noopener">gprasant</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/27114400" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>The statement <code>&quot;use strict&quot;; </code> instructs the browser to use the Strict mode, which is a reduced and safer feature set of JavaScript.</p>
+<h2>List of features (non-exhaustive)</h2>
+<ol>
+<li><p>Disallows global variables. (Catches missing <code>var</code> declarations and typos in variable names)</p>
+</li>
+<li><p>Silent failing assignments will throw error in strict mode (assigning <code>NaN = 5;</code>)</p>
+</li>
+<li><p>Attempts to delete undeletable properties will throw (<code>delete Object.prototype</code>)</p>
+</li>
+<li><p>Requires all property names in an object literal to be unique (<code>var x = {x1: &quot;1&quot;, x1: &quot;2&quot;}</code>)</p>
+</li>
+<li><p>Function parameter names must be unique (<code>function sum (x, x) {...}</code>)</p>
+</li>
+<li><p>Forbids octal syntax (<code>var x = 023;</code> some devs assume wrongly that a preceding zero does nothing to change the number.)</p>
+</li>
+<li><p>Forbids the <code>with</code> keyword</p>
+</li>
+<li><p><code>eval</code> in strict mode does not introduce new variables</p>
+</li>
+<li><p>Forbids deleting plain names (<code>delete x;</code>)</p>
+</li>
+<li><p>Forbids binding or assignment of the names <code>eval</code> and <code>arguments</code> in any form</p>
+</li>
+<li><p>Strict mode does not alias properties of the <code>arguments</code> object with the formal parameters. (e.g. in <code>function sum (a,b) { return arguments[0] + b;}</code> This works because <code>arguments[0]</code> is bound to <code>a</code> and so on. ) (<em>See <code>examples</code> section below to understand the difference</em>)</p>
+</li>
+<li><p><code>arguments.callee</code> is not supported</p>
+</li>
+</ol>
+<p>[Ref: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode" rel="noreferrer">Strict mode</a>, <em>Mozilla Developer Network</em>]</p>
+<hr />
+<p>Examples:</p>
+<ol start="11">
+<li>Strict mode code doesn't alias properties of arguments objects created within it</li>
+</ol>
+<pre class="lang-js prettyprint-override"><code>function show( msg ){
+    msg = 42;
+    console.log( msg );          // msg === 42
+    console.log( arguments[0] ); // arguments === 42
+}
+show( &quot;Hey&quot; );
+
+// In strict mode arguments[i] does not track the value of 
+// the corresponding named argument, nor does a named argument track the value in the corresponding arguments[i]
+function showStrict( msg ){
+    &quot;use strict&quot;;
+    msg = 42;
+    console.log( msg );          // msg === 42
+    console.log( arguments[0] ); // arguments === &quot;Hey&quot;
+}
+showStrict( &quot;Hey&quot; );
+</code></pre>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

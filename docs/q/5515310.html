@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Is there a standard function to check for null, undefined, or blank variables in JavaScript? · jsdigest</title>
+<meta name="description" content="Is there a universal JavaScript function that checks that a variable has a value and ensures that it&#39;s not undefined or null ? I&#39;ve got this code, but I&#39;m not…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Is there a standard function to check for null, undefined, or blank variables in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="3150 votes">3.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/177416/alex" rel="noopener">Alex</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">null</span><span class="tag">comparison</span><span class="tag">undefined</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/5515310/is-there-a-standard-function-to-check-for-null-undefined-or-blank-variables-in" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Is there a universal JavaScript function that checks that a variable has a value and ensures that it's not <code>undefined</code> or <code>null</code>? I've got this code, but I'm not sure if it covers all cases:</p>
+<pre><code>function isEmpty(val){
+    return (val === undefined || val == null || val.length &lt;= 0) ? true : false;
+}
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5791 votes">5.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1386886/jandy" rel="noopener">jAndy</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5515349" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can just check if the <em>variable</em> has a <code>truthy</code> value or not. That means</p>
+<pre><code>if (value) {
+    // do something..
+}
+</code></pre>
+<p>will evaluate to <code>true</code> if <code>value</code> is <strong>not</strong>:</p>
+<ul>
+<li>null</li>
+<li>undefined</li>
+<li>NaN</li>
+<li>empty string (&quot;&quot;)</li>
+<li>0</li>
+<li>false</li>
+</ul>
+<p>The above list represents all possible <code>falsy</code> values in ECMA-/Javascript. Find it in the <a href="https://www.ecma-international.org/ecma-262/5.1/#sec-9.2" rel="noreferrer">specification</a> at the <code>ToBoolean</code> section.</p>
+<p>Furthermore, if you do not <strong>know</strong> whether a variable exists (that means, if it was <em>declared</em>) you should check with the <code>typeof</code> operator. For instance</p>
+<pre><code>if (typeof foo !== 'undefined') {
+    // foo could get resolved and it's defined
+}
+</code></pre>
+<p>If you can be sure that a <em>variable</em> is declared at least, you should directly check if it has a <code>truthy</code> value like shown above.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="469 votes">469</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/87015/salman-arshad" rel="noopener">Salman Arshad</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5515385" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><blockquote>
+<p>This question has two interpretations:</p>
+<p>Check if the variable has a value<br />
+Check if the variable has a truthy value</p>
+<p>The following answers both.</p>
+</blockquote>
+<p>In JavaScript, a value could be <a href="https://developer.mozilla.org/en-US/docs/Glossary/Nullish" rel="noreferrer">nullish</a> or not nullish, and a value could be <a href="https://developer.mozilla.org/en-US/docs/Glossary/Falsy" rel="noreferrer">falsy</a> or <a href="https://developer.mozilla.org/en-US/docs/Glossary/Truthy" rel="noreferrer">truthy</a>.<br />
+Nullish values are a proper subset of falsy values:</p>
+<pre class="lang-none prettyprint-override"><code> ╭─ nullish ──────╮ ╭─ not nullish ─────────────────────────────────╮
+┌───────────┬──────┬───────┬───┬────┬─────┬──────┬───┬─────────┬─────┐
+│ undefined │ null │ false │ 0 │ &quot;&quot; │ ... │ true │ 1 │ &quot;hello&quot; │ ... │
+└───────────┴──────┴───────┴───┴────┴─────┴──────┴───┴─────────┴─────┘
+ ╰─ falsy ───────────────────────────────╯ ╰─ truthy ───────────────╯
+</code></pre>
+<h2>Check if value is nullish (undefined or null)</h2>
+<p>Use one of the following depending on your coding style:</p>
+<pre><code>if (value == null)                         { /* value is nullish */ }
+if (value === undefined || value === null) { /* value is nullish */ }
+if (value == undefined)                    { /* value is nullish */ }
+if ((value ?? null) === null)              { /* value is nullish */ }
+</code></pre>
+<p>Notes:</p>
+<ul>
+<li>The <code>==</code> operator works because <a href="https://tc39.es/ecma262/multipage/abstract-operations.html#sec-islooselyequal" rel="noreferrer">it has a special case for null vs undefined comparison</a></li>
+<li>The <code>===</code> operator is more readable (opinion based), eqeqeq friendly and allows checking for undefined and null separately</li>
+<li>The first and third examples work identically, however the third one is rarely seen in production code</li>
+<li>The fourth example uses nullish coalescing operator to change nullish values to <code>null</code> for straight forward comparison</li>
+</ul>
+<h2>Check if value is not nullish</h2>
+<pre><code>if (value != null)                         { /* value is not nullish, although it could be falsy */ }
+if (value !== undefined &amp;&amp; value !== null) { /* value is not nullish, although it could be falsy */ }
+if (value != undefined)                    { /* value is not nullish, although it could be falsy */ }
+if ((value ?? null) !== null)              { /* value is not nullish, although it could be falsy */ }
+</code></pre>
+<h2>Check if value is falsy</h2>
+<p>Use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_NOT" rel="noreferrer"><code>!</code></a> operator:</p>
+<pre><code>if (!value) { /* value is falsy */ }
+</code></pre>
+<h2>Check if value is truthy</h2>
+<pre><code>if (value) { /* value is truthy */ }
+</code></pre>
+<h2>Data validation</h2>
+<p>The nullish, falsy and truthy checks cannot be used for data validation on their own. For example, <code>0</code> (falsy) is valid age of a person and <code>-1</code> (truthy) is not. Additional logic needs to be added on case-by-case basis. Some examples:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>/*
+ * check if value is greater than/equal to 0
+ * note that we cannot use truthy check here because 0 must be allowed
+ */
+[null, -1, 0, 1].forEach(num =&gt; {
+  if (num != null &amp;&amp; num &gt;= 0) {
+    console.log("%o is not nullish and greater than/equal to 0", num);
+  } else {
+    console.log("%o is bad", num);
+  }
+});
+
+/*
+ * check if value is not empty-or-whitespace string
+ */
+[null, "", " ", "hello"].forEach(str =&gt; {
+  if (str &amp;&amp; /\S/.test(str)) {
+    console.log("%o is truthy and has non-whitespace characters", str);
+  } else {
+    console.log("%o is bad", str);
+  }
+});
+
+/*
+ * check if value is not an empty array
+ * check for truthy before checking the length property
+ */
+[null, [], [1]].forEach(arr =&gt; {
+  if (arr &amp;&amp; arr.length) {
+    console.log("%o is truthy and has one or more items", arr);
+  } else {
+    console.log("%o is bad", arr);
+  }
+});
+
+/*
+ * check if value is not an empty array
+ * using optional chaining operator to make sure that the value is not nullish
+ */
+[null, [], [1]].forEach(arr =&gt; {
+  if (arr?.length) {
+    console.log("%o is not nullish and has one or more items", arr);
+  } else {
+    console.log("%o is bad", arr);
+  }
+});</code></pre>
+</div>
+</div>
+</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="134 votes">134</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/20394/mike-samuel" rel="noopener">Mike Samuel</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5515370" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>function isEmpty(value){
+  return (value == null || value.length === 0);
+}
+</code></pre>
+<p>This will return true for</p>
+<pre><code>undefined  // Because undefined == null
+
+null
+
+[]
+
+&quot;&quot;
+</code></pre>
+<p>and zero argument functions since a function's <code>length</code> is the number of declared parameters it takes.</p>
+<p>To disallow the latter category, you might want to just check for blank strings</p>
+<pre><code>function isEmpty(value){
+  return (value == null || value === '');
+}
+</code></pre>
+<p>Null or whitespace</p>
+<pre><code>function isEmpty(value){
+  return (value == null || value.trim().length === 0);
+}
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

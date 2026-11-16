@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How does the &quot;this&quot; keyword work, and when should it be used? · jsdigest</title>
+<meta name="description" content="I am looking to find a clear explanation of what the &quot;this&quot; keyword does, and how to use it correctly. It seems to behave strangely, and I don&#39;t fully understa…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How does the &quot;this&quot; keyword work, and when should it be used?</h1>
+    <div class="q-meta big"><span class="score hot" title="1500 votes">1.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/314661/maxim-gershkovich" rel="noopener">Maxim Gershkovich</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">this</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/3127429/how-does-the-this-keyword-work-and-when-should-it-be-used" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I am looking to find a clear explanation of what the &quot;this&quot; keyword does, and how to use it correctly.</p>
+<p>It seems to behave strangely, and I don't fully understand why.</p>
+<p>How does <code>this</code> work and when should it be used?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1506 votes">1.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/196844/daniel-trebbien" rel="noopener">Daniel Trebbien</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3127440" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Operators/this" rel="noreferrer"><code>this</code></a> is a keyword in JavaScript that is a property of an execution context. Its main use is in functions and constructors.
+The rules for <code>this</code> are quite simple (if you stick to best practices).</p>
+<h2>Technical description of <code>this</code> in the specification</h2>
+<p>The <a href="//tc39.es/ecma262" rel="noreferrer">ECMAScript standard</a> defines <a href="//tc39.es/ecma262/#sec-this-keyword" rel="noreferrer"><code>this</code></a> via the abstract operation (abbreviated <em>AO</em>) <a href="//tc39.es/ecma262/#sec-resolvethisbinding" rel="noreferrer">ResolveThisBinding</a>:</p>
+<blockquote>
+<p>The [AO] ResolveThisBinding […] determines the binding of the keyword <code>this</code> using the LexicalEnvironment of the <a href="//tc39.es/ecma262/#running-execution-context" rel="noreferrer">running execution context</a>. [Steps]:</p>
+<ol>
+<li>Let <em>envRec</em> be <a href="//tc39.es/ecma262/#sec-getthisenvironment" rel="noreferrer">GetThisEnvironment</a>().</li>
+<li>Return ? <em>envRec</em>.GetThisBinding().</li>
+</ol>
+</blockquote>
+<p><a href="//tc39.es/ecma262/#sec-global-environment-records" rel="noreferrer">Global Environment Records</a>, <a href="//tc39.es/ecma262/#sec-module-environment-records" rel="noreferrer">module Environment Records</a>, and <a href="//tc39.es/ecma262/#sec-function-environment-records" rel="noreferrer">function Environment Records</a> each have their own GetThisBinding method.</p>
+<p>The <a href="//tc39.es/ecma262/#sec-getthisenvironment" rel="noreferrer">GetThisEnvironment</a> AO finds the current <a href="//tc39.es/ecma262/#running-execution-context" rel="noreferrer">running execution context</a>’s LexicalEnvironment and finds the closest ascendant Environment Record (by iteratively accessing their [[OuterEnv]] properties) which has a <em>this</em> binding (i.e. HasThisBinding returns <strong>true</strong>). This process ends in one of the three Environment Record types.</p>
+<p>The value of <code>this</code> often depends on whether code is in <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Strict_mode" rel="noreferrer">strict mode</a>.</p>
+<p>The return value of GetThisBinding reflects the value of <code>this</code> of the current execution context, so whenever a new execution context is established, <code>this</code> resolves to a distinct value. This can also happen when the current execution context is modified. The following subsections list the five cases where this can happen.</p>
+<p>You can put the code samples in the <a href="//astexplorer.net/" rel="noreferrer">AST explorer</a> to follow along with specification details.</p>
+<h3>1. Global execution context in scripts</h3>
+<p>This is script code evaluated at the top level, e.g. directly inside a <code>&lt;script&gt;</code>:</p>
+<pre class="lang-html prettyprint-override"><code>&lt;script&gt;
+// Global context
+console.log(this); // Logs global object.
+
+setTimeout(function(){
+  console.log(&quot;Not global context&quot;);
+});
+&lt;/script&gt;
+</code></pre>
+<p>When in the initial global execution context of a script, evaluating <code>this</code> causes <a href="//tc39.es/ecma262/#sec-global-environment-records-getthisbinding" rel="noreferrer">GetThisBinding</a> to take the following steps:</p>
+<blockquote>
+<p>The GetThisBinding concrete method of a global Environment Record <em>envRec</em> […] [does this]:</p>
+<ol>
+<li>Return <em>envRec</em>.[[GlobalThisValue]].</li>
+</ol>
+</blockquote>
+<p>The [[GlobalThisValue]] property of a global Environment Record is always set to the host-defined <a href="//tc39.es/ecma262/#sec-global-object" rel="noreferrer">global object</a>, which is reachable via <a href="//tc39.es/ecma262/#sec-globalthis" rel="noreferrer"><code>globalThis</code></a> (<code>window</code> on Web, <code>global</code> on Node.js; <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/globalThis" rel="noreferrer">Docs on MDN</a>). Follow the steps of <a href="//tc39.es/ecma262/#sec-initializehostdefinedrealm" rel="noreferrer">InitializeHostDefinedRealm</a> to learn how the [[GlobalThisValue]] property comes to be.</p>
+<h3>2. Global execution context in <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Guide/Modules" rel="noreferrer">modules</a></h3>
+<p>Modules have been introduced in ECMAScript 2015.</p>
+<p>This applies to modules, e.g. when directly inside a <code>&lt;script type=&quot;module&quot;&gt;</code>, as opposed to a simple <code>&lt;script&gt;</code>.</p>
+<p>When in the initial global execution context of a module, evaluating <code>this</code> causes <a href="//tc39.es/ecma262/#sec-module-environment-records-getthisbinding" rel="noreferrer">GetThisBinding</a> to take the following steps:</p>
+<blockquote>
+<p>The GetThisBinding concrete method of a module Environment Record […] [does this]:</p>
+<ol>
+<li>Return <strong>undefined</strong>.</li>
+</ol>
+</blockquote>
+<p>In modules, the value of <code>this</code> is always <code>undefined</code> in the global context. Modules are implicitly in <a href="//tc39.es/ecma262/#sec-strict-mode-code" rel="noreferrer">strict mode</a>.</p>
+<h3>3. Entering <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/eval" rel="noreferrer">eval</a> code</h3>
+<p>There are two kinds of <code>eval</code> calls: <a href="//tc39.es/ecma262/#sec-function-calls-runtime-semantics-evaluation" rel="noreferrer">direct</a> and <a href="//tc39.es/ecma262/#sec-eval-x" rel="noreferrer">indirect</a>. This distinction exists since the ECMAScript 5th edition.</p>
+<ul>
+<li>A direct <code>eval</code> call usually looks like <code>eval(</code>…<code>);</code> or <code>(eval)(</code>…<code>);</code> (or <code>((eval))(</code>…<code>);</code>, etc.).<sup>1</sup> It’s only <em>direct</em> if the call expression fits a narrow pattern.<sup>2</sup></li>
+<li>An indirect <code>eval</code> call involves calling the function reference <code>eval</code> in any other way. It could be <code>eval?.(</code>…<code>)</code>, <code>(</code>…<code>, eval)(</code>…<code>)</code>, <code>window.eval(</code>…<code>)</code>, <code>eval.call(</code>…<code>,</code>…<code>)</code>, etc. Given <code>const aliasEval1 = eval; window.aliasEval2 = eval;</code>, it would also be <code>aliasEval1(</code>…<code>)</code>, <code>aliasEval2(</code>…<code>)</code>. Separately, given <code>const originalEval = eval; window.eval = (x) =&gt; originalEval(x);</code>, calling <code>eval(</code>…<code>)</code> would also be indirect.</li>
+</ul>
+<p>See <a href="//stackoverflow.com/a/9107491/196844">chuckj’s answer to <em>“(1, eval)('this') vs eval('this') in JavaScript?”</em></a> and <a href="//dmitrysoshnikov.com/ecmascript/es5-chapter-2-strict-mode#indirect-eval-call" rel="noreferrer">Dmitry Soshnikov’s ECMA-262-5 in detail – Chapter 2: Strict Mode</a> (<a href="//web.archive.org/web/20210530120958/https://dmitrysoshnikov.com/ecmascript/es5-chapter-2-strict-mode#indirect-eval-call" rel="noreferrer">archived</a>) for when you might use an indirect <code>eval()</code> call.</p>
+<p><a href="//tc39.es/ecma262/#sec-performeval" rel="noreferrer">PerformEval</a> executes the <code>eval</code> code. It creates a new <a href="//tc39.es/ecma262/#sec-declarative-environment-records" rel="noreferrer">declarative Environment Record</a> as its LexicalEnvironment, which is where <a href="//tc39.es/ecma262/#sec-getthisenvironment" rel="noreferrer">GetThisEnvironment</a> gets the <code>this</code> value from.</p>
+<p>Then, if <code>this</code> appears in <code>eval</code> code, the GetThisBinding method of the Environment Record found by <a href="//tc39.es/ecma262/#sec-getthisenvironment" rel="noreferrer">GetThisEnvironment</a> is called and its value returned.</p>
+<p>And the created <a href="//tc39.es/ecma262/#sec-declarative-environment-records" rel="noreferrer">declarative Environment Record</a> depends on whether the <code>eval</code> call was direct or indirect:</p>
+<ul>
+<li>In a direct eval, it will be based on the current <a href="//tc39.es/ecma262/#running-execution-context" rel="noreferrer">running execution context</a>’s LexicalEnvironment.</li>
+<li>In an indirect eval, it will be based on the [[GlobalEnv]] property (a <a href="//tc39.es/ecma262/#sec-global-environment-records" rel="noreferrer">global Environment Record</a>) of the <a href="//tc39.es/ecma262/#sec-code-realms" rel="noreferrer">Realm Record</a> which executed the indirect eval.</li>
+</ul>
+<p>Which means:</p>
+<ul>
+<li>In a direct eval, the <code>this</code> value doesn’t change; it’s taken from the lexical scope that called <code>eval</code>.</li>
+<li>In an indirect eval, the <code>this</code> value is the global object (<code>globalThis</code>).</li>
+</ul>
+<p><em>What about <code>new Function</code>?</em> — <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Function/Function" rel="noreferrer"><code>new Function</code></a> is similar to <code>eval</code>, but it doesn’t call the code immediately; it creates a function. A <em>this</em> binding doesn’t apply anywhere here, except when the function is called, which works normally, as explained in the next subsection.</p>
+<h3>4. Entering <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Functions" rel="noreferrer">function</a> code</h3>
+<p>Entering function code occurs when <em>calling</em> a function.</p>
+<p>There are four categories of syntax to invoke a function.</p>
+<ul>
+<li>The <a href="//tc39.es/ecma262/#sec-evaluatecall" rel="noreferrer">EvaluateCall</a> AO is performed for these three:<sup>3</sup>
+<ul>
+<li><a href="//tc39.es/ecma262/#sec-function-calls-runtime-semantics-evaluation" rel="noreferrer">Normal function calls</a></li>
+<li><a href="//tc39.es/ecma262/#sec-optional-chaining-evaluation" rel="noreferrer">Optional chaining calls</a></li>
+<li><a href="//tc39.es/ecma262/#sec-tagged-templates-runtime-semantics-evaluation" rel="noreferrer">Tagged templates</a></li>
+</ul>
+</li>
+<li>And <a href="//tc39.es/ecma262/#sec-evaluatenew" rel="noreferrer">EvaluateNew</a> is performed for this one:<sup>3</sup>
+<ul>
+<li><a href="//tc39.es/ecma262/#sec-new-operator-runtime-semantics-evaluation" rel="noreferrer">Constructor invocations</a></li>
+</ul>
+</li>
+</ul>
+<p>The actual function call happens at the <a href="//tc39.es/ecma262/#sec-call" rel="noreferrer">Call</a> AO, which is called with a <em>thisValue</em> determined from context; this argument is passed along in a long chain of call-related calls. <a href="//tc39.es/ecma262/#sec-call" rel="noreferrer">Call</a> calls the <a href="//tc39.es/ecma262/#sec-ecmascript-function-objects-call-thisargument-argumentslist" rel="noreferrer">[[Call]]</a> internal slot of the function. This calls <a href="//tc39.es/ecma262/#sec-prepareforordinarycall" rel="noreferrer">PrepareForOrdinaryCall</a> where a new <a href="//tc39.es/ecma262/#sec-function-environment-records" rel="noreferrer">function Environment Record</a> is created:</p>
+<blockquote>
+<p>A <em>function Environment Record</em> is a declarative Environment Record that is used to represent the top-level scope of a function and, if the function is not an <em>ArrowFunction</em>, provides a <code>this</code> binding. If a function is not an <em>ArrowFunction</em> function and references <code>super</code>, its function Environment Record also contains the state that is used to perform <code>super</code> method invocations from within the function.</p>
+</blockquote>
+<p>In addition, there is the [[ThisValue]] field in a function Environment Record:</p>
+<blockquote>
+<p>This is the <code>this</code> value used for this invocation of the function.</p>
+</blockquote>
+<p>The <a href="//tc39.es/ecma262/#sec-newfunctionenvironment" rel="noreferrer">NewFunctionEnvironment</a> call also sets the function environment’s [[ThisBindingStatus]] property.</p>
+<p><a href="//tc39.es/ecma262/#sec-ecmascript-function-objects-call-thisargument-argumentslist" rel="noreferrer">[[Call]]</a> also calls <a href="//tc39.es/ecma262/#sec-ordinarycallbindthis" rel="noreferrer">OrdinaryCallBindThis</a>, where the appropriate <em>thisArgument</em> is determined based on:</p>
+<ul>
+<li>the original reference,</li>
+<li>the kind of the function, and</li>
+<li>whether or not the code is in <a href="//tc39.es/ecma262/#sec-strict-mode-code" rel="noreferrer">strict mode</a>.</li>
+</ul>
+<p>Once determined, a final call to the <a href="//tc39.es/ecma262/#sec-bindthisvalue" rel="noreferrer">BindThisValue</a> method of the newly created function Environment Record actually sets the [[ThisValue]] field to the <em>thisArgument</em>.</p>
+<p>Finally, this very field is where a <a href="//tc39.es/ecma262/#sec-function-environment-records" rel="noreferrer">function Environment Record’s</a> <a href="//tc39.es/ecma262/#sec-function-environment-records-getthisbinding" rel="noreferrer">GetThisBinding</a> AO gets the value for <code>this</code> from:</p>
+<blockquote>
+<p>The GetThisBinding concrete method of a function Environment Record <em>envRec</em> […] [does this]:</p>
+<p>[…]<br />
+3. Return <em>envRec</em>.[[ThisValue]].</p>
+</blockquote>
+<p>Again, how exactly the <em>this</em> value is determined depends on many factors; this was just a general overview. With this technical background, let’s examine all the concrete examples.</p>
+<h4><a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Functions/Arrow_functions" rel="noreferrer">Arrow functions</a></h4>
+<p>When an <a href="//tc39.es/ecma262/#sec-runtime-semantics-instantiatearrowfunctionexpression" rel="noreferrer">arrow function</a> is evaluated, the [[ThisMode]] internal slot of the function object is set to <em>“lexical”</em> in <a href="//tc39.es/ecma262/#sec-ordinaryfunctioncreate" rel="noreferrer">OrdinaryFunctionCreate</a>.</p>
+<p>At <a href="//tc39.es/ecma262/#sec-ordinarycallbindthis" rel="noreferrer">OrdinaryCallBindThis</a>, which takes a function <em>F</em>:</p>
+<blockquote>
+<ol>
+<li>Let <em>thisMode</em> be <em>F</em>.[[ThisMode]].</li>
+<li>If <em>thisMode</em> is <em>lexical</em>, return NormalCompletion(<code>undefined</code>).
+[…]</li>
+</ol>
+</blockquote>
+<p>which just means that the rest of the algorithm which binds <em>this</em> is skipped. An arrow function does not bind its own <em>this</em> value.</p>
+<p>So, what is <code>this</code> inside an arrow function, then? Looking back at <a href="//tc39.es/ecma262/#sec-resolvethisbinding" rel="noreferrer">ResolveThisBinding</a> and <a href="//tc39.es/ecma262/#sec-getthisenvironment" rel="noreferrer">GetThisEnvironment</a>, the <a href="//tc39.es/ecma262/#sec-function-environment-records-hasthisbinding" rel="noreferrer">HasThisBinding method explicitly returns <strong>false</strong></a>.</p>
+<blockquote>
+<p>The HasThisBinding concrete method of a function Environment Record <em>envRec</em> […] [does this]:</p>
+<ol>
+<li>If <em>envRec</em>.[[ThisBindingStatus]] is <em>lexical</em>, return <strong>false</strong>; otherwise, return <strong>true</strong>.</li>
+</ol>
+</blockquote>
+<p>So the outer environment is looked up instead, iteratively. The process will end in one of the three environments that have a <em>this</em> binding.</p>
+<p>This just means that, <strong>in arrow function bodies, <code>this</code> comes from the lexical scope of the arrow function</strong>, or in other words (from <a href="//stackoverflow.com/a/34361380">Arrow function vs function declaration / expressions: Are they equivalent / exchangeable?</a>):</p>
+<blockquote>
+<p>Arrow functions don’t have their own <code>this</code> […] binding. Instead, [this identifier is] resolved in the lexical scope like any other variable. That means that inside an arrow function, <code>this</code> [refers] to the [value of <code>this</code>] in the environment the arrow function is <em>defined</em> in (i.e. “outside” the arrow function).</p>
+</blockquote>
+<h4>Function <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Operators/Property_Accessors" rel="noreferrer">properties</a></h4>
+<p>In normal functions (<code>function</code>, <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Functions/Method_definitions" rel="noreferrer">methods</a>), <code>this</code> is determined <strong>by how the function is called</strong>.</p>
+<p>This is where these “syntax variants” come in handy.</p>
+<p>Consider this object containing a function:</p>
+<pre class="lang-js prettyprint-override"><code>const refObj = {
+    func: function(){
+      console.log(this);
+    }
+  };
+</code></pre>
+<p>Alternatively:</p>
+<pre class="lang-js prettyprint-override"><code>const refObj = {
+    func(){
+      console.log(this);
+    }
+  };
+</code></pre>
+<p>In any of the following function calls, the <code>this</code> value inside <code>func</code> will be <code>refObj</code>.<sup>1</sup></p>
+<ul>
+<li><code>refObj.func()</code></li>
+<li><code>refObj[&quot;func&quot;]()</code></li>
+<li><code>refObj?.func()</code></li>
+<li><code>refObj.func?.()</code></li>
+<li><code>refObj.func``</code></li>
+</ul>
+<p>If the called function is syntactically a property of a base object, then this base will be the “reference” of the call, which, in usual cases, will be the value of <code>this</code>. This is explained by the evaluation steps linked above; for example, in <code>refObj.func()</code> (or <code>refObj[&quot;func&quot;]()</code>), the <a href="//tc39.es/ecma262/#prod-CallMemberExpression" rel="noreferrer"><em>CallMemberExpression</em></a> is the entire expression <code>refObj.func()</code>, which consists of the <em><a href="//tc39.es/ecma262/#prod-MemberExpression" rel="noreferrer">MemberExpression</a></em> <code>refObj.func</code> and the <a href="//tc39.es/ecma262/#prod-Arguments" rel="noreferrer"><em>Arguments</em></a> <code>()</code>.</p>
+<p>But also, <code>refObj.func</code> and <code>refObj</code> play three roles, each:</p>
+<ul>
+<li>they’re both expressions,</li>
+<li>they’re both references, and</li>
+<li>they’re both values.</li>
+</ul>
+<p><code>refObj.func</code> as a <em>value</em> is the callable function object; the corresponding <em>reference</em> is used to determine the <code>this</code> binding.</p>
+<p>The optional chaining and tagged template examples work very similarly: basically, the reference is everything before the <code>?.()</code>, before the <code>``</code>, or before the <code>()</code>.</p>
+<p><a href="//tc39.es/ecma262/#sec-evaluatecall" rel="noreferrer">EvaluateCall</a> uses <a href="//tc39.es/ecma262/#sec-ispropertyreference" rel="noreferrer">IsPropertyReference</a> of that reference to determine if it is a property of an object, syntactically. It’s trying to get the [[Base]] property of the reference (which is e.g. <code>refObj</code>, when applied to <code>refObj.func</code>; or <code>foo.bar</code> when applied to <code>foo.bar.baz</code>). If it is written as a property, then <a href="//tc39.es/ecma262/#sec-getthisvalue" rel="noreferrer">GetThisValue</a> will get this [[Base]] property and use it as the <em>this</em> value.</p>
+<p>Note: <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Functions/get" rel="noreferrer">Getters / Setters</a> work the same way as methods, regarding <code>this</code>. Simple properties don’t affect the execution context, e.g. here, <code>this</code> is in global scope:</p>
+<pre class="lang-js prettyprint-override"><code>const o = {
+    a: 1,
+    b: this.a, // Is `globalThis.a`.
+    [this.a]: 2 // Refers to `globalThis.a`.
+  };
+</code></pre>
+<h4>Calls without base reference, strict mode, and <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Statements/with" rel="noreferrer"><code>with</code></a></h4>
+<p>A call without a base reference is usually a function that isn’t called as a property. For example:</p>
+<pre class="lang-js prettyprint-override"><code>func(); // As opposed to `refObj.func();`.
+</code></pre>
+<p>This also happens when <a href="/q/30486345">passing or assigning methods</a>, or using the <a href="/q/35522560">comma operator</a>. This is where the difference between Reference Record and Value is relevant.</p>
+<p>Note function <code>j</code>: following the specification, you will notice that <code>j</code> can only return the function object (Value) itself, but not a Reference Record. Therefore the base reference <code>refObj</code> is lost.</p>
+<pre class="lang-js prettyprint-override"><code>const g = (f) =&gt; f(); // No base ref.
+const h = refObj.func;
+const j = () =&gt; refObj.func;
+
+g(refObj.func);
+h(); // No base ref.
+j()(); // No base ref.
+(0, refObj.func)(); // Another common pattern to remove the base ref.
+</code></pre>
+<p><a href="//tc39.es/ecma262/#sec-evaluatecall" rel="noreferrer">EvaluateCall</a> calls <a href="//tc39.es/ecma262/#sec-call" rel="noreferrer">Call</a> with a <em>thisValue</em> of <strong>undefined</strong> here. This makes a difference in <a href="//tc39.es/ecma262/#sec-ordinarycallbindthis" rel="noreferrer">OrdinaryCallBindThis</a> (<em>F</em>: the function object; <em>thisArgument</em>: the <em>thisValue</em> passed to <a href="//tc39.es/ecma262/#sec-call" rel="noreferrer">Call</a>):</p>
+<blockquote>
+<ol>
+<li>Let <em>thisMode</em> be <em>F</em>.[[ThisMode]].</li>
+</ol>
+<p>[…]</p>
+<ol start="5">
+<li>If <em>thisMode</em> is <em>strict</em>, let <em>thisValue</em> be <em>thisArgument</em>.</li>
+<li>Else,
+<ol>
+<li>If <em>thisArgument</em> is <strong>undefined</strong> or <strong>null</strong>, then
+<ol>
+<li>Let <em>globalEnv</em> be <em>calleeRealm</em>.[[GlobalEnv]].</li>
+<li>[…]</li>
+<li>Let <em>thisValue</em> be <em>globalEnv</em>.[[GlobalThisValue]].</li>
+</ol>
+</li>
+<li>Else,
+<ol>
+<li>Let <em>thisValue</em> be ! <a href="//tc39.es/ecma262/#sec-toobject" rel="noreferrer">ToObject</a>(thisArgument).</li>
+<li>NOTE: <a href="//tc39.es/ecma262/#sec-toobject" rel="noreferrer">ToObject</a> produces wrapper objects […].</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p>[…]</p>
+</blockquote>
+<p>Note: step 5 sets the actual value of <code>this</code> to the supplied <em>thisArgument</em> in strict mode — <code>undefined</code> in this case. In “sloppy mode”, an undefined or null <em>thisArgument</em> results in <code>this</code> being the global <em>this</em> value.</p>
+<p>If <a href="//tc39.es/ecma262/#sec-ispropertyreference" rel="noreferrer">IsPropertyReference</a> returns <strong>false</strong>, then <a href="//tc39.es/ecma262/#sec-evaluatecall" rel="noreferrer">EvaluateCall</a> takes these steps:</p>
+<blockquote>
+<ol>
+<li>Let <em>refEnv</em> be <em>ref</em>.[[Base]].</li>
+<li>Assert: <em>refEnv</em> is an Environment Record.</li>
+<li>Let <em>thisValue</em> be <em>refEnv</em>.WithBaseObject().</li>
+</ol>
+</blockquote>
+<p>This is where an undefined <em>thisValue</em> may come from: <em>refEnv</em>.<a href="//tc39.es/ecma262/#sec-object-environment-records-withbaseobject" rel="noreferrer">WithBaseObject</a>() is always <strong>undefined</strong>, <em>except</em> in <a href="//tc39.es/ecma262/#sec-with-statement-runtime-semantics-evaluation" rel="noreferrer"><code>with</code></a> statements. In this case, <em>thisValue</em> will be the binding object.</p>
+<p>There’s also <a href="//tc39.es/ecma262/#sec-symbol.unscopables" rel="noreferrer"><code>Symbol.unscopables</code></a> (<a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Symbol/unscopables" rel="noreferrer">Docs on MDN</a>) to control the <code>with</code> binding behavior.</p>
+<p>To summarize, so far:</p>
+<pre class="lang-js prettyprint-override"><code>function f1(){
+  console.log(this);
+}
+
+function f2(){
+  console.log(this);
+}
+
+function f3(){
+  console.log(this);
+}
+
+const o = {
+    f1,
+    f2,
+    [Symbol.unscopables]: {
+      f2: true
+    }
+  };
+
+f1(); // Logs `globalThis`.
+
+with(o){
+  f1(); // Logs `o`.
+  f2(); // `f2` is unscopable, so this logs `globalThis`.
+  f3(); // `f3` is not on `o`, so this logs `globalThis`.
+}
+</code></pre>
+<p>and:</p>
+<pre class="lang-js prettyprint-override"><code>&quot;use strict&quot;;
+
+function f(){
+  console.log(this);
+}
+
+f(); // Logs `undefined`.
+
+// `with` statements are not allowed in strict-mode code.
+</code></pre>
+<p>Note that when evaluating <code>this</code>, <strong>it doesn’t matter <em>where</em> a normal function is defined</strong>.</p>
+<h4><a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Function/call" rel="noreferrer"><code>.call</code></a>, <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Function/apply" rel="noreferrer"><code>.apply</code></a>, <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Function/bind" rel="noreferrer"><code>.bind</code></a>, <em>thisArg</em>, and primitives</h4>
+<p>Another consequence of step 5 of <a href="//tc39.es/ecma262/#sec-ordinarycallbindthis" rel="noreferrer">OrdinaryCallBindThis</a>, in conjunction with step 6.2 (6.b in the spec), is that a primitive <em>this</em> value is coerced to an object <em>only</em> in “sloppy” mode.</p>
+<p>To examine this, let’s introduce another source for the <em>this</em> value: the three methods that override the <em>this</em> binding:<sup>4</sup></p>
+<ul>
+<li><code>Function.prototype.apply(thisArg, argArray)</code></li>
+<li><code>Function.prototype.</code> {<code>call</code>, <code>bind</code>} <code>(thisArg, ...args)</code></li>
+</ul>
+<p><a href="//tc39.es/ecma262/#sec-function.prototype.bind" rel="noreferrer"><code>.bind</code></a> creates a bound function, whose <em>this</em> binding is set to <em>thisArg</em> and cannot change again. <a href="//tc39.es/ecma262/#sec-function.prototype.call" rel="noreferrer"><code>.call</code></a> and <a href="//tc39.es/ecma262/#sec-function.prototype.apply" rel="noreferrer"><code>.apply</code></a> call the function immediately, with the <em>this</em> binding set to <em>thisArg</em>.</p>
+<p><code>.call</code> and <code>.apply</code> map directly to <a href="//tc39.es/ecma262/#sec-call" rel="noreferrer">Call</a>, using the specified <em>thisArg</em>. <code>.bind</code> creates a bound function with <a href="//tc39.es/ecma262/#sec-boundfunctioncreate" rel="noreferrer">BoundFunctionCreate</a>. These have <em>their own</em> <a href="//tc39.es/ecma262/#sec-bound-function-exotic-objects-call-thisargument-argumentslist" rel="noreferrer">[[Call]] method</a> which looks up the function object’s [[BoundThis]] internal slot.</p>
+<p>Examples of setting a custom <em>this</em> value:</p>
+<pre class="lang-js prettyprint-override"><code>function f(){
+  console.log(this);
+}
+
+const myObj = {},
+  g = f.bind(myObj),
+  h = (m) =&gt; m();
+
+// All of these log `myObj`.
+g();
+f.bind(myObj)();
+f.call(myObj);
+h(g);
+</code></pre>
+<p>For objects, this is the same in strict and non-strict mode.</p>
+<p>Now, try to supply a primitive value:</p>
+<pre class="lang-js prettyprint-override"><code>function f(){
+  console.log(this);
+}
+
+const myString = &quot;s&quot;,
+  g = f.bind(myString);
+
+g();              // Logs `String { &quot;s&quot; }`.
+f.call(myString); // Logs `String { &quot;s&quot; }`.
+</code></pre>
+<p>In non-strict mode, primitives are coerced to their object-wrapped form. It’s the same kind of object you get when calling <code>Object(&quot;s&quot;)</code> or <code>new String(&quot;s&quot;)</code>. In strict mode, you <em>can</em> use primitives:</p>
+<pre class="lang-js prettyprint-override"><code>&quot;use strict&quot;;
+
+function f(){
+  console.log(this);
+}
+
+const myString = &quot;s&quot;,
+  g = f.bind(myString);
+
+g();              // Logs `&quot;s&quot;`.
+f.call(myString); // Logs `&quot;s&quot;`.
+</code></pre>
+<p>Libraries make use of these methods, e.g. jQuery sets the <code>this</code> to the DOM element selected here:</p>
+<pre class="lang-js prettyprint-override"><code>$(&quot;button&quot;).click(function(){
+  console.log(this); // Logs the clicked button.
+});
+</code></pre>
+<h4>Constructors, <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Classes" rel="noreferrer">classes</a>, and <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Operators/new" rel="noreferrer"><code>new</code></a></h4>
+<p>When calling a function as a constructor using the <code>new</code> operator, <a href="//tc39.es/ecma262/#sec-evaluatenew" rel="noreferrer">EvaluateNew</a> calls <a href="//tc39.es/ecma262/#sec-construct" rel="noreferrer">Construct</a>, which calls the <a href="//tc39.es/ecma262/#sec-ecmascript-function-objects-construct-argumentslist-newtarget" rel="noreferrer">[[Construct]] method</a>. If the function is a base constructor (i.e. not a <code>class extends</code>…<code>{</code>…<code>}</code>), it sets <em>thisArgument</em> to a new object created from the constructor’s prototype. Properties set on <code>this</code> in the constructor will end up on the resulting instance object. <code>this</code> is implicitly returned, unless you explicitly return your own non-primitive value.</p>
+<p>A <a href="//tc39.es/ecma262/#sec-class-definitions" rel="noreferrer"><code>class</code></a> is a new way of creating constructor functions, introduced in ECMAScript 2015.</p>
+<pre class="lang-js prettyprint-override"><code>function Old(a){
+  this.p = a;
+}
+
+const o = new Old(1);
+
+console.log(o);  // Logs `Old { p: 1 }`.
+
+class New{
+  constructor(a){
+    this.p = a;
+  }
+}
+
+const n = new New(1);
+
+console.log(n); // Logs `New { p: 1 }`.
+</code></pre>
+<p>Class definitions are implicitly in <a href="//tc39.es/ecma262/#sec-strict-mode-code" rel="noreferrer">strict mode</a>:</p>
+<pre class="lang-js prettyprint-override"><code>class A{
+  m1(){
+    return this;
+  }
+  m2(){
+    const m1 = this.m1;
+    
+    console.log(m1());
+  }
+}
+
+new A().m2(); // Logs `undefined`.
+</code></pre>
+<h4><a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference/Operators/super" rel="noreferrer"><code>super</code></a></h4>
+<p>The exception to the behavior with <code>new</code> is <code>class extends</code>…<code>{</code>…<code>}</code>, as mentioned above. Derived classes do not immediately set their <em>this</em> value upon invocation; they only do so once the base class is reached through a series of <code>super</code> calls (happens implicitly without an own <code>constructor</code>). Using <code>this</code> before calling <code>super</code> is not allowed.</p>
+<p>Calling <a href="//tc39.es/ecma262/#sec-super-keyword-runtime-semantics-evaluation" rel="noreferrer"><code>super</code></a> calls the super constructor with the <em>this</em> value of the lexical scope (the function Environment Record) of the call. <a href="//tc39.es/ecma262/#sec-getthisvalue" rel="noreferrer">GetThisValue</a> has a special rule for <code>super</code> calls. It uses <a href="//tc39.es/ecma262/#sec-bindthisvalue" rel="noreferrer">BindThisValue</a> to set <code>this</code> to that Environment Record.</p>
+<pre class="lang-js prettyprint-override"><code>class DerivedNew extends New{
+  constructor(a, a2){
+    // Using `this` before `super` results in a ReferenceError.
+    super(a);
+    this.p2 = a2;
+  }
+}
+
+const n2 = new DerivedNew(1, 2);
+
+console.log(n2); // Logs `DerivedNew { p: 1, p2: 2 }`.
+</code></pre>
+<h3>5. Evaluating class fields</h3>
+<p>Instance fields and static fields were introduced in ECMAScript 2022.</p>
+<p>When a <code>class</code> is evaluated, <a href="//tc39.es/ecma262/#sec-runtime-semantics-classdefinitionevaluation" rel="noreferrer">ClassDefinitionEvaluation</a> is performed, modifying the <a href="//tc39.es/ecma262/#running-execution-context" rel="noreferrer">running execution context</a>. For each <a href="//tc39.es/ecma262/#prod-ClassElement" rel="noreferrer"><em>ClassElement</em></a>:</p>
+<ul>
+<li>if a field is static, then <code>this</code> refers to the class itself,</li>
+<li>if a field is not static, then <code>this</code> refers to the instance.</li>
+</ul>
+<p>Private fields (e.g. <code>#x</code>) and methods are added to a PrivateEnvironment.</p>
+<p><a href="//github.com/tc39/proposal-class-static-block" rel="noreferrer">Static blocks</a> are currently a <a href="//tc39.es/process-document/" rel="noreferrer">TC39 stage 3 proposal</a>. Static blocks work the same as static fields and methods: <code>this</code> inside them refers to the class itself.</p>
+<p>Note that in methods and getters / setters, <code>this</code> works just like in normal function properties.</p>
+<pre class="lang-js prettyprint-override"><code>class Demo{
+  a = this;
+  b(){
+    return this;
+  }
+  static c = this;
+  static d(){
+    return this;
+  }
+  // Getters, setters, private modifiers are also possible.
+}
+
+const demo = new Demo;
+
+console.log(demo.a, demo.b()); // Both log `demo`.
+console.log(Demo.c, Demo.d()); // Both log `Demo`.
+</code></pre>
+<hr />
+<p><sup>1</sup>: <code>(o.f)()</code> is equivalent to <code>o.f()</code>; <code>(f)()</code> is equivalent to <code>f()</code>. This is explained in <a href="//2ality.com/2015/12/references.html" rel="noreferrer">this 2ality article</a> (<a href="//web.archive.org/web/20210201161804/https://2ality.com/2015/12/references.html" rel="noreferrer">archived</a>). Particularly see <a href="//tc39.es/ecma262/#sec-grouping-operator" rel="noreferrer">how a <em>ParenthesizedExpression</em> is evaluated</a>.</p>
+<p><sup>2</sup>: It must be a <em><a href="//tc39.es/ecma262/#prod-MemberExpression" rel="noreferrer">MemberExpression</a></em>, must not be a property, must have a [[ReferencedName]] of exactly <strong>&quot;eval&quot;</strong>, and must be the %eval% intrinsic object.</p>
+<p><sup>3</sup>: Whenever the specification says <em>“Let</em> ref <em>be the result of evaluating</em> X.”, then <em>X</em> is some expression that you need to find the evaluation steps for. For example, evaluating a <em><a href="//tc39.es/ecma262/#prod-MemberExpression" rel="noreferrer">MemberExpression</a></em> or <a href="//tc39.es/ecma262/#prod-CallExpression" rel="noreferrer"><em>CallExpression</em></a> is the result of one of <a href="//tc39.es/ecma262/#sec-property-accessors-runtime-semantics-evaluation" rel="noreferrer">these algorithms</a>. Some of them result in a <a href="//tc39.es/ecma262/#sec-reference-record-specification-type" rel="noreferrer">Reference Record</a>.</p>
+<p><sup>4</sup>: There are also several other native and host methods that allow providing a <em>this</em> value, notably <code>Array.prototype.map</code>, <code>Array.prototype.forEach</code>, etc. that accept a <em>thisArg</em> as their second argument. Anyone can make their own methods to alter <code>this</code> like <code>(func, thisArg) =&gt; func.bind(thisArg)</code>, <code>(func, thisArg) =&gt; func.call(thisArg)</code>, etc. As always, <a href="//developer.mozilla.org/en/docs/Web/JavaScript/Reference" rel="noreferrer">MDN</a> offers great documentation.</p>
+<hr />
+<h2>Just for fun, test your understanding with some examples</h2>
+<p>For each code snippet, answer the question: <em>“What is the value of <code>this</code> at the marked line? Why?”</em>.</p>
+<p><em>To reveal the answers, click the gray boxes.</em></p>
+<ol>
+<li>
+<pre class="lang-js prettyprint-override"><code>if(true){
+  console.log(this); // What is `this` here?
+}
+</code></pre>
+<blockquote class="spoiler">
+<p> <code>globalThis</code>. The marked line is evaluated in the initial global execution context.</p>
+</blockquote>
+</li>
+<li><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const obj = {};
+
+function myFun(){
+  return { // What is `this` here?
+    "is obj": this === obj,
+    "is globalThis": this === globalThis
+  };
+}
+
+obj.method = myFun;
+
+console.log(obj.method());
+
+   </code></pre>
+</div>
+</div>
+</p>
+<blockquote class="spoiler">
+<p> <code>obj</code>. When calling a function as a property of an object, it is called with the <em>this</em> binding set to the <em>base</em> of the reference <code>obj.method</code>, i.e. <code>obj</code>.</p>
+</blockquote>
+</li>
+<li><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const obj = {
+    myMethod: function(){
+      return { // What is `this` here?
+        "is obj": this === obj,
+        "is globalThis": this === globalThis
+      };
+    }
+  },
+  myFun = obj.myMethod;
+
+console.log(myFun());
+
+   </code></pre>
+</div>
+</div>
+</p>
+<blockquote class="spoiler">
+<p> <code>globalThis</code>. Since the function value <code>myFun</code> / <code>obj.myMethod</code> is not called off of an object, as a property, the <em>this</em> binding will be <code>globalThis</code>.
+
+ This is different from Python, in which accessing a method (<code>obj.myMethod</code>) creates a <a href="//docs.python.org/3/library/stdtypes.html#methods" rel="noreferrer">bound method object</a>.</p>
+</blockquote>
+</li>
+<li><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const obj = {
+    myFun: () =&gt; ({ // What is `this` here?
+      "is obj": this === obj,
+      "is globalThis": this === globalThis
+    })
+  };
+
+console.log(obj.myFun());
+
+   </code></pre>
+</div>
+</div>
+</p>
+<blockquote class="spoiler">
+<p> <code>globalThis</code>. Arrow functions don’t create their own <em>this</em> binding. The lexical scope is the same as the initial global scope, so <code>this</code> is <code>globalThis</code>.</p>
+</blockquote>
+</li>
+<li>
+<pre class="lang-js prettyprint-override"><code>function myFun(){
+  console.log(this); // What is `this` here?
+}
+
+const obj = {
+    myMethod: function(){
+      eval(&quot;myFun()&quot;);
+    }
+  };
+
+obj.myMethod();
+</code></pre>
+<blockquote class="spoiler">
+<p> <code>globalThis</code>. When evaluating the direct eval call, <code>this</code> is <code>obj</code>. However, in the eval code, <code>myFun</code> is not called off of an object, so the <em>this</em> binding is set to the global object.</p>
+</blockquote>
+</li>
+<li><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function myFun() {
+  // What is `this` here?
+  return {
+    "is obj": this === obj,
+    "is globalThis": this === globalThis
+  };
+}
+
+const obj = {};
+
+console.log(myFun.call(obj));
+
+   </code></pre>
+</div>
+</div>
+</p>
+<blockquote class="spoiler">
+<p> <code>obj</code>. The line <code>myFun.call(obj);</code> is invoking the special built-in function <code>Function.prototype.call</code>, which accepts <code>thisArg</code> as the first argument.</p>
+</blockquote>
+</li>
+<li><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>class MyCls{
+  arrow = () =&gt; ({ // What is `this` here?
+    "is MyCls": this === MyCls,
+    "is globalThis": this === globalThis,
+    "is instance": this instanceof MyCls
+  });
+}
+
+console.log(new MyCls().arrow());
+
+   </code></pre>
+</div>
+</div>
+</p>
+<blockquote class="spoiler">
+<p> It’s the instance of <code>MyCls</code>. Arrow functions don’t change the <em>this</em> binding, so it comes from lexical scope. Therefore, this is <em>exactly the same</em> as with the class fields mentioned above, like <code>a = this;</code>. Try changing it to <code>static arrow</code>. Do you get the result you expect?</p>
+</blockquote>
+</li>
+</ol>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="193 votes">193</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1317018/mahesha999" rel="noopener">Mahesha999</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/17514482" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>The <code>this</code> keyword behaves differently in JavaScript compared to other languages. In Object Oriented languages, the <code>this</code> keyword refers to the current instance of the class. In JavaScript the value of <code>this</code> is determined by the invocation context of function (<em><code>context.function()</code></em>) and where it is called.</p>
+
+<p><strong>1. When used in global context</strong></p>
+
+<p>When you use <code>this</code> in global context, it is bound to global object (<code>window</code> in browser)</p>
+
+<pre><code>document.write(this);  //[object Window]
+</code></pre>
+
+<p>When you use <code>this</code> inside a function defined in the global context, <code>this</code> is still bound to global object since the function is actually made a method of global context.</p>
+
+<pre><code>function f1()
+{
+   return this;
+}
+document.write(f1());  //[object Window]
+</code></pre>
+
+<p>Above <code>f1</code> is made a method of global object. Thus we can also call it on <code>window</code> object as follows:</p>
+
+<pre><code>function f()
+{
+    return this;
+}
+
+document.write(window.f()); //[object Window]
+</code></pre>
+
+<p><strong>2. When used inside object method</strong></p>
+
+<p>When you use <code>this</code> keyword inside an object method, <code>this</code> is bound to the "immediate" enclosing object.</p>
+
+<pre><code>var obj = {
+    name: "obj",
+    f: function () {
+        return this + ":" + this.name;
+    }
+};
+document.write(obj.f());  //[object Object]:obj
+</code></pre>
+
+<p>Above I have put the word immediate in double quotes. It is to make the point that if you nest the object inside another object, then <code>this</code> is bound to the immediate parent.</p>
+
+<pre><code>var obj = {
+    name: "obj1",
+    nestedobj: {
+        name:"nestedobj",
+        f: function () {
+            return this + ":" + this.name;
+        }
+    }            
+}
+
+document.write(obj.nestedobj.f()); //[object Object]:nestedobj
+</code></pre>
+
+<p>Even if you add function explicitly to the object as a method, it still follows above rules, that is <code>this</code> still points to the immediate parent object.</p>
+
+<pre><code>var obj1 = {
+    name: "obj1",
+}
+
+function returnName() {
+    return this + ":" + this.name;
+}
+
+obj1.f = returnName; //add method to object
+document.write(obj1.f()); //[object Object]:obj1
+</code></pre>
+
+<p><strong>3. When invoking context-less function</strong></p>
+
+<p>When you use <code>this</code> inside function that is invoked without any context (i.e. not on any object), it is bound to the global object (<code>window</code> in browser)(even if the function is defined inside the object) .</p>
+
+<pre><code>var context = "global";
+
+var obj = {  
+    context: "object",
+    method: function () {                  
+        function f() {
+            var context = "function";
+            return this + ":" +this.context; 
+        };
+        return f(); //invoked without context
+    }
+};
+
+document.write(obj.method()); //[object Window]:global 
+</code></pre>
+
+<p><strong>Trying it all with functions</strong></p>
+
+<p>We can try above points with functions too. However there are some differences.</p>
+
+<ul>
+<li>Above we added members to objects using object literal notation. We can add members to functions by using <code>this</code>. to specify them.</li>
+<li>Object literal notation creates an instance of object which we can use immediately. With function we may need to first create its instance using <code>new</code> operator.</li>
+<li>Also in an object literal approach, we can explicitly add members to already defined object using dot operator. This gets added to the specific instance only. However I have added variable to the function prototype so that it gets reflected in all instances of the function.</li>
+</ul>
+
+<p>Below I tried out all the things that we did with Object and <code>this</code> above, but by first creating function instead of directly writing an object.</p>
+
+<pre><code>/********************************************************************* 
+  1. When you add variable to the function using this keyword, it 
+     gets added to the function prototype, thus allowing all function 
+     instances to have their own copy of the variables added.
+*********************************************************************/
+function functionDef()
+{
+    this.name = "ObjDefinition";
+    this.getName = function(){                
+        return this+":"+this.name;
+    }
+}        
+
+obj1 = new functionDef();
+document.write(obj1.getName() + "&lt;br /&gt;"); //[object Object]:ObjDefinition   
+
+/********************************************************************* 
+   2. Members explicitly added to the function protorype also behave 
+      as above: all function instances have their own copy of the 
+      variable added.
+*********************************************************************/
+functionDef.prototype.version = 1;
+functionDef.prototype.getVersion = function(){
+    return "v"+this.version; //see how this.version refers to the
+                             //version variable added through 
+                             //prototype
+}
+document.write(obj1.getVersion() + "&lt;br /&gt;"); //v1
+
+/********************************************************************* 
+   3. Illustrating that the function variables added by both above 
+      ways have their own copies across function instances
+*********************************************************************/
+functionDef.prototype.incrementVersion = function(){
+    this.version = this.version + 1;
+}
+var obj2 = new functionDef();
+document.write(obj2.getVersion() + "&lt;br /&gt;"); //v1
+
+obj2.incrementVersion();      //incrementing version in obj2
+                              //does not affect obj1 version
+
+document.write(obj2.getVersion() + "&lt;br /&gt;"); //v2
+document.write(obj1.getVersion() + "&lt;br /&gt;"); //v1
+
+/********************************************************************* 
+   4. `this` keyword refers to the immediate parent object. If you 
+       nest the object through function prototype, then `this` inside 
+       object refers to the nested object not the function instance
+*********************************************************************/
+functionDef.prototype.nestedObj = { name: 'nestedObj', 
+                                    getName1 : function(){
+                                        return this+":"+this.name;
+                                    }                            
+                                  };
+
+document.write(obj2.nestedObj.getName1() + "&lt;br /&gt;"); //[object Object]:nestedObj
+
+/********************************************************************* 
+   5. If the method is on an object's prototype chain, `this` refers 
+      to the object the method was called on, as if the method was on 
+      the object.
+*********************************************************************/
+var ProtoObj = { fun: function () { return this.a } };
+var obj3 = Object.create(ProtoObj); //creating an object setting ProtoObj
+                                    //as its prototype
+obj3.a = 999;                       //adding instance member to obj3
+document.write(obj3.fun()+"&lt;br /&gt;");//999
+                                    //calling obj3.fun() makes 
+                                    //ProtoObj.fun() to access obj3.a as 
+                                    //if fun() is defined on obj3
+</code></pre>
+
+<p><strong>4. When used inside constructor function</strong>.</p>
+
+<p>When the function is used as a constructor (that is when it is called with <code>new</code> keyword), <code>this</code> inside function body points to the new object being constructed.</p>
+
+<pre><code>var myname = "global context";
+function SimpleFun()
+{
+    this.myname = "simple function";
+}
+
+var obj1 = new SimpleFun(); //adds myname to obj1
+//1. `new` causes `this` inside the SimpleFun() to point to the
+//   object being constructed thus adding any member
+//   created inside SimipleFun() using this.membername to the
+//   object being constructed
+//2. And by default `new` makes function to return newly 
+//   constructed object if no explicit return value is specified
+
+document.write(obj1.myname); //simple function
+</code></pre>
+
+<p><strong>5. When used inside function defined on prototype chain</strong></p>
+
+<p>If the method is on an object's prototype chain, <code>this</code> inside such method refers to the object the method was called on, as if the method is defined on the object.</p>
+
+<pre><code>var ProtoObj = {
+    fun: function () {
+        return this.a;
+    }
+};
+//Object.create() creates object with ProtoObj as its
+//prototype and assigns it to obj3, thus making fun() 
+//to be the method on its prototype chain
+
+var obj3 = Object.create(ProtoObj);
+obj3.a = 999;
+document.write(obj3.fun()); //999
+
+//Notice that fun() is defined on obj3's prototype but 
+//`this.a` inside fun() retrieves obj3.a   
+</code></pre>
+
+<p><strong>6. Inside call(), apply() and bind() functions</strong></p>
+
+<ul>
+<li>All these methods are defined on <code>Function.prototype</code>.</li>
+<li>These methods allows to write a function once and invoke it in different context. In other words, they allows to specify the value of <code>this</code> which will be used while the function is being executed. They also take any parameters to be passed to the original function when it is invoked.</li>
+<li><strong><code>fun.apply(obj1 [, argsArray])</code></strong> Sets <code>obj1</code> as the value of <code>this</code> inside <code>fun()</code> and calls <code>fun()</code> passing elements of <code>argsArray</code> as its arguments.</li>
+<li><strong><code>fun.call(obj1 [, arg1 [, arg2 [,arg3 [, ...]]]])</code></strong> - Sets <code>obj1</code> as the value of <code>this</code> inside <code>fun()</code> and calls <code>fun()</code> passing <code>arg1, arg2, arg3, ...</code> as its arguments.</li>
+<li><strong><code>fun.bind(obj1 [, arg1 [, arg2 [,arg3 [, ...]]]])</code></strong> - Returns the reference to the function <code>fun</code> with <code>this</code> inside fun bound to <code>obj1</code> and parameters of <code>fun</code> bound to the   parameters specified <code>arg1, arg2, arg3,...</code>.</li>
+<li>By now the difference between <code>apply</code>, <code>call</code> and <code>bind</code> must have become apparent. <code>apply</code> allows to specify the arguments to function as array-like object i.e. an object with a numeric <code>length</code> property and corresponding non-negative integer properties. Whereas <code>call</code> allows to specify the arguments to the function directly. Both <code>apply</code> and <code>call</code> immediately invokes the function in the specified context and with the specified arguments. On the other hand, <code>bind</code> simply returns the function bound to the specified <code>this</code> value and the arguments. We can capture the reference to this returned function by assigning it to a variable and later we can call it any time.</li>
+</ul>
+
+
+
+<pre><code>function add(inc1, inc2)
+{
+    return this.a + inc1 + inc2;
+}
+
+var o = { a : 4 };
+document.write(add.call(o, 5, 6)+"&lt;br /&gt;"); //15
+      //above add.call(o,5,6) sets `this` inside
+      //add() to `o` and calls add() resulting:
+      // this.a + inc1 + inc2 = 
+      // `o.a` i.e. 4 + 5 + 6 = 15
+document.write(add.apply(o, [5, 6]) + "&lt;br /&gt;"); //15
+      // `o.a` i.e. 4 + 5 + 6 = 15
+
+var g = add.bind(o, 5, 6);       //g: `o.a` i.e. 4 + 5 + 6
+document.write(g()+"&lt;br /&gt;");    //15
+
+var h = add.bind(o, 5);          //h: `o.a` i.e. 4 + 5 + ?
+document.write(h(6) + "&lt;br /&gt;"); //15
+      // 4 + 5 + 6 = 15
+document.write(h() + "&lt;br /&gt;");  //NaN
+      //no parameter is passed to h()
+      //thus inc2 inside add() is `undefined`
+      //4 + 5 + undefined = NaN&lt;/code&gt;
+</code></pre>
+
+<p><strong>7. <code>this</code> inside event handlers</strong></p>
+
+<ul>
+<li>When you assign function directly to event handlers of an element, use of <code>this</code> directly inside event handling function refers to the corresponding element. Such direct function assignment can be done using <code>addeventListener</code> method or through the traditional event registration methods like <code>onclick</code>.</li>
+<li>Similarly, when you use <code>this</code> directly inside the event property (like <code>&lt;button &gt;</code>) of the element, it refers to the element.</li>
+<li>However use of <code>this</code> indirectly through the other function called inside the event handling function or event property resolves to the global object <code>window</code>.</li>
+<li>The same above behavior is achieved when we attach the function to the event handler using Microsoft's Event Registration model method <code>attachEvent</code>. Instead of assigning the function to the event handler (and the thus making the function method of the element), it calls the function on the event (effectively calling it in global context).</li>
+</ul>
+
+<p><em>I recommend to better try this in <a href="http://jsfiddle.net/Mahesha999/xKtzC/8/embedded/html,js,result" rel="noreferrer">JSFiddle</a>.</em></p>
+
+<pre><code>&lt;script&gt; 
+    function clickedMe() {
+       alert(this + " : " + this.tagName + " : " + this.id);
+    } 
+    document.getElementById("button1").addEventListener("click", clickedMe, false);
+    document.getElementById("button2").onclick = clickedMe;
+    document.getElementById("button5").attachEvent('onclick', clickedMe);   
+&lt;/script&gt;
+
+&lt;h3&gt;Using `this` "directly" inside event handler or event property&lt;/h3&gt;
+&lt;button id="button1"&gt;click() "assigned" using addEventListner() &lt;/button&gt;&lt;br /&gt;
+&lt;button id="button2"&gt;click() "assigned" using click() &lt;/button&gt;&lt;br /&gt;
+&lt;button id="button3"&gt;used `this` directly in click event property&lt;/button&gt;
+
+&lt;h3&gt;Using `this` "indirectly" inside event handler or event property&lt;/h3&gt;
+&lt;button&gt;`this` used indirectly, inside function &lt;br /&gt; defined &amp; called inside event property&lt;/button&gt;&lt;br /&gt;
+
+&lt;button id="button4"&gt;`this` used indirectly, inside function &lt;br /&gt; called inside event property&lt;/button&gt; &lt;br /&gt;
+
+IE only: &lt;button id="button5"&gt;click() "attached" using attachEvent() &lt;/button&gt;
+</code></pre>
+
+<p><strong>8. <code>this</code> in ES6 arrow function</strong> </p>
+
+<p>In an arrow function, <code>this</code> will behave like common variables: it will be inherited from its lexical scope. The function's <code>this</code>, where the arrow function is defined, will be the arrow function's <code>this</code>.</p>
+
+<p>So, that's the same behavior as:</p>
+
+<pre><code>(function(){}).bind(this)
+</code></pre>
+
+<p>See the following code:</p>
+
+<pre class="lang-js prettyprint-override"><code>const globalArrowFunction = () =&gt; {
+  return this;
+};
+
+console.log(globalArrowFunction()); //window
+
+const contextObject = {
+  method1: () =&gt; {return this},
+  method2: function(){
+    return () =&gt; {return this};
+  }
+};
+
+console.log(contextObject.method1()); //window
+
+const contextLessFunction = contextObject.method1;
+
+console.log(contextLessFunction()); //window
+
+console.log(contextObject.method2()()) //contextObject
+
+const innerArrowFunction = contextObject.method2();
+
+console.log(innerArrowFunction()); //contextObject 
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="77 votes">77</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3459110/user3459110" rel="noopener">user3459110</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/26574449" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h1>Javascript's <code>this</code></h1>
+
+<h2>Simple function invocation</h2>
+
+<p>Consider the following function:</p>
+
+<pre><code>function foo() {
+    console.log("bar");
+    console.log(this);
+}
+foo(); // calling the function
+</code></pre>
+
+<p>Note that we are running this in the normal mode, i.e. strict mode is not used.</p>
+
+<p>When running in a browser, the value of <code>this</code> would be logged as <code>window</code>. This is because <code>window</code> is the global variable in a web browser's scope.</p>
+
+<p>If you run this same piece of code in an environment like node.js, <code>this</code> would refer to the global variable in your app.</p>
+
+<p>Now if we run this in strict mode by adding the statement <code>"use strict";</code> to the beginning of the function declaration, <code>this</code> would no longer refer to the global variable in either of the environments. This is done to avoid confusions in strict mode. <code>this</code> would, in this case just log <code>undefined</code>, because that is what it is, it is not defined.</p>
+
+<p>In the following cases, we would see how to manipulate the value of <code>this</code>.</p>
+
+<h2>Calling a function on an object</h2>
+
+<p>There are different ways to do this. If you have called native methods in Javascript like <code>forEach</code> and <code>slice</code>, you should already know that the <code>this</code> variable in that case refers to the <code>Object</code> on which you called that function (Note that in javascript, just about everything is an <code>Object</code>, including <code>Array</code>s and <code>Function</code>s). Take the following code for example.</p>
+
+<pre><code>var myObj = {key: "Obj"};
+myObj.logThis = function () {
+    // I am a method
+    console.log(this);
+}
+myObj.logThis(); // myObj is logged
+</code></pre>
+
+<p>If an <code>Object</code> contains a property which holds a <code>Function</code>, the property is called a method. This method, when called, will always have it's <code>this</code> variable set to the <code>Object</code> it is associated with. This is true for both strict and non-strict modes.</p>
+
+<p>Note that if a method is stored (or rather, copied) in another variable, the reference to <code>this</code> is no longer preserved in the new variable. For example:</p>
+
+<pre><code>// continuing with the previous code snippet
+
+var myVar = myObj.logThis;
+myVar();
+// logs either of window/global/undefined based on mode of operation
+</code></pre>
+
+<p>Considering a more commonly practical scenario:</p>
+
+<pre><code>var el = document.getElementById('idOfEl');
+el.addEventListener('click', function() { console.log(this) });
+// the function called by addEventListener contains this as the reference to the element
+// so clicking on our element would log that element itself
+</code></pre>
+
+<h2>The <code>new</code> keyword</h2>
+
+<p>Consider a constructor function in Javascript:</p>
+
+<pre><code>function Person (name) {
+    this.name = name;
+    this.sayHello = function () {
+        console.log ("Hello", this);
+    }
+}
+
+var awal = new Person("Awal");
+awal.sayHello();
+// In `awal.sayHello`, `this` contains the reference to the variable `awal`
+</code></pre>
+
+<p>How does this work? Well, let's see what happens when we use the <code>new</code> keyword.</p>
+
+<ol>
+<li>Calling the function with the <code>new</code> keyword would immediately initialize an <code>Object</code> of type <code>Person</code>.</li>
+<li>The constructor of this <code>Object</code> has its constructor set to <code>Person</code>. Also, note that <code>typeof awal</code> would return <code>Object</code> only.</li>
+<li>This new <code>Object</code> would be assigned the prototype of <code>Person.prototype</code>. This means that any method or property in the <code>Person</code> prototype would be available to all instances of <code>Person</code>, including <code>awal</code>.</li>
+<li>The function <code>Person</code> itself is now invoked; <code>this</code> being a reference to the newly constructed object <code>awal</code>.</li>
+</ol>
+
+<p>Pretty straightforward, eh?</p>
+
+<p>Note that the official ECMAScript spec nowhere states that such types of functions are actual <code>constructor</code> functions. They are just normal functions, and <code>new</code> can be used on any function. It's just that we use them as such, and so we call them as such only.</p>
+
+<h2>Calling functions on Functions: <code>call</code> and <code>apply</code></h2>
+
+<p>So yeah, since <code>function</code>s are also <code>Objects</code> (and in-fact first class variables in Javascript), even functions have methods which are... well, functions themselves.</p>
+
+<p>All functions inherit from the global <code>Function</code>, and two of its many methods are <code>call</code> and <code>apply</code>, and both can be used to manipulate the value of <code>this</code> in the function on which they are called.</p>
+
+<pre><code>function foo () { console.log (this, arguments); }
+var thisArg = {myObj: "is cool"};
+foo.call(thisArg, 1, 2, 3);
+</code></pre>
+
+<p>This is a typical example of using <code>call</code>. It basically takes the first parameter and sets <code>this</code> in the function <code>foo</code> as a reference to <code>thisArg</code>.  All other parameters passed to <code>call</code> is passed to the function <code>foo</code> as arguments.<br>
+So the above code will log <code>{myObj: "is cool"}, [1, 2, 3]</code> in the console. Pretty nice way to change the value of <code>this</code> in any function.</p>
+
+<p><code>apply</code> is almost the same as <code>call</code> accept that it takes only two parameters: <code>thisArg</code> and an array which contains the arguments to be passed to the function. So the above <code>call</code> call can be translated to <code>apply</code> like this:</p>
+
+<pre><code>foo.apply(thisArg, [1,2,3])
+</code></pre>
+
+<p>Note that <code>call</code> and <code>apply</code> can override the value of <code>this</code> set by dot method invocation we discussed in the second bullet.
+Simple enough :)</p>
+
+<h2>Presenting.... <code>bind</code>!</h2>
+
+<p><code>bind</code> is a brother of <code>call</code> and <code>apply</code>.  It is also a method inherited by all functions from the global <code>Function</code> constructor in Javascript. The difference between <code>bind</code> and <code>call</code>/<code>apply</code> is that both <code>call</code> and <code>apply</code> will actually invoke the function. <code>bind</code>, on the other hand, returns a new function with the <code>thisArg</code> and <code>arguments</code> pre-set. Let's take an example to better understand this:</p>
+
+<pre><code>function foo (a, b) {
+    console.log (this, arguments);
+}
+var thisArg = {myObj: "even more cool now"};
+var bound = foo.bind(thisArg, 1, 2);
+console.log (typeof bound); // logs `function`
+console.log (bound);
+/* logs `function () { native code }` */
+
+bound(); // calling the function returned by `.bind`
+// logs `{myObj: "even more cool now"}, [1, 2]`
+</code></pre>
+
+<p>See the difference between the three? It is subtle, but they are used differently. Like <code>call</code> and <code>apply</code>, <code>bind</code> will also over-ride the value of <code>this</code> set by dot-method invocation.</p>
+
+<p>Also note that neither of these three functions do any change to the original function. <code>call</code> and <code>apply</code> would return the value from freshly constructed functions while <code>bind</code> will return the freshly constructed function itself, ready to be called.</p>
+
+<h2>Extra stuff, copy this</h2>
+
+<p>Sometimes, you don't like the fact that <code>this</code> changes with scope, especially nested scope. Take a look at the following example.</p>
+
+<pre><code>var myObj = {
+    hello: function () {
+        return "world"
+        },
+    myMethod: function () {
+        // copy this, variable names are case-sensitive
+        var that = this;
+        // callbacks ftw \o/
+        foo.bar("args", function () {
+            // I want to call `hello` here
+            this.hello(); // error
+            // but `this` references to `foo` damn!
+            // oh wait we have a backup \o/
+            that.hello(); // "world"
+        });
+    }
+  };
+</code></pre>
+
+<p>In the above code, we see that the value of <code>this</code> changed with the nested scope, but we wanted the value of <code>this</code> from the original scope. So we 'copied' <code>this</code> to <code>that</code> and used the copy instead of <code>this</code>. Clever, eh?</p>
+
+<p>Index:</p>
+
+<ol>
+<li>What is held in <code>this</code> by default?</li>
+<li>What if we call the function as a method with Object-dot notation?</li>
+<li>What if we use the <code>new</code> keyword?</li>
+<li>How do we manipulate <code>this</code> with <code>call</code> and <code>apply</code>?</li>
+<li>Using <code>bind</code>.</li>
+<li>Copying <code>this</code> to solve nested-scope issues.</li>
+</ol>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

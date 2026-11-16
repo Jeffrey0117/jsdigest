@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check if element exists in jQuery · jsdigest</title>
+<meta name="description" content="How do I check if an element exists if the element is created by .append() method? $(&#39;elemId&#39;).length doesn&#39;t work for me.">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Check if element exists in jQuery</h1>
+    <div class="q-meta big"><span class="score hot" title="1500 votes">1.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/482925/nick" rel="noopener">Nick</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/4592493/check-if-element-exists-in-jquery" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I check if an element exists if the element is created by <code>.append()</code> method?
+<code>$('elemId').length</code> doesn't work for me.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2042 votes">2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/139459/sarfraz" rel="noopener">Sarfraz</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4592511" rel="noopener">原文 ↗</a></div><div class="prose"><blockquote>
+  <p><code>$('elemId').length</code> doesn't work for
+  me.</p>
+</blockquote>
+
+<p>You need to put <code>#</code> before element id:</p>
+
+<pre><code>$('#elemId').length
+---^
+</code></pre>
+
+<hr>
+
+<p>With vanilla JavaScript, you don't need the hash (<code>#</code>) e.g. <code>document.getElementById('id_here')</code> , however when using jQuery, you do need to put hash to target elements based on <code>id</code> just like CSS.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="511 votes">511</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1784941/tapan-kumar" rel="noopener">Tapan kumar</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/19225490" rel="noopener">原文 ↗</a></div><div class="prose"><p>Try to check the length of the selector, if it returns you something then the element must exists else not.</p>
+
+<pre><code> if( $('#selector').length )         // use this if you are using id to check
+{
+     // it exists
+}
+
+
+ if( $('.selector').length )         // use this if you are using class to check
+{
+     // it exists
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="217 votes">217</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/795420/gaurav123" rel="noopener">Gaurav123</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/21745376" rel="noopener">原文 ↗</a></div><div class="prose"><p>Try this:</p>
+
+<pre><code>if ($("#mydiv").length &gt; 0){
+  // do something here
+}
+</code></pre>
+
+<p>The length property will return zero if element does not exists.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

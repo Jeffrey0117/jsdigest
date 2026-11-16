@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How can I programmatically navigate using React Router? · jsdigest</title>
+<meta name="description" content="With React Router , I can use the Link element to create links which are natively handled by React Router. I see internally it calls this.context.transitionTo(…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How can I programmatically navigate using React Router?</h1>
+    <div class="q-meta big"><span class="score hot" title="2376 votes">2.4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/5056/george-mauer" rel="noopener">George Mauer</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">reactjs</span><span class="tag">react-router</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/31079081/how-can-i-programmatically-navigate-using-react-router" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>With <a href="https://reactrouter.com/" rel="nofollow noreferrer">React Router</a>, I can use the <code>Link</code> element to create links which are natively handled by React Router.</p>
+<p>I see internally it calls <code>this.context.transitionTo(...)</code>.</p>
+<p>I want to do navigation. Not from a link, but from a dropdown selection (as an example). How can I do this in code? What is <code>this.context</code>?</p>
+<p>I saw the <code>Navigation</code> mixin, but can I do this without mixins?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2639 votes">2.6k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/444829/paul-s" rel="noopener">Paul S</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/42121109" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h3>React Router v6.6.1 with useNavigate</h3>
+<p>The <code>useHistory()</code> hook is now deprecated. If you are using React Router 6, the proper way to navigate programmatically is as follows:</p>
+<pre class="lang-js prettyprint-override"><code>import { useNavigate } from &quot;react-router-dom&quot;;
+
+function HomeButton() {
+  const navigate = useNavigate();
+
+  function handleClick() {
+    navigate(&quot;/home&quot;);
+  }
+
+  return (
+    &lt;button type=&quot;button&quot;
+      Go home
+    &lt;/button&gt;
+  );
+}
+</code></pre>
+<h3>React Router v5.1.0 with hooks</h3>
+<p>There is a new <code>useHistory</code> hook in React Router higher than 5.1.0, if you are using React higher than 16.8.0 and functional components.</p>
+<pre><code>import { useHistory } from &quot;react-router-dom&quot;;
+
+function HomeButton() {
+  const history = useHistory();
+
+  function handleClick() {
+    history.push(&quot;/home&quot;);
+  }
+
+  return (
+    &lt;button type=&quot;button&quot;
+      Go home
+    &lt;/button&gt;
+  );
+}
+</code></pre>
+<h3>React Router v4</h3>
+<p>With v4 of React Router, there are three approaches that you can take to programmatic routing within components.</p>
+<ol>
+<li>Use the <code>withRouter</code> higher-order component.</li>
+<li>Use composition and render a <code>&lt;Route&gt;</code></li>
+<li>Use the <code>context</code>.</li>
+</ol>
+<p>React Router is mostly a wrapper around the <a href="https://github.com/ReactTraining/history" rel="noreferrer"><code>history</code></a> library. <code>history</code> handles interaction with the browser's <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/history" rel="noreferrer"><code>window.history</code></a> for you with its browser and hash histories. It also provides a memory history which is useful for environments that don't have a global history. This is particularly useful in mobile app development (<code>react-native</code>) and unit testing with Node.js.</p>
+<p>A <code>history</code> instance has two methods for navigating: <code>push</code> and <code>replace</code>. If you think of the <code>history</code> as an array of visited locations, <code>push</code> will add a new location to the array and <code>replace</code> will replace the current location in the array with the new one. Typically you will want to use the <code>push</code> method when you are navigating.</p>
+<p>In earlier versions of React Router, you had to create your own <code>history</code> instance, but in v4 the <code>&lt;BrowserRouter&gt;</code>, <code>&lt;HashRouter&gt;</code>, and <code>&lt;MemoryRouter&gt;</code> components will create a browser, hash, and memory instances for you. React Router makes the properties and methods of the <code>history</code> instance associated with your router available through the context, under the <code>router</code> object.</p>
+<h4>1. Use the <code>withRouter</code> higher-order component</h4>
+<p>The <code>withRouter</code> higher-order component will inject the <code>history</code> object as a prop of the component. This allows you to access the <code>push</code> and <code>replace</code> methods without having to deal with the <code>context</code>.</p>
+<pre class="lang-js prettyprint-override"><code>import { withRouter } from 'react-router-dom'
+// This also works with react-router-native
+
+const Button = withRouter(({ history }) =&gt; (
+  &lt;button
+    type='button'
+    =&gt; { history.push('/new-location') }}
+  &gt;
+    Click Me!
+  &lt;/button&gt;
+))
+</code></pre>
+<h4>2. Use composition and render a <code>&lt;Route&gt;</code></h4>
+<p>The <code>&lt;Route&gt;</code> component isn't just for matching locations. You can render a pathless route and <strong>it will always match the current location</strong>. The <code>&lt;Route&gt;</code> component passes the same props as <code>withRouter</code>, so you will be able to access the <code>history</code> methods through the <code>history</code> prop.</p>
+<pre class="lang-js prettyprint-override"><code>import { Route } from 'react-router-dom'
+
+const Button = () =&gt; (
+  &lt;Route render={({ history}) =&gt; (
+    &lt;button
+      type='button'
+      =&gt; { history.push('/new-location') }}
+    &gt;
+      Click Me!
+    &lt;/button&gt;
+  )} /&gt;
+)
+</code></pre>
+<h4>3. Use the context*</h4>
+<p><strong>But you probably should not</strong></p>
+<p>The last option is one that you should only use if you feel comfortable working with React's <a href="https://facebook.github.io/react/docs/context.html" rel="noreferrer">context</a> model (React's Context API is stable as of v16).</p>
+<pre class="lang-js prettyprint-override"><code>const Button = (props, context) =&gt; (
+  &lt;button
+    type='button'
+    =&gt; {
+      // context.history.push === history.push
+      context.history.push('/new-location')
+    }}
+  &gt;
+    Click Me!
+  &lt;/button&gt;
+)
+
+// You need to specify the context type so that it
+// is available within the component
+Button.contextTypes = {
+  history: React.PropTypes.shape({
+    push: React.PropTypes.func.isRequired
+  })
+}
+</code></pre>
+<p>1 and 2 are the simplest choices to implement, so for most use cases, they are your best bets.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1445 votes">1.4k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1603820/felipe-skinner" rel="noopener">Felipe Skinner</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/31079244" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h3>React Router v6+ answer</h3>
+<p><strong>TL;DR:</strong> You can use the new <code>useNavigate</code> hook.</p>
+<pre><code>import { useNavigate } from &quot;react-router-dom&quot;;
+
+function Component() {
+  let navigate = useNavigate();
+  // Somewhere in your code, e.g., inside a handler:
+  navigate(&quot;/posts&quot;);
+}
+</code></pre>
+<p>The <code>useNavigate</code> hook returns a function which can be used for programmatic navigation.</p>
+<p>Example from the <a href="https://reactrouter.com/docs/en/v6/api#usenavigate" rel="nofollow noreferrer">React Router documentation</a>:</p>
+<pre><code>import { useNavigate } from &quot;react-router-dom&quot;;
+
+function SignupForm() {
+  let navigate = useNavigate();
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    await submitForm(event.target);
+    navigate(&quot;../success&quot;, { replace: true });
+    // 'replace: true' will replace the current entry in
+    // the history stack instead of adding a new one.
+
+  }
+
+  return &lt;form ... */}&lt;/form&gt;;
+}
+</code></pre>
+<h3>React Router 5.1.0+ answer (using hooks and React 16.8 or later))</h3>
+<p>You can use the <code>useHistory</code> hook on functional components and <em>programmatically</em> navigate:</p>
+<pre><code>import { useHistory } from &quot;react-router-dom&quot;;
+
+function HomeButton() {
+  let history = useHistory();
+  // Use history.push('/some/path') here
+};
+</code></pre>
+<h3>React Router 4.0.0+ answer</h3>
+<p>In 4.0 and above, use the history as a prop of your component.</p>
+<pre class="lang-js prettyprint-override"><code>class Example extends React.Component {
+   // Use `this.props.history.push('/some/path')` here
+};
+</code></pre>
+<p><em><strong>Note</strong></em>: <code>this.props.history</code> does not exist in the case your component was not rendered by <code>&lt;Route&gt;</code>. You should use <code>&lt;Route path=&quot;...&quot; component={YourComponent}/&gt;</code> to have <code>this.props.history</code> in YourComponent</p>
+<h3>React Router 3.0.0+ answer</h3>
+<p>In 3.0 and above, use the router as a prop of your component.</p>
+<pre class="lang-js prettyprint-override"><code>class Example extends React.Component {
+   // Use `this.props.router.push('/some/path')` here
+};
+</code></pre>
+<h3>React Router 2.4.0+ answer</h3>
+<p>In 2.4 and above, use a higher-order component to get the router as a prop of your component.</p>
+<pre class="lang-js prettyprint-override"><code>import { withRouter } from 'react-router';
+
+class Example extends React.Component {
+   // Use `this.props.router.push('/some/path')` here
+};
+
+// Export the decorated class
+var DecoratedExample = withRouter(Example);
+
+// PropTypes
+Example.propTypes = {
+  router: React.PropTypes.shape({
+    push: React.PropTypes.func.isRequired
+  }).isRequired
+};
+</code></pre>
+<h3>React Router 2.0.0+ answer</h3>
+<p>This version is backwards compatible with 1.x, so there isn't any need to an <em>upgrade guide</em>. Just going through the examples should be good enough.</p>
+<p>That said, if you wish to switch to the new pattern, there's a <code>browserHistory</code> module inside the router that you can access with</p>
+<p><code>import { browserHistory } from 'react-router'</code></p>
+<p>Now you have access to your browser history, so you can do things like push, replace, etc... Like:</p>
+<p><code>browserHistory.push('/some/path')</code></p>
+<p>Further reading:</p>
+<ul>
+<li><a href="https://github.com/reactjs/react-router/blob/latest/docs/guides/Histories.md" rel="nofollow noreferrer">Histories</a> and</li>
+<li><a href="https://github.com/reactjs/react-router/blob/latest/docs/guides/NavigatingOutsideOfComponents.md" rel="nofollow noreferrer">Navigation</a></li>
+</ul>
+<hr />
+<h3>React Router 1.x.x answer</h3>
+<p>I will not go into upgrading details. You can read about that in <a href="https://github.com/rackt/react-router/blob/master/upgrade-guides/v1.0.0.md" rel="nofollow noreferrer">the upgrade guide</a>.</p>
+<p>The main change about the question here is the change from <code>Navigation</code> mixin to <code>History</code>. Now it's using the browser historyAPI to change route so we will use <code>pushState()</code> from now on.</p>
+<p>Here's an example using Mixin:</p>
+<pre class="lang-js prettyprint-override"><code>var Example = React.createClass({
+  mixins: [ History ],
+  navigateToHelpPage () {
+    this.history.pushState(null, `/help`);
+  }
+})
+</code></pre>
+<p>Note that this <code>History</code> comes from the <a href="https://github.com/rackt/history" rel="nofollow noreferrer">rackt/history</a> project, not from React Router itself.</p>
+<p>If you don't want to use Mixin for some reason (maybe because of an <a href="https://en.wikipedia.org/wiki/ECMAScript#6th_Edition_%E2%80%93_ECMAScript_2015" rel="nofollow noreferrer">ES6</a> class), then you can access the history that you get from the router from <code>this.props.history</code>. It will be only accessible for the components rendered by your <code>Router</code>. So, if you want to use it in any child components it needs to be passed down as an attribute via <code>props</code>.</p>
+<p>You can read more about the new release at their <a href="https://github.com/rackt/react-router/tree/1.0.x/docs" rel="nofollow noreferrer">1.0.x documentation</a>.</p>
+<p>Here is a <a href="https://github.com/rackt/react-router/blob/1.0.x/docs/guides/advanced/NavigatingOutsideOfComponents.md" rel="nofollow noreferrer">help page specifically about navigating outside your component</a>.</p>
+<p>It recommends grabbing a reference <code>history = createHistory()</code> and calling <code>replaceState</code> on that.</p>
+<h3>React Router 0.13.x answer</h3>
+<p>I got into the same problem and could only find the solution with the Navigation mixin that comes with React Router.</p>
+<p>Here's how I did it</p>
+<pre class="lang-js prettyprint-override"><code>import React from 'react';
+import {Navigation} from 'react-router';
+
+let Authentication = React.createClass({
+  mixins: [Navigation],
+
+  handleClick(e) {
+    e.preventDefault();
+
+    this.transitionTo('/');
+  },
+
+  render(){
+    return (&lt;div me!&lt;/div&gt;);
+  }
+});
+</code></pre>
+<p>I was able to call <code>transitionTo()</code> without the need to access <code>.context</code></p>
+<p>Or you could try the fancy ES6 <code>class</code>:</p>
+<pre class="lang-js prettyprint-override"><code>import React from 'react';
+
+export default class Authentication extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick(e) {
+    e.preventDefault();
+
+    this.context.router.transitionTo('/');
+  }
+
+  render(){
+    return (&lt;div me!&lt;/div&gt;);
+  }
+}
+
+Authentication.contextTypes = {
+  router: React.PropTypes.func.isRequired
+};
+</code></pre>
+<blockquote>
+<p><strong>React-Router-Redux</strong></p>
+<p><strong>Note:</strong> if you're using Redux, there is another project called
+<a href="https://github.com/reactjs/react-router-redux" rel="nofollow noreferrer">React-Router-Redux</a> that gives you
+redux bindings for ReactRouter, using somewhat the same approach that
+<a href="https://github.com/rackt/react-redux" rel="nofollow noreferrer">React-Redux</a> does</p>
+</blockquote>
+<p>React-Router-Redux has a few methods available that allow for simple navigating from inside action creators. These can be particularly useful for people that have existing architecture in React Native, and they wish to utilize the same patterns in React Web with minimal boilerplate overhead.</p>
+<p>Explore the following methods:</p>
+<ul>
+<li><code>push(location)</code></li>
+<li><code>replace(location)</code></li>
+<li><code>go(number)</code></li>
+<li><code>goBack()</code></li>
+<li><code>goForward()</code></li>
+</ul>
+<p>Here is an example usage, with <a href="https://www.npmjs.com/package/redux-thunk" rel="nofollow noreferrer">Redux-Thunk</a>:</p>
+<p><strong>./actioncreators.js</strong></p>
+<pre class="lang-js prettyprint-override"><code>import { goBack } from 'react-router-redux'
+
+export const =&gt; (dispatch) =&gt; dispatch(goBack())
+</code></pre>
+<p><strong>./viewcomponent.js</strong></p>
+<pre class="lang-js prettyprint-override"><code>&lt;button
+  disabled={submitting}
+  className=&quot;cancel_button&quot;
+  =&gt; {
+    e.preventDefault()
+    this.props.onBackPress()
+  }}
+&gt;
+  CANCEL
+&lt;/button&gt;
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="558 votes">558</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1830623/bobby" rel="noopener">Bobby</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/34863577" rel="noopener">原文 ↗</a></div><div class="prose"><h3>React Router v2</h3>
+<p>For the most recent release (v2.0.0-rc5), the recommended navigation method is by directly pushing onto the history singleton. You can see that in action in the <a href="https://github.com/rackt/react-router/blob/master/docs/guides/NavigatingOutsideOfComponents.md" rel="nofollow noreferrer">Navigating outside of Components doc</a>.</p>
+<p>Relevant excerpt:</p>
+<pre class="lang-js prettyprint-override"><code>import { browserHistory } from 'react-router';
+browserHistory.push('/some/path');
+</code></pre>
+<p>If using the newer React Router API, you need to make use of the <code>history</code> from <code>this.props</code> when inside of components so:</p>
+<pre class="lang-js prettyprint-override"><code>this.props.history.push('/some/path');
+</code></pre>
+<p>It also offers <code>pushState</code>, but that is deprecated per logged warnings.</p>
+<p>If using <code>react-router-redux</code>, it offers a <code>push</code> function you can dispatch like so:</p>
+<pre class="lang-js prettyprint-override"><code>import { push } from 'react-router-redux';
+this.props.dispatch(push('/some/path'));
+</code></pre>
+<p>However, this may be only used to change the URL, not to actually navigate to the page.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

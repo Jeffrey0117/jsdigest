@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to check if a string &quot;StartsWith&quot; another string? · jsdigest</title>
+<meta name="description" content="How would I write the equivalent of C#&#39;s String.StartsWith in JavaScript? var haystack = &#39;hello world&#39;; var needle = &#39;he&#39;; haystack.startsWith(needle) == true…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to check if a string &quot;StartsWith&quot; another string?</h1>
+    <div class="q-meta big"><span class="score hot" title="1826 votes">1.8k</span><span class="q-by">asked by sol</span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">string</span><span class="tag">startswith</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/646628/how-to-check-if-a-string-startswith-another-string" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How would I write the equivalent of C#'s <a href="http://msdn.microsoft.com/en-us/library/baketfxw.aspx" rel="noreferrer"><code>String.StartsWith</code></a> in JavaScript?</p>
+
+<pre><code>var haystack = 'hello world';
+var needle = 'he';
+
+haystack.startsWith(needle) == true
+</code></pre>
+
+<p>Note: This is an old question, and as pointed out in the comments ECMAScript 2015 (ES6) introduced the <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith" rel="noreferrer"><code>.startsWith</code></a> method. However, at the time of writing this update (2015) <a href="http://kangax.github.io/compat-table/es6/#test-String.prototype_methods_String.prototype.startsWith" rel="noreferrer">browser support is far from complete</a>.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1869 votes">1.9k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/5445/christian-c-salvad%c3%b3" rel="noopener">Christian C. Salvad&amp;#243;</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/646643" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use ECMAScript 6's <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith" rel="noreferrer"><code>String.prototype.startsWith()</code></a> method. It's <a href="https://caniuse.com/mdn-javascript_builtins_string_startswith" rel="noreferrer">supported in all major browsers</a>. However, if you want to use it in a browser that is unsupported you'll want to use a shim/polyfill to add it on those browsers. Creating an implementation that complies with <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-string.prototype.startswith" rel="noreferrer">all the details laid out in the spec</a> is a little complicated. If you want a faithful shim, use either:</p>
+<ul>
+<li><a href="https://github.com/mathiasbynens/String.prototype.startsWith" rel="noreferrer">Matthias Bynens's <code>String.prototype.startsWith</code> shim</a>, or</li>
+<li>The <a href="https://github.com/paulmillr/es6-shim" rel="noreferrer">es6-shim</a>, which shims as much of the ES6 spec as possible, including <code>String.prototype.startsWith</code>.</li>
+</ul>
+<p>Once you've shimmed the method (or if you're only supporting browsers and JavaScript engines that already have it), you can use it like this:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>console.log("Hello World!".startsWith("He")); // true
+
+var haystack = "Hello world";
+var prefix = 'orl';
+console.log(haystack.startsWith(prefix)); // false</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1321 votes">1.3k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/61974/mark-byers" rel="noopener">Mark Byers</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4579228" rel="noopener">原文 ↗</a></div><div class="prose"><p>Another alternative with <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/String/lastIndexOf" rel="noreferrer"><code>.lastIndexOf</code></a>:</p>
+<pre><code>// does the haystack start with the needle?
+haystack.lastIndexOf(needle,0) === 0
+</code></pre>
+<p>This looks backwards through <code>haystack</code> for an occurrence of <code>needle</code> starting from index zero. In other words, it only checks if <code>haystack</code> starts with <code>needle</code>.
+<code>lastIndexOf</code> provides a second optional parameter 'fromIndex'. If given, the backwards search starts at this given index position and traverses back to index zero.
+When the second parameter is zero, there are only two possible return values of lastIndexOf -- it either returns 0 (success, the haystack does start with the needle) or -1 (the haystack does not start with the needle).</p>
+<p>In principle, this should have performance advantages over some other approaches:</p>
+<ul>
+<li>It doesn't search the entire <code>haystack</code>.</li>
+<li>It doesn't create a new temporary string and then immediately discard it.</li>
+</ul>
+<p>The &quot;simpler&quot;</p>
+<pre><code>haystack.lastIndexOf(needle) === 0 // incorrect!
+</code></pre>
+<p>may seem to give the correct &quot;startsWith&quot; results in some cases.
+This &quot;simpler&quot; version gives incorrect results if there are two copies of the needle in the string -- then lastIndexOf returns the position of the <em>last</em> copy of that needle, which will be greater than zero, and so will always return False, whether or not the string actually does startWith the needle.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="600 votes">600</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/73681/cobbal" rel="noopener">cobbal</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/646631" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>data.substring(0, input.length) === input
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

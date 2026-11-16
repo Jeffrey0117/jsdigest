@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I format a date in JavaScript? · jsdigest</title>
+<meta name="description" content="How do I format a Javascript Date object as a string? (Preferable format: 10-Aug-2010 )">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I format a date in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="3613 votes">3.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/4653/leora" rel="noopener">leora</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">date</span><span class="tag">datetime</span><span class="tag">datetime-format</span><span class="tag">date-formatting</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/3552461/how-do-i-format-a-date-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I format a Javascript <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date" rel="noreferrer"><code>Date</code></a> object as a string? (Preferable format: <code>10-Aug-2010</code>)</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1756 votes">1.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/333255/marko" rel="noopener">Marko</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3552493" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>For custom-delimited date formats, you have to pull out the date (or time)
+components from a <a href="//developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat" rel="noreferrer"><code>DateTimeFormat</code></a> object (which is part of the
+<a href="//developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl" rel="noreferrer">ECMAScript Internationalization API</a>), and then manually create a string
+with the delimiters you want.</p>
+<p>To do this, you can use <a href="//developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/formatToParts" rel="noreferrer"><code>DateTimeFormat#formatToParts</code></a>. You could
+destructure the array, but that is not ideal, as the array output depends on the
+locale:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>{ // example 1
+   let formatter = new Intl.DateTimeFormat('en');
+   let example = formatter.formatToParts();
+   console.log(example);
+}
+{ // example 2
+   let formatter = new Intl.DateTimeFormat('hi');
+   let example = formatter.formatToParts();
+   console.log(example);
+}</code></pre>
+</div>
+</div>
+</p>
+<p>Better would be to map a format array to resultant strings:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function join(date, options, separator) {
+   function format(option) {
+      let formatter = new Intl.DateTimeFormat('en', option);
+      return formatter.format(date);
+   }
+   return options.map(format).join(separator);
+}
+
+let options = [{day: 'numeric'}, {month: 'short'}, {year: 'numeric'}];
+let joined = join(new Date, options, '-');
+console.log(joined);</code></pre>
+</div>
+</div>
+</p>
+<p>You can also pull out the parts of a <code>DateTimeFormat</code> one-by-one using
+<a href="//developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat/format" rel="noreferrer"><code>DateTimeFormat#format</code></a>, but note that when using this method, as of March
+2020, there is <a href="//stackoverflow.com/questions/60544534#60545316">a bug</a> in the ECMAScript implementation when it comes to
+leading zeros on minutes and seconds (this bug is circumvented by the approach
+above).</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>let date = new Date(2010, 7, 5);
+let year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
+let month = new Intl.DateTimeFormat('en', { month: 'short' }).format(date);
+let day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date);
+console.log(`${day}-${month}-${year}`);</code></pre>
+</div>
+</div>
+</p>
+<p>When working with dates and times, it is usually worth using a library (eg. <a href="//moment.github.io/luxon" rel="noreferrer">luxon</a>, <a href="https://date-fns.org/" rel="noreferrer">date-fns</a>, <a href="https://momentjs.com/docs/#/-project-status/recommendations/" rel="noreferrer"><del>moment.js</del> is not recommended for new projects</a>) because of the many hidden complexities of the field.</p>
+<p>Note that the ECMAScript Internationalization API, used in the solutions above
+is not supported <a href="//caniuse.com#search=datetimeformat" rel="noreferrer">in IE10</a> (<a href="//gs.statcounter.com/browser-version-market-share" rel="noreferrer">0.03%</a> global browser market share in Feb
+2020).</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="3091 votes">3.1k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4964277/ajeet-kanojia" rel="noopener">ajeet kanojia</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/34015511" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>If you need slightly less control over formatting than the currently accepted answer, <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString" rel="noreferrer"><code>Date#toLocaleDateString</code></a> can be used to create standard locale-specific renderings. The <code>locale</code> and <code>options</code> arguments let applications specify the language whose formatting conventions should be used, and allow some customization of the rendering.</p>
+<h4>Options key examples:</h4>
+<ol>
+<li><strong>day:</strong> <br/>
+The representation of the day. <br/>
+Possible values are &quot;numeric&quot;, &quot;2-digit&quot;.</li>
+<li><strong>weekday:</strong> <br/>
+The representation of the weekday. <br/>
+Possible values are &quot;narrow&quot;, &quot;short&quot;, &quot;long&quot;.</li>
+<li><strong>year:</strong> <br/>
+The representation of the year. <br/>
+Possible values are &quot;numeric&quot;, &quot;2-digit&quot;.</li>
+<li><strong>month:</strong> <br/>
+The representation of the month. <br/>
+Possible values are &quot;numeric&quot;, &quot;2-digit&quot;, &quot;narrow&quot;, &quot;short&quot;, &quot;long&quot;.</li>
+<li><strong>hour:</strong> <br/>
+The representation of the hour. <br/>
+Possible values are &quot;numeric&quot;, &quot;2-digit&quot;.</li>
+<li><strong>minute:</strong>
+The representation of the minute. <br/>
+Possible values are &quot;numeric&quot;, &quot;2-digit&quot;.</li>
+<li><strong>second:</strong> <br/>
+The representation of the second. <br/>
+Possible values are &quot;numeric&quot;, 2-digit&quot;.</li>
+<li><strong>hour12:</strong> <br/>
+The representation of time format. <br/>
+Accepts boolean true or false</li>
+</ol>
+<p>All these keys are optional.  You can change the number of options values based on your requirements, and this will also reflect the presence of each date time term.</p>
+<p>Note: If you would only like to configure the content options, but still use the current locale, passing <code>null</code> for the first parameter will cause an error.  Use <code>undefined</code> instead.</p>
+<h4>For different languages:</h4>
+<ol>
+<li><strong>&quot;en-US&quot;:</strong> For American English</li>
+<li><strong>&quot;en-GB&quot;:</strong> For British English</li>
+<li><strong>&quot;hi-IN&quot;:</strong> For Hindi</li>
+<li><strong>&quot;ja-JP&quot;:</strong> For Japanese</li>
+</ol>
+<p>You can use more language options.</p>
+<h4>For example</h4>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+var today  = new Date();
+
+console.log(today.toLocaleDateString("en-US")); // 9/17/2016
+console.log(today.toLocaleDateString("en-US", options)); // Saturday, September 17, 2016
+console.log(today.toLocaleDateString("hi-IN", options)); // शनिवार, 17 सितंबर 2016</code></pre>
+</div>
+</div>
+</p>
+<p>You can also use the <code>toLocaleString()</code> method for the same purpose. The only difference is this function provides the time when you don't pass any options.</p>
+<pre><code>// Example
+9/17/2016, 1:21:34 PM
+</code></pre>
+<h4>References:</h4>
+<ul>
+<li><p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString" rel="noreferrer"><code>toLocaleString()</code></a></p>
+</li>
+<li><p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString" rel="noreferrer"><code>toLocaleDateString()</code></a></p>
+</li>
+</ul>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="807 votes">807</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4161032/sebastian-i" rel="noopener">sebastian.i</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/30272803" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you need to quickly format your date using plain JavaScript, use <code>getDate</code>, <code>getMonth + 1</code>, <code>getFullYear</code>, <code>getHours</code> and <code>getMinutes</code>:</p>
+
+<pre><code>var d = new Date();
+
+var datestring = d.getDate()  + "-" + (d.getMonth()+1) + "-" + d.getFullYear() + " " +
+d.getHours() + ":" + d.getMinutes();
+
+// 16-5-2015 9:50
+</code></pre>
+
+<p>Or, if you need it to be padded with zeros:</p>
+
+<pre><code>var datestring = ("0" + d.getDate()).slice(-2) + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" +
+    d.getFullYear() + " " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+
+// 16-05-2015 09:50
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

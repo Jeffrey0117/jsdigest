@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get the values from the &quot;GET&quot; parameters (JavaScript) · jsdigest</title>
+<meta name="description" content="I have a URL with some GET parameters as follows: www.test.com/t.html?a=1&amp;b=3&amp;c=m2-m3-m4-m5 I need to get the whole value of c . I tried to read the URL, but I…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Get the values from the &quot;GET&quot; parameters (JavaScript)</h1>
+    <div class="q-meta big"><span class="score hot" title="1756 votes">1.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/120457/joe" rel="noopener">joe</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">url</span><span class="tag">url-parameters</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/979975/get-the-values-from-the-get-parameters-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I have a URL with some GET parameters as follows:</p>
+
+<pre><code>www.test.com/t.html?a=1&amp;b=3&amp;c=m2-m3-m4-m5 
+</code></pre>
+
+<p>I need to get the whole value of <code>c</code>. I tried to read the URL, but I got only <code>m2</code>. How do I do this using JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2710 votes">2.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/19068/quentin" rel="noopener">Quentin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/979995" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>JavaScript <em>itself</em> has nothing built in for handling query string parameters.</p>
+<p>Code running in a (<a href="https://caniuse.com/url" rel="noreferrer">modern</a>) browser  can use the <a href="https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams" rel="noreferrer"><code>URL</code> object</a> (a <a href="https://developer.mozilla.org/en-US/docs/Web/API" rel="noreferrer">Web API</a>). <code>URL</code> is also implemented by <a href="https://nodejs.org/api/url.html#the-whatwg-url-api" rel="noreferrer">Node.js</a>:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// You can get url_string from window.location.href if you want to work with
+// the URL of the current page
+var url_string = "http://www.example.com/t.html?a=1&amp;b=3&amp;c=m2-m3-m4-m5"; 
+var url = new URL(url_string);
+var c = url.searchParams.get("c");
+console.log(c);</code></pre>
+</div>
+</div>
+</p>
+<hr />
+<p>For older browsers (including Internet Explorer), you can use <a href="https://github.com/webcomponents/URL" rel="noreferrer">this polyfill</a>.</p>
+<p>You could also use one for <a href="https://github.com/ungap/url-search-params" rel="noreferrer">URLSearchParams</a> and extract the query string to pass to it with <code>window.location.search.substring(1)</code>.</p>
+<hr />
+<p>You could also use the code from the original version of this answer that predates <code>URL</code>. The above polyfill is robust and well tested and I strongly recommend it over this though.</p>
+<p>You could access <code>location.search</code>, which would give you from the <code>?</code> character on to the end of the URL or the start of the fragment identifier (#foo), whichever comes first.</p>
+<p>Then you can parse it with this:</p>
+<p><div class="snippet" data-lang="js" data-hide="true" data-console="true" data-babel="false">
+<div class="snippet-code snippet-currently-hidden">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function parse_query_string(query) {
+  var vars = query.split("&amp;");
+  var query_string = {};
+  for (var i = 0; i &lt; vars.length; i++) {
+    var pair = vars[i].split("=");
+    var key = decodeURIComponent(pair.shift());
+    var value = decodeURIComponent(pair.join("="));
+    // If first entry with this name
+    if (typeof query_string[key] === "undefined") {
+      query_string[key] = value;
+      // If second entry with this name
+    } else if (typeof query_string[key] === "string") {
+      var arr = [query_string[key], value];
+      query_string[key] = arr;
+      // If third or later entry with this name
+    } else {
+      query_string[key].push(value);
+    }
+  }
+  return query_string;
+}
+
+var query_string = "a=1&amp;b=3&amp;c=m2-m3-m4-m5";
+var parsed_qs = parse_query_string(query_string);
+console.log(parsed_qs.c);</code></pre>
+</div>
+</div>
+</p>
+<p>You can get the query string from the URL of the current page with:</p>
+<pre><code>var query = window.location.search.substring(1);
+var qs = parse_query_string(query);
+</code></pre>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="270 votes">270</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/23501/ate%c5%9f-g%c3%b6ral" rel="noopener">Ateş G&amp;#246;ral</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1099670" rel="noopener">原文 ↗</a></div><div class="prose"><p>Most implementations I've seen miss out URL-decoding the names and the values.</p>
+
+<p>Here's a general utility function that also does proper URL-decoding:</p>
+
+<pre><code>function getQueryParams(qs) {
+    qs = qs.split('+').join(' ');
+
+    var params = {},
+        tokens,
+        re = /[?&amp;]?([^=]+)=([^&amp;]*)/g;
+
+    while (tokens = re.exec(qs)) {
+        params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
+}
+
+//var query = getQueryParams(document.location.search);
+//alert(query.foo);
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="262 votes">262</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/74314/haim-evgi" rel="noopener">Haim Evgi</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/979997" rel="noopener">原文 ↗</a></div><div class="prose"><p><a href="https://community.esri.com/thread/33634" rel="noreferrer">source</a>    </p>
+
+<pre><code>function gup( name, url ) {
+    if (!url) url = location.href;
+    name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+    var regexS = "[\\?&amp;]"+name+"=([^&amp;#]*)";
+    var regex = new RegExp( regexS );
+    var results = regex.exec( url );
+    return results == null ? null : results[1];
+}
+gup('q', 'hxxp://example.com/?q=abc')
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

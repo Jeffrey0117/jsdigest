@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop setInterval call in JavaScript · jsdigest</title>
+<meta name="description" content="I am using setInterval(fname, 10000); to call a function every 10 seconds in JavaScript. Is it possible to stop calling it on some event? I want the user to be…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Stop setInterval call in JavaScript</h1>
+    <div class="q-meta big"><span class="score hot" title="1802 votes">1.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1448/cnu" rel="noopener">cnu</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">dom-events</span><span class="tag">setinterval</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/109086/stop-setinterval-call-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I am using <code>setInterval(fname, 10000);</code> to call a function every 10 seconds in JavaScript. Is it possible to stop calling it on some event? </p>
+
+<p>I want the user to be able to stop the repeated refresh of data.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2775 votes">2.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3560/john-millikin" rel="noopener">John Millikin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/109091" rel="noopener">原文 ↗</a></div><div class="prose"><p><code>setInterval()</code> returns an interval ID, which you can pass to <code>clearInterval()</code>:</p>
+<pre><code>var refreshIntervalId = setInterval(fname, 10000);
+
+/* later */
+clearInterval(refreshIntervalId);
+</code></pre>
+<p>See the docs for <a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setInterval" rel="noreferrer"><code>setInterval()</code></a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/clearInterval" rel="noreferrer"><code>clearInterval()</code></a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="138 votes">138</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/12707/quintin-robinson" rel="noopener">Quintin Robinson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/109098" rel="noopener">原文 ↗</a></div><div class="prose"><p>If you set the return value of <code>setInterval</code> to a variable, you can use <code>clearInterval</code> to stop it.</p>
+
+<pre><code>var myTimer = setInterval(...);
+clearInterval(myTimer);
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="71 votes">71</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/342388/omgrant" rel="noopener">OMGrant</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/2844027" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can set a new variable and have it incremented by ++ (count up one) every time it runs, then I use a conditional statement to end it:</p>
+
+<pre><code>var intervalId = null;
+var varCounter = 0;
+var varName = function(){
+     if(varCounter &lt;= 10) {
+          varCounter++;
+          /* your code goes here */
+     } else {
+          clearInterval(intervalId);
+     }
+};
+
+$(document).ready(function(){
+     intervalId = setInterval(varName, 10000);
+});
+</code></pre>
+
+<p>I hope that it helps and it is right.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

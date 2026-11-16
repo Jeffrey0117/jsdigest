@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to loop through a plain JavaScript object with the objects as members · jsdigest</title>
+<meta name="description" content="How can I loop through all members in a JavaScript object, including values that are objects? For example, how could I loop through this (accessing the &quot;your_n…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to loop through a plain JavaScript object with the objects as members</h1>
+    <div class="q-meta big"><span class="score hot" title="1840 votes">1.8k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/32242/edt" rel="noopener">edt</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">loops</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/921789/how-to-loop-through-a-plain-javascript-object-with-the-objects-as-members" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How can I loop through all members in a JavaScript object, including values that are objects?</p>
+<p>For example, how could I loop through this (accessing the &quot;your_name&quot; and &quot;your_message&quot; for each)?</p>
+<pre><code>var validation_messages = {
+    &quot;key_1&quot;: {
+        &quot;your_name&quot;: &quot;jimmy&quot;,
+        &quot;your_msg&quot;: &quot;hello world&quot;
+    },
+    &quot;key_2&quot;: {
+        &quot;your_name&quot;: &quot;billy&quot;,
+        &quot;your_msg&quot;: &quot;foo equals bar&quot;
+    }
+}
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2267 votes">2.3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1423/agilejon" rel="noopener">AgileJon</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/921808" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>for (var key in validation_messages) {
+    // skip loop if the property is from prototype
+    if (!validation_messages.hasOwnProperty(key)) continue;
+
+    var obj = validation_messages[key];
+    for (var prop in obj) {
+        // skip loop if the property is from prototype
+        if (!obj.hasOwnProperty(prop)) continue;
+
+        // your code
+        alert(prop + " = " + obj[prop]);
+    }
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="925 votes">925</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/717950/axel-rauschmayer" rel="noopener">Axel Rauschmayer</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5737192" rel="noopener">原文 ↗</a></div><div class="prose"><p>Under ECMAScript 5, you can combine <code>Object.keys()</code> and <code>Array.prototype.forEach()</code>:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var obj = {
+  first: "John",
+  last: "Doe"
+};
+
+//
+//	Visit non-inherited enumerable keys
+//
+Object.keys(obj).forEach(function(key) {
+
+  console.log(key, obj[key]);
+
+});</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="460 votes">460</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1612318/rotareti" rel="noopener">Rotareti</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/41550077" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>In <strong>ES6/2015</strong> you can loop through an object like this (using the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions" rel="noreferrer">arrow function</a>):</p>
+<pre class="lang-js prettyprint-override"><code>Object.keys(myObj).forEach(key =&gt; {
+  console.log(key);        // the name of the current key.
+  console.log(myObj[key]); // the value of the current key.
+});
+</code></pre>
+<p><a href="https://jsbin.com/feribofaqa/edit?html,js,console,output" rel="noreferrer">JS Bin</a></p>
+<p>In <strong>ES7/2016</strong> you can use <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/entries" rel="noreferrer"><code>Object.entries</code></a> instead of <code>Object.keys</code> and loop through an object like this:</p>
+<pre class="lang-js prettyprint-override"><code>Object.entries(myObj).forEach(([key, val]) =&gt; {
+  console.log(key); // the name of the current key.
+  console.log(val); // the value of the current key.
+});
+</code></pre>
+<p>The above would also work as a <strong>one-liner</strong>:</p>
+<pre class="lang-js prettyprint-override"><code>Object.entries(myObj).forEach(([key, val]) =&gt; console.log(key, val));
+</code></pre>
+<p><a href="https://jsbin.com/tokotusuze/1/edit?html,js,console,output" rel="noreferrer">jsbin</a></p>
+<p>In case you want to loop through nested objects as well, you can use a <strong>recursive</strong> function (ES6):</p>
+<pre class="lang-js prettyprint-override"><code>const loopNestedObj = obj =&gt; {
+  Object.keys(obj).forEach(key =&gt; {
+    if (obj[key] &amp;&amp; typeof obj[key] === &quot;object&quot;) loopNestedObj(obj[key]); // recurse.
+    else console.log(key, obj[key]); // or do something with key and val.
+  });
+};
+</code></pre>
+<p><a href="https://jsbin.com/ruravuhelu/edit?html,js,console,output" rel="noreferrer">JS Bin</a></p>
+<p>The same as function above, but with <strong>ES7</strong> <code>Object.entries()</code> instead of <code>Object.keys()</code>:</p>
+<pre class="lang-js prettyprint-override"><code>const loopNestedObj = obj =&gt; {
+  Object.entries(obj).forEach(([key, val]) =&gt; {
+    if (val &amp;&amp; typeof val === &quot;object&quot;) loopNestedObj(val); // recurse.
+    else console.log(key, val); // or do something with key and val.
+  });
+};
+</code></pre>
+<p>Here we loop through nested objects change values and return a new object in one go using <code>Object.entries()</code> combined with <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/fromEntries" rel="noreferrer"><code>Object.fromEntries()</code></a> (<strong>ES10/2019</strong>):</p>
+<pre class="lang-js prettyprint-override"><code>const loopNestedObj = obj =&gt;
+  Object.fromEntries(
+    Object.entries(obj).map(([key, val]) =&gt; {
+      if (val &amp;&amp; typeof val === &quot;object&quot;) [key, loopNestedObj(val)]; // recurse
+      else [key, updateMyVal(val)]; // or do something with key and val.
+    })
+  );
+</code></pre>
+<p>Another way of looping through objects is by using  <strong>for ... in</strong> and <strong>for ... of</strong>. See <a href="https://stackoverflow.com/a/46386334/1612318">vdegenne's nicely written answer</a>.</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

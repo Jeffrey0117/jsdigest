@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check if a value is an object in JavaScript · jsdigest</title>
+<meta name="description" content="How do you check if a value is an object in JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Check if a value is an object in JavaScript</h1>
+    <div class="q-meta big"><span class="score hot" title="2340 votes">2.3k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1091828/danny-fox" rel="noopener">Danny Fox</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">types</span><span class="tag">javascript-objects</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/8511281/check-if-a-value-is-an-object-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do you check if a value is an object in JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score" title="991 votes">991</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/95382/michael-krelin" rel="noopener">Michael Krelin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/8511332" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>UPDATE</strong>:</p>
+<p><strong>This answer is incomplete and gives misleading results</strong>. For example, <code>null</code> is also considered of type <code>object</code> in JavaScript, not to mention several other edge cases. Follow the recommendation below and move on to other <strong><a href="https://stackoverflow.com/a/8511350/2336212">&quot;most upvoted (and correct!) answer&quot;</a></strong>:</p>
+<pre class="lang-js prettyprint-override"><code>typeof yourVariable === 'object' &amp;&amp; yourVariable !== null
+</code></pre>
+<hr />
+<p><strong>Original answer</strong>:</p>
+<p>Try using <code>typeof(var)</code> and/or <code>var instanceof something</code>.</p>
+<p>EDIT: This answer gives an idea of how to examine variable's properties, but it is <em>not</em> a bulletproof recipe (after all there's no recipe at all!) for checking whether it's an object, far from it. Since people tend to look for something to copy from here without doing any research, I'd highly recommend that they turn to the other, most upvoted (and correct!) answer.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="2625 votes">2.6k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/50742/chuck" rel="noopener">Chuck</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/8511350" rel="noopener">原文 ↗</a></div><div class="prose"><p>If <code>typeof x === 'object'</code>, <code>x</code> is an object (except a function) or <code>null</code>. If you want <code>null</code>, arrays, and functions to be excluded, just make it:</p>
+<pre class="lang-js prettyprint-override"><code>typeof x === 'object' &amp;&amp; !Array.isArray(x) &amp;&amp; x !== null
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="640 votes">640</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/894284/matt-fenwick" rel="noopener">Matt Fenwick</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/22482737" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>Let's define &quot;object&quot; in Javascript</strong>.  According to the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Glossary" rel="noreferrer">MDN docs</a>, every value is either an object or a primitive:</p>
+<blockquote>
+<p>primitive, primitive value</p>
+<p>A data that is not an object and does not have any methods. JavaScript has 7 primitive data types: string, number, bigint, boolean, undefined, symbol, and null.</p>
+</blockquote>
+<p><strong>What's a primitive?</strong></p>
+<ul>
+<li><code>3</code></li>
+<li><code>'abc'</code></li>
+<li><code>true</code></li>
+<li><code>null</code></li>
+<li><code>undefined</code></li>
+</ul>
+<p><strong>What's an object (i.e. not a primitive)?</strong></p>
+<ul>
+<li><code>Object.prototype</code></li>
+<li>everything descended from <code>Object.prototype</code>
+<ul>
+<li><code>Function.prototype</code>
+<ul>
+<li><code>Object</code></li>
+<li><code>Function</code></li>
+<li><code>function C(){}</code> -- user-defined functions</li>
+</ul>
+</li>
+<li><code>C.prototype</code> -- the prototype property of a user-defined function: this is <em>not</em> <code>C</code>s prototype
+<ul>
+<li><code>new C()</code> -- &quot;new&quot;-ing a user-defined function</li>
+</ul>
+</li>
+<li><code>Math</code></li>
+<li><code>Array.prototype</code>
+<ul>
+<li>arrays</li>
+</ul>
+</li>
+<li><code>{&quot;a&quot;: 1, &quot;b&quot;: 2}</code> -- objects created using literal notation</li>
+<li><code>new Number(3)</code> -- wrappers around primitives</li>
+<li>... <em>many other things</em> ...</li>
+</ul>
+</li>
+<li><code>Object.create(null)</code></li>
+<li>everything descended from an <code>Object.create(null)</code></li>
+</ul>
+<p><strong>How to check whether a value is an object</strong></p>
+<p><code>instanceof</code> by itself won't work, because it misses two cases:</p>
+<pre><code>// oops:  isObject(Object.prototype) -&gt; false
+// oops:  isObject(Object.create(null)) -&gt; false
+function isObject(val) {
+    return val instanceof Object; 
+}
+</code></pre>
+<p><code>typeof x === 'object'</code> won't work, because of false positives (<code>null</code>) and false negatives (functions):</p>
+<pre><code>// oops: isObject(Object) -&gt; false
+function isObject(val) {
+    return (typeof val === 'object');
+}
+</code></pre>
+<p><code>Object.prototype.toString.call</code> won't work, because of false positives for all of the primitives:</p>
+<pre><code>&gt; Object.prototype.toString.call(3)
+&quot;[object Number]&quot;
+
+&gt; Object.prototype.toString.call(new Number(3))
+&quot;[object Number]&quot;
+</code></pre>
+<p>So I use:</p>
+<pre><code>function isObject(val) {
+    if (val === null) { return false;}
+    return ( (typeof val === 'function') || (typeof val === 'object') );
+}
+</code></pre>
+<hr />
+<p>@Daan's answer also seems to work:</p>
+<pre><code>function isObject(obj) {
+  return obj === Object(obj);
+}
+</code></pre>
+<p>because, according to the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" rel="noreferrer">MDN docs</a>:</p>
+<blockquote>
+<p>The Object constructor creates an object wrapper for the given value. If the value is null or undefined, it will create and return an empty object, otherwise, it will return an object of a type that corresponds to the given value. If the value is an object already, it will return the value.</p>
+</blockquote>
+<hr />
+<p>A third way that seems to work (not sure if it's 100%) is to use <code>Object.getPrototypeOf</code> which <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getPrototypeOf" rel="noreferrer">throws an exception</a> if its argument isn't an object:</p>
+<pre><code>// these 5 examples throw exceptions
+Object.getPrototypeOf(null)
+Object.getPrototypeOf(undefined)
+Object.getPrototypeOf(3)
+Object.getPrototypeOf('abc')
+Object.getPrototypeOf(true)
+
+// these 5 examples don't throw exceptions
+Object.getPrototypeOf(Object)
+Object.getPrototypeOf(Object.prototype)
+Object.getPrototypeOf(Object.create(null))
+Object.getPrototypeOf([])
+Object.getPrototypeOf({})
+</code></pre>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

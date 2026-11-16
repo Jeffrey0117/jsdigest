@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>When are you supposed to use escape instead of encodeURI / encodeURIComponent? · jsdigest</title>
+<meta name="description" content="When encoding a query string to be sent to a web server - when do you use escape() and when do you use encodeURI() or encodeURIComponent() : Use escape: escape…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>When are you supposed to use escape instead of encodeURI / encodeURIComponent?</h1>
+    <div class="q-meta big"><span class="score hot" title="1516 votes">1.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1341/adam" rel="noopener">Adam</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">encoding</span><span class="tag">query-string</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/75980/when-are-you-supposed-to-use-escape-instead-of-encodeuri-encodeuricomponent" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>When encoding a query string to be sent to a web server - when do you use <code>escape()</code> and when do you use <code>encodeURI()</code> or <code>encodeURIComponent()</code>:</p>
+<p>Use escape:</p>
+<pre><code>escape(&quot;% +&amp;=&quot;);
+</code></pre>
+<p>OR</p>
+<p>use <code>encodeURI()</code> / <code>encodeURIComponent()</code></p>
+<pre><code>encodeURI(&quot;http://www.google.com?var1=value1&amp;var2=value2&quot;);
+
+encodeURIComponent(&quot;var1=value1&amp;var2=value2&quot;);
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2020 votes">2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/16686/arne-evertsson" rel="noopener">Arne Evertsson</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3608791" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h1>escape()</h1>
+<p>Don't use it!
+<code>escape()</code> is defined in section <a href="https://www.ecma-international.org/ecma-262/9.0/index.html#sec-escape-string" rel="noreferrer">B.2.1.1 escape</a> and the <a href="https://www.ecma-international.org/ecma-262/9.0/index.html#sec-additional-ecmascript-features-for-web-browsers" rel="noreferrer">introduction text of Annex B</a> says:</p>
+<blockquote>
+<p>... All of the language features and behaviours specified in this annex have one or more undesirable characteristics and in the absence of legacy usage would be removed from this specification. ...<br />
+... Programmers should not use or assume the existence of these features and behaviours when writing new ECMAScript code....</p>
+</blockquote>
+<p>Behaviour:</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/escape" rel="noreferrer">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/escape</a></p>
+<p>Special characters are encoded with the exception of: @*_+-./</p>
+<p>The hexadecimal form for characters, whose code unit value is 0xFF or less, is a two-digit escape sequence: <code>%xx</code>.</p>
+<p>For characters with a greater code unit, the four-digit format <code>%uxxxx</code> is used. This is not allowed within a query string (as defined in <a href="https://www.rfc-editor.org/rfc/rfc3986#section-3.4" rel="noreferrer">RFC3986</a>):</p>
+<pre><code>query       = *( pchar / &quot;/&quot; / &quot;?&quot; )
+pchar         = unreserved / pct-encoded / sub-delims / &quot;:&quot; / &quot;@&quot;
+unreserved    = ALPHA / DIGIT / &quot;-&quot; / &quot;.&quot; / &quot;_&quot; / &quot;~&quot;
+pct-encoded   = &quot;%&quot; HEXDIG HEXDIG
+sub-delims    = &quot;!&quot; / &quot;$&quot; / &quot;&amp;&quot; / &quot;'&quot; / &quot;(&quot; / &quot;)&quot;
+              / &quot;*&quot; / &quot;+&quot; / &quot;,&quot; / &quot;;&quot; / &quot;=&quot;
+</code></pre>
+<p>A percent sign is only allowed if it is directly followed by two hexdigits, percent followed by <code>u</code> is not allowed.</p>
+<h1>encodeURI()</h1>
+<p>Use encodeURI when you want a working URL. Make this call:</p>
+<pre><code>encodeURI(&quot;http://www.example.org/a file with spaces.html&quot;)
+</code></pre>
+<p>to get:</p>
+<pre><code>http://www.example.org/a%20file%20with%20spaces.html
+</code></pre>
+<p>Don't call encodeURIComponent since it would destroy the URL and return</p>
+<pre><code>http%3A%2F%2Fwww.example.org%2Fa%20file%20with%20spaces.html
+</code></pre>
+<p>Note that encodeURI, like encodeURIComponent, does not escape the ' character.</p>
+<h1>encodeURIComponent()</h1>
+<p>Use encodeURIComponent when you want to encode the value of a URL parameter.</p>
+<pre><code>var p1 = encodeURIComponent(&quot;http://example.org/?a=12&amp;b=55&quot;)
+</code></pre>
+<p>Then you may create the URL you need:</p>
+<pre><code>var url = &quot;http://example.net/?param1=&quot; + p1 + &quot;&amp;param2=99&quot;;
+</code></pre>
+<p>And you will get this complete URL:</p>
+<p><code>http://example.net/?param1=http%3A%2F%2Fexample.org%2F%Ffa%3D12%26b%3D55&amp;param2=99</code></p>
+<p>Note that encodeURIComponent does not escape the <code>'</code> character. A common bug is to use it to create html attributes such as <code>href='MyUrl'</code>, which could suffer an injection bug. If you are constructing html from strings, either use <code>&quot;</code> instead of <code>'</code> for attribute quotes, or add an extra layer of encoding (<code>'</code> can be encoded as %27).</p>
+<p>For more information on this type of encoding you can check: <a href="http://en.wikipedia.org/wiki/Percent-encoding" rel="noreferrer">http://en.wikipedia.org/wiki/Percent-encoding</a></p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="494 votes">494</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2391782/johann-echavarria" rel="noopener">Johann Echavarria</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/23842171" rel="noopener">原文 ↗</a></div><div class="prose"><p>The difference between <code>encodeURI()</code> and <code>encodeURIComponent()</code> are exactly 11 characters encoded by encodeURIComponent but not by encodeURI:</p>
+
+<p><img src="https://i.sstatic.net/RGP77.png" alt="Table with the ten differences between encodeURI and encodeURIComponent"></p>
+
+<p>I generated this table easily with <strong>console.table</strong> in Google Chrome with this code:</p>
+
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="false" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var arr = [];
+for(var i=0;i&lt;256;i++) {
+  var char=String.fromCharCode(i);
+  if(encodeURI(char)!==encodeURIComponent(char)) {
+    arr.push({
+      character:char,
+      encodeURI:encodeURI(char),
+      encodeURIComponent:encodeURIComponent(char)
+    });
+  }
+}
+console.table(arr);</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="49 votes">49</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/438970/damien" rel="noopener">Damien</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/12796866" rel="noopener">原文 ↗</a></div><div class="prose"><p>I found this article enlightening :
+<a href="http://unixpapa.com/js/querystring.html" rel="noreferrer">Javascript Madness: Query String Parsing</a></p>
+
+<p>I found it when I was trying to undersand why decodeURIComponent was not decoding '+' correctly. Here is an extract:</p>
+
+<pre><code>String:                         "A + B"
+Expected Query String Encoding: "A+%2B+B"
+escape("A + B") =               "A%20+%20B"     Wrong!
+encodeURI("A + B") =            "A%20+%20B"     Wrong!
+encodeURIComponent("A + B") =   "A%20%2B%20B"   Acceptable, but strange
+
+Encoded String:                 "A+%2B+B"
+Expected Decoding:              "A + B"
+unescape("A+%2B+B") =           "A+++B"       Wrong!
+decodeURI("A+%2B+B") =          "A+++B"       Wrong!
+decodeURIComponent("A+%2B+B") = "A+++B"       Wrong!
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

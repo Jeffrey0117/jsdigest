@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How does data binding work in AngularJS? · jsdigest</title>
+<meta name="description" content="How does data binding work in the AngularJS framework? I haven&#39;t found technical details on their site . It&#39;s more or less clear how it works when data is prop…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How does data binding work in AngularJS?</h1>
+    <div class="q-meta big"><span class="score hot" title="2050 votes">2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/168367/pashec" rel="noopener">Pashec</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">angularjs</span><span class="tag">data-binding</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/9682092/how-does-data-binding-work-in-angularjs" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How does data binding work in the <code>AngularJS</code> framework?</p>
+
+<p>I haven't found technical details on <a href="http://angularjs.org" rel="noreferrer">their site</a>. It's more or less clear how it works when data is propagated from view to model. But how does AngularJS track changes of model properties without setters and getters?</p>
+
+<p>I found that there are <a href="https://stackoverflow.com/questions/1029241/javascript-object-watch-for-all-browsers">JavaScript watchers</a> that may do this work. But they are not supported in <a href="http://en.wikipedia.org/wiki/Internet_Explorer_6" rel="noreferrer">Internet&nbsp;Explorer&nbsp;6</a> and <a href="http://en.wikipedia.org/wiki/Internet_Explorer_7" rel="noreferrer">Internet&nbsp;Explorer&nbsp;7</a>. So how does AngularJS know that I changed for example the following and reflected this change on a view?</p>
+
+<pre><code>myobject.myproperty="new value";
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2763 votes">2.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/192810/misko-hevery" rel="noopener">Misko Hevery</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/9693933" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>AngularJS remembers the value and compares it to a previous value. This is basic dirty-checking. If there is a change in value, then it fires the change event.</p>
+
+<p>The <code>$apply()</code> method, which is what you call when you are transitioning from a non-AngularJS world into an AngularJS world, calls <code>$digest()</code>. A digest is just plain old dirty-checking. It works on all browsers and is totally predictable.</p>
+
+<p>To contrast dirty-checking (AngularJS) vs change listeners (<a href="http://en.wikipedia.org/wiki/KnockoutJS">KnockoutJS</a> and <a href="https://en.wikipedia.org/wiki/Backbone.js">Backbone.js</a>): While dirty-checking may seem simple, and even inefficient (I will address that later), it turns out that it is semantically correct all the time, while change listeners have lots of weird corner cases and need things like dependency tracking to make it more semantically correct. KnockoutJS dependency tracking is a clever feature for a problem which AngularJS does not have.</p>
+
+<h1>Issues with change listeners:</h1>
+
+<ul>
+<li>The syntax is atrocious, since browsers do not support it natively. Yes, there are proxies, but they are not semantically correct in all cases, and of course there are no proxies on old browsers. The bottom line is that dirty-checking allows you to do <a href="http://en.wikipedia.org/wiki/Plain_Old_Java_Object">POJO</a>, whereas KnockoutJS and Backbone.js force you to inherit from their classes, and access your data through accessors.</li>
+<li>Change coalescence. Suppose you have an array of items. Say you want to add items into an array, as you are looping to add, each time you add you are firing events on change, which is rendering the UI. This is very bad for performance. What you want is to update the UI only once, at the end. The change events are too fine-grained.</li>
+<li>Change listeners fire immediately on a setter, which is a problem, since the change listener can further change data, which fires more change events. This is bad since on your stack you may have several change events happening at once. Suppose you have two arrays which need to be kept in sync for whatever reason. You can only add to one or the other, but each time you add you fire a change event, which now has an inconsistent view of the world. This is a very similar problem to thread locking, which JavaScript avoids since each callback executes exclusively and to completion. Change events break this since setters can have far-reaching consequences which are not intended and non obvious, which creates the thread problem all over again. It turns out that what you want to do is to delay the listener execution, and guarantee, that only one listener runs at a time, hence any code is free to change data, and it knows that no other code runs while it is doing so.</li>
+</ul>
+
+<h1>What about performance?</h1>
+
+<p>So it may seem that we are slow, since dirty-checking is inefficient. This is where we need to look at real numbers rather than just have theoretical arguments, but first let's define some constraints.</p>
+
+<p>Humans are:</p>
+
+<ul>
+<li><p><em>Slow</em> — Anything faster than 50&nbsp;ms is imperceptible to humans and thus can be considered as "instant".</p></li>
+<li><p><em>Limited</em> — You can't really show more than about 2000 pieces of information to a human on a single page. Anything more than that is really bad UI, and humans can't process this anyway.</p></li>
+</ul>
+
+<p>So the real question is this: How many comparisons can you do on a browser in 50&nbsp;ms? This is a hard question to answer as many factors come into play, but here is a test case: <a href="http://jsperf.com/angularjs-digest/6">http://jsperf.com/angularjs-digest/6</a> which creates 10,000 watchers. On a modern browser this takes just under 6&nbsp;ms. On <a href="http://en.wikipedia.org/wiki/Internet_Explorer_8">Internet&nbsp;Explorer&nbsp;8</a> it takes about 40&nbsp;ms. As you can see, this is not an issue even on slow browsers these days. There is a caveat: The comparisons need to be simple to fit into the time limit... Unfortunately it is way too easy to add a slow comparison into AngularJS, so it is easy to build slow applications when you don't know what you are doing. But we hope to have an answer by providing an instrumentation module, which would show you which are the slow comparisons.</p>
+
+<p>It turns out that video games and GPUs use the dirty-checking approach, specifically because it is consistent. As long as they get over the monitor refresh rate (typically 50-60 Hz, or every 16.6-20 ms), any performance over that is a waste, so you're better off drawing more stuff, than getting FPS higher.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="329 votes">329</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/179024/mw" rel="noopener">MW.</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/18381836" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Misko already gave an excellent description of how the data bindings work, but I would like to add my view on the performance issue with the data binding.</p>
+
+<p>As Misko stated, around 2000 bindings are where you start to see problems, but you shouldn't have more than 2000 pieces of information on a page anyway. This may be true, but not every data-binding is visible to the user. Once you start building any sort of widget or data grid with two-way binding you can <em>easily</em> hit 2000 bindings, without having a bad UX.</p>
+
+<p>Consider, for example, a combo box where you can type text to filter the available options. This sort of control could have ~150 items and still be highly usable. If it has some extra feature (for example a specific class on the currently selected option) you start to get 3-5 bindings per option. Put three of these widgets on a page (e.g. one to select a country, the other to select a city in the said country, and the third to select a hotel) and you are somewhere between 1000 and 2000 bindings already.</p>
+
+<p>Or consider a data-grid in a corporate web application. 50 rows per page is not unreasonable, each of which could have 10-20 columns. If you build this with ng-repeats, and/or have information in some cells which uses some bindings, you could be approaching 2000 bindings with this grid alone.</p>
+
+<p>I find this to be a <strong>huge</strong> problem when working with AngularJS, and the only solution I've been able to find so far is to construct widgets without using two-way binding, instead of using ngOnce, deregistering watchers and similar tricks, or construct directives which build the DOM with jQuery and DOM manipulation. I feel this defeats the purpose of using Angular in the first place.</p>
+
+<p>I would love to hear suggestions on other ways to handle this, but then maybe I should write my own question. I wanted to put this in a comment, but it turned out to be way too long for that...</p>
+
+<p><strong>TL;DR</strong> <br />
+The data binding can cause performance issues on complex pages.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="162 votes">162</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/687677/superluminary" rel="noopener">superluminary</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/30596164" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h2>By dirty checking the <code>$scope</code> object</h2>
+<p>Angular maintains a simple <code>array</code> of watchers in the <code>$scope</code> objects. If you inspect any <code>$scope</code> you will find that it contains an <code>array</code> called <code>$$watchers</code>.</p>
+<p>Each watcher is an <code>object</code> that contains among other things</p>
+<ol>
+<li>An expression which the watcher is monitoring. This might just be an <code>attribute</code> name, or something more complicated.</li>
+<li>A last known value of the expression. This can be checked against the current computed value of the expression. If the values differ the watcher will trigger the function and mark the <code>$scope</code> as dirty.</li>
+<li>A function which will be executed if the watcher is dirty.</li>
+</ol>
+<h2>How watchers are defined</h2>
+<p>There are many different ways of defining a watcher in AngularJS.</p>
+<ul>
+<li><p>You can explicitly <code>$watch</code> an <code>attribute</code> on <code>$scope</code>.</p>
+<pre><code>  $scope.$watch('person.username', validateUnique);
+</code></pre>
+</li>
+<li><p>You can place a <code>{{}}</code> interpolation in your template (a watcher will be created for you on the current <code>$scope</code>).</p>
+<pre><code>  &lt;p&gt;username: {{person.username}}&lt;/p&gt;
+</code></pre>
+</li>
+<li><p>You can ask a directive such as <code>ng-model</code> to define the watcher for you.</p>
+<pre><code>  &lt;input ng-model=&quot;person.username&quot; /&gt;
+</code></pre>
+</li>
+</ul>
+<h2>The <code>$digest</code> cycle checks all watchers against their last value</h2>
+<p>When we interact with AngularJS through the normal channels (ng-model, ng-repeat, etc) a digest cycle will be triggered by the directive.</p>
+<p>A digest cycle is a <strong>depth-first traversal of <code>$scope</code> and all its children</strong>. For each <code>$scope</code> <code>object</code>, we iterate over its <code>$$watchers</code> <code>array</code> and evaluate all the expressions. If the new expression value is different from the last known value, the watcher's function is called. This function might recompile part of the DOM, recompute a value on <code>$scope</code>, trigger an <code>AJAX</code> <code>request</code>, anything you need it to do.</p>
+<p>Every scope is traversed and every watch expression evaluated and checked against the last value.</p>
+<h2>If a watcher is triggered, the <code>$scope</code> is dirty</h2>
+<p>If a watcher is triggered, the app knows something has changed, and the <code>$scope</code> is marked as dirty.</p>
+<p>Watcher functions can change other attributes on <code>$scope</code> or on a parent <code>$scope</code>. If one <code>$watcher</code> function has been triggered, we can't guarantee that our other <code>$scope</code>s are still clean, and so we execute the entire digest cycle again.</p>
+<p>This is because AngularJS has two-way binding, so data can be passed back up the <code>$scope</code> tree. We may change a value on a higher <code>$scope</code> that has already been digested. Perhaps we change a value on the <code>$rootScope</code>.</p>
+<h2>If the <code>$digest</code> is dirty, we execute the entire <code>$digest</code> cycle again</h2>
+<p>We continually loop through the <code>$digest</code> cycle until either the digest cycle comes up clean (all <code>$watch</code> expressions have the same value as they had in the previous cycle), or we reach the digest limit. By default, this limit is set at 10.</p>
+<p>If we reach the digest limit AngularJS will raise an error in the console:</p>
+<pre><code>10 $digest() iterations reached. Aborting!
+</code></pre>
+<h2>The digest is hard on the machine but easy on the developer</h2>
+<p>As you can see, every time something changes in an AngularJS app, AngularJS will check every single watcher in the <code>$scope</code> hierarchy to see how to respond. For a developer this is a massive productivity boon, as you now need to write almost no wiring code, AngularJS will just notice if a value has changed, and make the rest of the app consistent with the change.</p>
+<p>From the perspective of the machine though this is wildly inefficient and will slow our app down if we create too many watchers. Misko has quoted a figure of about 4000 watchers before your app will feel slow on older browsers.</p>
+<p>This limit is easy to reach if you <code>ng-repeat</code> over a large <code>JSON</code> <code>array</code> for example. You can mitigate against this using features like one-time binding to compile a template without creating watchers.</p>
+<h2>How to avoid creating too many watchers</h2>
+<p>Each time your user interacts with your app, every single watcher in your app will be evaluated at least once. A big part of optimising an AngularJS app is reducing the number of watchers in your <code>$scope</code> tree. One easy way to do this is with <em>one time binding</em>.</p>
+<p>If you have data which will rarely change, you can bind it only once using the :: syntax, like so:</p>
+<pre><code>&lt;p&gt;{{::person.username}}&lt;/p&gt;
+</code></pre>
+<p>or</p>
+<pre><code>&lt;p ng-bind=&quot;::person.username&quot;&gt;&lt;/p&gt;
+</code></pre>
+<p>The binding will only be triggered when the containing template is rendered and the data loaded into <code>$scope</code>.</p>
+<p>This is especially important when you have an <code>ng-repeat</code> with many items.</p>
+<pre><code>&lt;div ng-repeat=&quot;person in people track by username&quot;&gt;
+  {{::person.username}}
+&lt;/div&gt;
+</code></pre>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

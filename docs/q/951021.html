@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is the JavaScript version of sleep()? · jsdigest</title>
+<meta name="description" content="Is there a better way to engineer a sleep in JavaScript than the following pausecomp function ? function pausecomp(millis) { var date = new Date(); var curDate…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What is the JavaScript version of sleep()?</h1>
+    <div class="q-meta big"><span class="score hot" title="3982 votes">4k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/26004/fmsf" rel="noopener">fmsf</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">sleep</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Is there a better way to engineer a <code>sleep</code> in JavaScript than <a href="http://www.sean.co.uk/a/webdesign/javascriptdelay.shtm" rel="noreferrer">the following <code>pausecomp</code> function</a>?</p>
+<pre><code>function pausecomp(millis)
+{
+    var date = new Date();
+    var curDate = null;
+    do { curDate = new Date(); }
+    while(curDate-date &lt; millis);
+}
+</code></pre>
+<p>Unlike <a href="https://stackoverflow.com/questions/758688/sleep-in-javascript-delay-between-actions">Sleep in JavaScript - delay between actions</a>, I want a <em>real sleep</em> in the middle of a function, and not a delay before a piece of code executes.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5709 votes">5.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1269037/dan-dascalescu" rel="noopener">Dan Dascalescu</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/39914235" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h2>2017 — 2021 update</h2>
+<p>Since 2009 when this question was asked, JavaScript has evolved significantly. All other answers are now obsolete or overly complicated. Here is the current best practice:</p>
+<pre><code>function sleep(ms) {
+    return new Promise(resolve =&gt; setTimeout(resolve, ms));
+}
+</code></pre>
+<p>Or as a one-liner:</p>
+<pre><code>await new Promise(r =&gt; setTimeout(r, 2000));
+</code></pre>
+<p>As a function:</p>
+<pre><code>const sleep = ms =&gt; new Promise(r =&gt; setTimeout(r, ms));
+</code></pre>
+<p>or in Typescript:</p>
+<pre><code>const sleep = (ms: number) =&gt; new Promise((r) =&gt; setTimeout(r, ms));
+</code></pre>
+<p>use it as:</p>
+<pre><code>await sleep(&lt;duration&gt;);
+</code></pre>
+<h3>Demo:</h3>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function sleep(ms) {
+    return new Promise(resolve =&gt; setTimeout(resolve, ms));
+}
+
+async function demo() {
+    for (let i = 0; i &lt; 5; i++) {
+        console.log(`Waiting ${i} seconds...`);
+        await sleep(i * 1000);
+    }
+    console.log('Done');
+}
+
+demo();</code></pre>
+</div>
+</div>
+</p>
+<p>Note that,</p>
+<ol>
+<li><code>await</code> can only be executed in functions prefixed with the <code>async</code> keyword, or at the top level of your script in <a href="https://stackoverflow.com/questions/46515764/how-can-i-use-async-await-at-the-top-level/56590390#56590390">an increasing number of environments</a>.</li>
+<li><code>await</code> only pauses the current <code>async</code> function. This means it does not block the execution of the rest of the script, which is what you want in the vast majority of the cases. If you do want a blocking construct, see <a href="https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep/56406126#56406126">this answer</a> using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics" rel="noreferrer"><code>Atomics</code></a><code>.wait</code>, but note that most browsers will not allow it on the browser's main thread.</li>
+</ol>
+<p>Two new JavaScript features (as of 2017) helped write this &quot;sleep&quot; function:</p>
+<ul>
+<li><a href="https://ponyfoo.com/articles/es6-promises-in-depth" rel="noreferrer">Promises, a native feature of ES2015</a> (aka ES6). We also use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions" rel="noreferrer">arrow functions</a> in the definition of the sleep function.</li>
+<li>The <a href="https://ponyfoo.com/articles/understanding-javascript-async-await" rel="noreferrer"><code>async/await</code></a> feature lets the code explicitly wait for a promise to settle (resolve or reject).</li>
+</ul>
+<h2>Compatibility</h2>
+<ul>
+<li>promises are supported <a href="http://node.green/#Promise" rel="noreferrer">in Node v0.12+</a> and <a href="http://caniuse.com/#feat=promises" rel="noreferrer">widely supported in browsers</a>, except IE</li>
+<li><code>async</code>/<code>await</code> landed in V8 and has been <a href="https://developers.google.com/web/fundamentals/getting-started/primers/async-functions" rel="noreferrer">enabled by default since Chrome 55</a> (released in Dec 2016)
+<ul>
+<li>it landed <a href="https://blog.risingstack.com/async-await-node-js-7-nightly/" rel="noreferrer">in Node 7 in October 2016</a></li>
+<li>and also landed <a href="https://blog.nightly.mozilla.org/2016/11/01/async-await-support-in-firefox/" rel="noreferrer">in Firefox Nightly in November 2016</a></li>
+</ul>
+</li>
+</ul>
+<p>If for some reason you're using Node older than 7 (which reached <a href="https://github.com/nodejs/Release#end-of-life-releases" rel="noreferrer">end of life in 2017</a>), or are targeting old browsers, <code>async</code>/<code>await</code> can still be used via <a href="https://babeljs.io/" rel="noreferrer">Babel</a> (a tool that will <a href="https://www.stevefenton.co.uk/2012/11/compiling-vs-transpiling/" rel="noreferrer">transpile</a> JavaScript + new features into plain old JavaScript), with the <a href="https://babeljs.io/docs/en/babel-plugin-transform-async-to-generator" rel="noreferrer"><code>transform-async-to-generator</code></a> plugin.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="868 votes">868</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/449161/ben-flynn" rel="noopener">Ben Flynn</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5992511" rel="noopener">原文 ↗</a></div><div class="prose"><p>(See the <a href="https://stackoverflow.com/a/39914235/11236">updated answer for 2016</a>)</p>
+<p>I think it's perfectly reasonable to want to perform an action, wait, and then perform another action. If you are used to writing in multi-threaded languages, you probably have the idea of yielding execution for a set amount of time until your thread wakes up.</p>
+<p>The issue here is that JavaScript is a single-thread event-based model. While in a specific case, it might be nice to have the whole engine wait for a few seconds, in general it is bad practice. Suppose I wanted to make use of your functions while writing my own? When I called your method, my methods would all freeze up. If JavaScript could somehow preserve your function's execution context, store it somewhere, then bring it back and continue later, then sleep could happen, but that would basically be threading.</p>
+<p>So you are pretty much stuck with what others have suggested -- you'll need to break your code up into multiple functions.</p>
+<p>Your question is a bit of a false choice, then. There is no way to sleep in the way you want, nor should you pursue the solution you suggest.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="824 votes">824</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/61027/nosredna" rel="noopener">Nosredna</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/951057" rel="noopener">原文 ↗</a></div><div class="prose"><p>In JavaScript, I rewrite every function so that it can end as soon as possible. You want the browser back in control so it can make your DOM changes.</p>
+<p>Every time I've wanted a sleep in the middle of my function, I refactored to use a <code>setTimeout()</code>.</p>
+<h2>Edit</h2>
+<p>The infamous sleep, or delay, function within any language is much debated.  Some will say that there should always be a signal or callback to fire a given functionality, others will argue that sometimes an arbitrary moment of delay is useful.  I say that to each their own and one rule can never dictate anything in this industry.</p>
+<p>Writing a sleep function is simple and made even more usable with JavaScript Promises:</p>
+<pre><code>// sleep time expects milliseconds
+function sleep (time) {
+  return new Promise((resolve) =&gt; setTimeout(resolve, time));
+}
+
+// Usage!
+sleep(500).then(() =&gt; {
+    // Do something after the sleep!
+});
+</code></pre>
+<p>If you are inside an <code>async</code> function you can do a proper await step with the above definition of <code>sleep()</code>:</p>
+<pre><code>// Available inside async functions:
+await sleep(500);
+
+// Do something after the sleep…
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

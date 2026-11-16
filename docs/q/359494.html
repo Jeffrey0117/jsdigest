@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which equals operator (== vs ===) should be used in JavaScript comparisons? · jsdigest</title>
+<meta name="description" content="I&#39;m using JSLint to go through JavaScript, and it&#39;s returning many suggestions to replace == (two equals signs) with === (three equals signs) when doing things…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Which equals operator (== vs ===) should be used in JavaScript comparisons?</h1>
+    <div class="q-meta big"><span class="score hot" title="5642 votes">5.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/44990/bcasp" rel="noopener">bcasp</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">operators</span><span class="tag">equality</span><span class="tag">equality-operator</span><span class="tag">identity-operator</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/359494/which-equals-operator-vs-should-be-used-in-javascript-comparisons" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm using <a href="http://en.wikipedia.org/wiki/JSLint" rel="noreferrer">JSLint</a> to go through JavaScript, and it's returning many suggestions to replace <code>==</code> (two equals signs) with <code>===</code> (three equals signs) when doing things like comparing <code>idSele_UNVEHtype.value.length == 0</code> inside of an <code>if</code> statement.</p>
+
+<p>Is there a performance benefit to replacing <code>==</code> with <code>===</code>? </p>
+
+<p>Any performance improvement would be welcomed as many comparison operators exist.</p>
+
+<p>If no type conversion takes place, would there be a performance gain over <code>==</code>?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="7226 votes">7.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1288/bill-the-lizard" rel="noopener">Bill the Lizard</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/359509" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>The strict equality operator (<code>===</code>) behaves identically to the abstract equality operator (<code>==</code>) except no type conversion is done, and the types must be the same to be considered equal.</p>
+<p>Reference: <a href="https://www.c-point.com/javascript_tutorial/jsgrpComparison.htm" rel="noreferrer">JavaScript Tutorial: Comparison Operators</a></p>
+<p>The <code>==</code> operator will compare for equality <em>after doing any necessary type conversions</em>.  The <code>===</code> operator will <strong>not</strong> do the conversion, so if two values are not the same type <code>===</code> will simply return <code>false</code>. Both are equally quick.</p>
+<p>To quote Douglas Crockford's excellent <a href="https://rads.stackoverflow.com/amzn/click/com/0596517742" rel="noreferrer" rel="nofollow noreferrer">JavaScript: The Good Parts</a>,</p>
+<blockquote>
+<p>JavaScript has two sets of equality operators: <code>===</code> and <code>!==</code>, and their evil twins <code>==</code> and <code>!=</code>.  The good ones work the way you would expect.  If the two operands are of the same type and have the same value, then <code>===</code> produces <code>true</code> and <code>!==</code> produces <code>false</code>.  The evil twins do the right thing when the operands are of the same type, but if they are of different types, they attempt to coerce the values.  The rules by which they do that are complicated and unmemorable.  These are some of the interesting cases:</p>
+</blockquote>
+<blockquote>
+<pre><code>'' == '0'           // false
+0 == ''             // true
+0 == '0'            // true
+</code></pre>
+</blockquote>
+<blockquote>
+<pre><code>false == 'false'    // false
+false == '0'        // true
+</code></pre>
+</blockquote>
+<blockquote>
+<pre><code>false == undefined  // false
+false == null       // false
+null == undefined   // true
+</code></pre>
+</blockquote>
+<blockquote>
+<pre><code>' \t\r\n ' == 0     // true
+</code></pre>
+</blockquote>
+<p><a href="https://i.sstatic.net/yISob.png" rel="noreferrer"><img src="https://i.sstatic.net/yISob.png" alt="Equality Comparison Table " /></a></p>
+<blockquote>
+<p>The lack of transitivity is alarming.  My advice is to never use the evil twins.  Instead, always use <code>===</code> and <code>!==</code>.  All of the comparisons just shown produce <code>false</code> with the <code>===</code> operator.</p>
+</blockquote>
+<hr />
+<h3>Update</h3>
+<p>A good point was brought up by <a href="https://stackoverflow.com/users/165495/casebash">@Casebash</a> in the comments and in <a href="https://stackoverflow.com/users/113570/philippe-leybaert">@Phillipe Laybaert's</a> <a href="https://stackoverflow.com/a/957602/1288">answer</a> concerning objects.  For objects, <code>==</code> and <code>===</code> act consistently with one another (except in a special case).</p>
+<pre><code>var a = [1,2,3];
+var b = [1,2,3];
+
+var c = { x: 1, y: 2 };
+var d = { x: 1, y: 2 };
+
+var e = &quot;text&quot;;
+var f = &quot;te&quot; + &quot;xt&quot;;
+
+a == b            // false
+a === b           // false
+
+c == d            // false
+c === d           // false
+
+e == f            // true
+e === f           // true
+</code></pre>
+<p>The special case is when you compare a primitive with an object that evaluates to the same primitive, due to its <code>toString</code> or <code>valueOf</code> method. For example, consider the comparison of a string primitive with a string object created using the <code>String</code> constructor.</p>
+<pre><code>&quot;abc&quot; == new String(&quot;abc&quot;)    // true
+&quot;abc&quot; === new String(&quot;abc&quot;)   // false
+</code></pre>
+<p>Here the <code>==</code> operator is checking the values of the two objects and returning <code>true</code>, but the <code>===</code> is seeing that they're not the same type and returning <code>false</code>.  Which one is correct?  That really depends on what you're trying to compare.  My advice is to bypass the question entirely and just don't use the <code>String</code> constructor to create string objects from string literals.</p>
+<p><strong>Reference</strong><br />
+<a href="https://262.ecma-international.org/5.1/#sec-11.9.3" rel="noreferrer">https://262.ecma-international.org/5.1/#sec-11.9.3</a></p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1259 votes">1.3k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/44084/andreas-grech" rel="noopener">Andreas Grech</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/359547" rel="noopener">原文 ↗</a></div><div class="prose"><h3>Using the <code>==</code> operator (<em>Equality</em>)</h3>
+<pre><code>true == 1; //true, because 'true' is converted to 1 and then compared
+&quot;2&quot; == 2;  //true, because &quot;2&quot; is converted to 2 and then compared
+</code></pre>
+<h3>Using the <code>===</code> operator (<em>Identity</em>)</h3>
+<pre><code>true === 1; //false
+&quot;2&quot; === 2;  //false
+</code></pre>
+<p>This is because the <strong>equality operator <code>==</code> does type coercion</strong>, meaning that the interpreter implicitly tries to convert the values before comparing.</p>
+<p>On the other hand, the <strong>identity operator <code>===</code> does not do type coercion</strong>, and thus does not convert the values when comparing.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="906 votes">906</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/979621/snag" rel="noopener">SNag</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/23465314" rel="noopener">原文 ↗</a></div><div class="prose"><p>Here's an interesting visualisation of the equality comparison between <code>==</code> and <code>===</code>.</p>
+<p><strong>Source: <a href="https://github.com/dorey/JavaScript-Equality-Table" rel="noreferrer">https://github.com/dorey/JavaScript-Equality-Table</a></strong> (<a href="https://dorey.github.io/JavaScript-Equality-Table/" rel="noreferrer">demo</a>, <a href="https://dorey.github.io/JavaScript-Equality-Table/unified/" rel="noreferrer">unified demo</a>)</p>
+<hr />
+<h2><code>var1 === var2</code></h2>
+<p>When using <code>===</code> for JavaScript equality testing, everything is as is.<br />
+Nothing gets converted before being evaluated.</p>
+<p><img src="https://i.sstatic.net/62vxI.png" alt="Equality evaluation of === in JS" /></p>
+<h2><code>var1 == var2</code></h2>
+<p>When using <code>==</code> for JavaScript equality testing, some <em><strong>funky conversions</strong></em> take place.</p>
+<p><img src="https://i.sstatic.net/35MpY.png" alt="Equality evaluation of == in JS" /></p>
+<h3>Summary of equality in Javascript</h3>
+<p><img src="https://i.sstatic.net/FX7z1.png" alt="Equality in Javascript" /></p>
+<hr />
+<h3>Conclusion:</h3>
+<p><strong>Always use <code>===</code></strong>, unless you fully understand the <a href="https://dorey.github.io/JavaScript-Equality-Table/#two-equals" rel="noreferrer">funky conversions</a> that take place with <code>==</code>.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

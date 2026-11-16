@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>&quot;Thinking in AngularJS&quot; if I have a jQuery background? · jsdigest</title>
+<meta name="description" content="Suppose I&#39;m familiar with developing client-side applications in jQuery , but now I&#39;d like to start using AngularJS . Can you describe the paradigm shift that…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>&quot;Thinking in AngularJS&quot; if I have a jQuery background?</h1>
+    <div class="q-meta big"><span class="score hot" title="4498 votes">4.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/215945/mark-rajcok" rel="noopener">Mark Rajcok</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">angularjs</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/14994391/thinking-in-angularjs-if-i-have-a-jquery-background" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Suppose I'm familiar with developing client-side applications in <a href="http://jquery.com/" rel="noreferrer">jQuery</a>, but now I'd like to start using <a href="http://angularjs.org/" rel="noreferrer">AngularJS</a>. Can you describe the paradigm shift that is necessary? Here are a few questions that might help you frame an answer:</p>
+
+<ul>
+<li>How do I architect and design client-side web applications differently? What is the biggest difference?</li>
+<li>What should I stop doing/using; What should I start doing/using instead?</li>
+<li>Are there any server-side considerations/restrictions?</li>
+</ul>
+
+<p>I'm not looking for a detailed comparison between <code>jQuery</code> and <code>AngularJS</code>.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="7152 votes">7.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/259038/josh-david-miller" rel="noopener">Josh David Miller</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/15012542" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h1>1. Don't design your page, and then change it with <a href="http://en.wikipedia.org/wiki/Document_Object_Model" rel="noreferrer">DOM</a> manipulations</h1>
+
+<p>In jQuery, you design a page, and then you make it dynamic. This is because jQuery was designed for augmentation and has grown incredibly from that simple premise.</p>
+
+<p>But in AngularJS, you must start from the ground up with your architecture in mind. Instead of starting by thinking "I have this piece of the DOM and I want to make it do X", you have to start with what you want to accomplish, then go about designing your application, and then finally go about designing your view.</p>
+
+<h1>2. Don't augment jQuery with AngularJS</h1>
+
+<p>Similarly, don't start with the idea that jQuery does X, Y, and Z, so I'll just add AngularJS on top of that for models and controllers. This is <em>really</em> tempting when you're just starting out, which is why I always recommend that new AngularJS developers don't use jQuery at all, at least until they get used to doing things the "Angular Way".</p>
+
+<p>I've seen many developers here and on the mailing list create these elaborate solutions with jQuery plugins of 150 or 200 lines of code that they then glue into AngularJS with a collection of callbacks and <code>$apply</code>s that are confusing and convoluted; but they eventually get it working! The problem is that in <strong>most</strong> cases that jQuery plugin could be rewritten in AngularJS in a fraction of the code, where suddenly everything becomes comprehensible and straightforward.</p>
+
+<p>The bottom line is this: when solutioning, first "think in AngularJS"; if you can't think of a solution, ask the community; if after all of that there is no easy solution, <em>then</em> feel free to reach for the jQuery. But don't let jQuery become a crutch or you'll never master AngularJS.</p>
+
+<h1>3. Always think in terms of architecture</h1>
+
+<p>First know that <a href="http://en.wikipedia.org/wiki/Single-page_application" rel="noreferrer">single-page applications</a> are <em>applications</em>. They're <em>not</em> webpages. So we need to think like a server-side developer <em>in addition</em> to thinking like a client-side developer. We have to think about how to divide our application into individual, extensible, testable components.</p>
+
+<p>So then <em>how</em> do you do that? How do you "think in AngularJS"? Here are some general principles, contrasted with jQuery.</p>
+
+<h2>The view is the "official record"</h2>
+
+<p>In jQuery, we programmatically change the view. We could have a dropdown menu defined as a <code>ul</code> like so:</p>
+
+<pre class="lang-html prettyprint-override"><code>&lt;ul class="main-menu"&gt;
+    &lt;li class="active"&gt;
+        &lt;a href="#/home"&gt;Home&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+        &lt;a href="#/menu1"&gt;Menu 1&lt;/a&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;a href="#/sm1"&gt;Submenu 1&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#/sm2"&gt;Submenu 2&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#/sm3"&gt;Submenu 3&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+        &lt;a href="#/home"&gt;Menu 2&lt;/a&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<p>In jQuery, in our application logic, we would activate it with something like:</p>
+
+<pre class="lang-js prettyprint-override"><code>$('.main-menu').dropdownMenu();
+</code></pre>
+
+<p>When we just look at the view, it's not immediately obvious that there is any functionality here. For small applications, that's fine. But for non-trivial applications, things quickly get confusing and hard to maintain.</p>
+
+<p>In AngularJS, though, the view is the official record of view-based functionality. Our <code>ul</code> declaration would look like this instead:</p>
+
+<pre class="lang-html prettyprint-override"><code>&lt;ul class="main-menu" dropdown-menu&gt;
+    ...
+&lt;/ul&gt;
+</code></pre>
+
+<p>These two do the same thing, but in the AngularJS version anyone looking at the template knows what's supposed to happen. Whenever a new member of the development team comes on board, she can look at this and then <em>know</em> that there is a directive called <code>dropdownMenu</code> operating on it; she doesn't need to intuit the right answer or sift through any code. The view told us what was supposed to happen. Much cleaner.</p>
+
+<p>Developers new to AngularJS often ask a question like: how do I find all links of a specific kind and add a directive onto them. The developer is always flabbergasted when we reply: you don't. But the reason you don't do that is that this is like half-jQuery, half-AngularJS, and no good. The problem here is that the developer is trying to "do jQuery" in the context of AngularJS. That's never going to work well. The view <em>is</em> the official record. Outside of a directive (more on this below), you never, ever, <em>never</em> change the DOM. And directives are applied <em>in the view</em>, so intent is clear.</p>
+
+<p>Remember: don't design, and then mark up. You must architect, and then design.</p>
+
+<h2>Data binding</h2>
+
+<p>This is by far one of the most awesome features of AngularJS and cuts out a lot of the need to do the kinds of DOM manipulations I mentioned in the previous section. AngularJS will automatically update your view so you don't have to! In jQuery, we respond to events and then update content. Something like:</p>
+
+<pre class="lang-js prettyprint-override"><code>$.ajax({
+  url: '/myEndpoint.json',
+  success: function ( data, status ) {
+    $('ul#log').append('&lt;li&gt;Data Received!&lt;/li&gt;');
+  }
+});
+</code></pre>
+
+<p>For a view that looks like this:</p>
+
+<pre class="lang-html prettyprint-override"><code>&lt;ul class="messages" id="log"&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<p>Apart from mixing concerns, we also have the same problems of signifying intent that I mentioned before. But more importantly, we had to manually reference and update a DOM node. And if we want to delete a log entry, we have to code against the DOM for that too. How do we test the logic apart from the DOM? And what if we want to change the presentation?</p>
+
+<p>This a little messy and a trifle frail. But in AngularJS, we can do this:</p>
+
+<pre class="lang-js prettyprint-override"><code>$http( '/myEndpoint.json' ).then( function ( response ) {
+    $scope.log.push( { msg: 'Data Received!' } );
+});
+</code></pre>
+
+<p>And our view can look like this:</p>
+
+<pre class="lang-html prettyprint-override"><code>&lt;ul class="messages"&gt;
+    &lt;li ng-repeat="entry in log"&gt;{{ entry.msg }}&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<p>But for that matter, our view could look like this:</p>
+
+<pre class="lang-html prettyprint-override"><code>&lt;div class="messages"&gt;
+    &lt;div class="alert" ng-repeat="entry in log"&gt;
+        {{ entry.msg }}
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>And now instead of using an unordered list, we're using Bootstrap alert boxes. And we never had to change the controller code! But more importantly, no matter <em>where</em> or <em>how</em> the log gets updated, the view will change too. Automatically. Neat!</p>
+
+<p>Though I didn't show it here, the data binding is two-way. So those log messages could also be editable in the view just by doing this: <code>&lt;input ng-model="entry.msg" /&gt;</code>. And there was much rejoicing.</p>
+
+<h2>Distinct model layer</h2>
+
+<p>In jQuery, the DOM is kind of like the model. But in AngularJS, we have a separate model layer that we can manage in any way we want, completely independently from the view. This helps for the above data binding, maintains <a href="http://en.wikipedia.org/wiki/Separation_of_concerns" rel="noreferrer">separation of concerns</a>, and introduces far greater testability. Other answers mentioned this point, so I'll just leave it at that.</p>
+
+<h2>Separation of concerns</h2>
+
+<p>And all of the above tie into this over-arching theme: keep your concerns separate. Your view acts as the official record of what is supposed to happen (for the most part); your model represents your data; you have a service layer to perform reusable tasks; you do DOM manipulation and augment your view with directives; and you glue it all together with controllers. This was also mentioned in other answers, and the only thing I would add pertains to testability, which I discuss in another section below.</p>
+
+<h2>Dependency injection</h2>
+
+<p>To help us out with separation of concerns is <a href="http://en.wikipedia.org/wiki/Dependency_injection" rel="noreferrer">dependency injection</a> (DI). If you come from a server-side language (from <a href="http://en.wikipedia.org/wiki/Java_%28programming_language%29" rel="noreferrer">Java</a> to <a href="http://en.wikipedia.org/wiki/PHP" rel="noreferrer">PHP</a>) you're probably familiar with this concept already, but if you're a client-side guy coming from jQuery, this concept can seem anything from silly to superfluous to hipster. But it's not. :-)</p>
+
+<p>From a broad perspective, DI means that you can declare components very freely and then from any other component, just ask for an instance of it and it will be granted. You don't have to know about loading order, or file locations, or anything like that. The power may not immediately be visible, but I'll provide just one (common) example: testing.</p>
+
+<p>Let's say in our application, we require a service that implements server-side storage through a <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer" rel="noreferrer">REST</a> API and, depending on application state, local storage as well. When running tests on our controllers, we don't want to have to communicate with the server - we're testing the <em>controller</em>, after all. We can just add a mock service of the same name as our original component, and the injector will ensure that our controller gets the fake one automatically - our controller doesn't and needn't know the difference.</p>
+
+<p>Speaking of testing...</p>
+
+<h1>4. Test-driven development - <em>always</em></h1>
+
+<p>This is really part of section 3 on architecture, but it's so important that I'm putting it as its own top-level section.</p>
+
+<p>Out of all of the many jQuery plugins you've seen, used, or written, how many of them had an accompanying test suite? Not very many because jQuery isn't very amenable to that. But AngularJS is.</p>
+
+<p>In jQuery, the only way to test is often to create the component independently with a sample/demo page against which our tests can perform DOM manipulation. So then we have to develop a component separately and <em>then</em> integrate it into our application. How inconvenient! So much of the time, when developing with jQuery, we opt for iterative instead of test-driven development. And who could blame us?</p>
+
+<p>But because we have separation of concerns, we can do test-driven development iteratively in AngularJS! For example, let's say we want a super-simple directive to indicate in our menu what our current route is. We can declare what we want in the view of our application:</p>
+
+<pre class="lang-html prettyprint-override"><code>&lt;a href="/hello" when-active&gt;Hello&lt;/a&gt;
+</code></pre>
+
+<p>Okay, now we can write a test for the non-existent <code>when-active</code> directive:</p>
+
+<pre class="lang-js prettyprint-override"><code>it( 'should add "active" when the route changes', inject(function() {
+    var elm = $compile( '&lt;a href="/hello" when-active&gt;Hello&lt;/a&gt;' )( $scope );
+
+    $location.path('/not-matching');
+    expect( elm.hasClass('active') ).toBeFalsey();
+
+    $location.path( '/hello' );
+    expect( elm.hasClass('active') ).toBeTruthy();
+}));
+</code></pre>
+
+<p>And when we run our test, we can confirm that it fails. Only now should we create our directive:</p>
+
+<pre class="lang-js prettyprint-override"><code>.directive( 'whenActive', function ( $location ) {
+    return {
+        scope: true,
+        link: function ( scope, element, attrs ) {
+            scope.$on( '$routeChangeSuccess', function () {
+                if ( $location.path() == element.attr( 'href' ) ) {
+                    element.addClass( 'active' );
+                }
+                else {
+                    element.removeClass( 'active' );
+                }
+            });
+        }
+    };
+});
+</code></pre>
+
+<p>Our test now passes <em>and</em> our menu performs as requested. Our development is <em>both</em> iterative <em>and</em> test-driven. Wicked-cool.</p>
+
+<h1>5. Conceptually, directives are <em>not</em> packaged jQuery</h1>
+
+<p>You'll often hear "only do DOM manipulation in a directive". <strong>This is a necessity.</strong> Treat it with due deference!</p>
+
+<p>But let's dive a little deeper...</p>
+
+<p>Some directives just decorate what's already in the view (think <code>ngClass</code>) and therefore sometimes do DOM manipulation straight away and then are basically done. But if a directive is like a "widget" and has a template, it should <em>also</em> respect separation of concerns. That is, the template <em>too</em> should remain largely independent from its implementation in the link and controller functions.</p>
+
+<p>AngularJS comes with an entire set of tools to make this very easy; with <code>ngClass</code> we can dynamically update the class; <code>ngModel</code> allows two-way data binding; <code>ngShow</code> and <code>ngHide</code> programmatically show or hide an element; and many more - including the ones we write ourselves. In other words, we can do all kinds of awesomeness <em>without</em> DOM manipulation. The less DOM manipulation, the easier directives are to test, the easier they are to style, the easier they are to change in the future, and the more re-usable and distributable they are.</p>
+
+<p>I see lots of developers new to AngularJS using directives as the place to throw a bunch of jQuery. In other words, they think "since I can't do DOM manipulation in the controller, I'll take that code put it in a directive". While that certainly is much better, it's often <em>still wrong</em>.</p>
+
+<p>Think of the logger we programmed in section 3. Even if we put that in a directive, we <em>still</em> want to do it the "Angular Way". It <em>still</em> doesn't take any DOM manipulation! There are lots of times when DOM manipulation is necessary, but it's a <em>lot</em> rarer than you think! Before doing DOM manipulation <em>anywhere</em> in your application, ask yourself if you really need to. There might be a better way.</p>
+
+<p>Here's a quick example that shows the pattern I see most frequently. We want a toggleable button. (Note: this example is a little contrived and a skosh verbose to represent more complicated cases that are solved in exactly the same way.)</p>
+
+<pre class="lang-js prettyprint-override"><code>.directive( 'myDirective', function () {
+    return {
+        template: '&lt;a class="btn"&gt;Toggle me!&lt;/a&gt;',
+        link: function ( scope, element, attrs ) {
+            var on = false;
+
+            $(element).click( function () {
+                on = !on;
+                $(element).toggleClass('active', on);
+            });
+        }
+    };
+});
+</code></pre>
+
+<p>There are a few things wrong with this:</p>
+
+<ol>
+<li>First, jQuery was never necessary. There's nothing we did here that needed jQuery at all!</li>
+<li>Second, even if we already have jQuery on our page, there's no reason to use it here; we can simply use <code>angular.element</code> and our component will still work when dropped into a project that doesn't have jQuery.</li>
+<li>Third, even assuming jQuery <em>was</em> required for this directive to work, jqLite (<code>angular.element</code>) will <em>always</em> use jQuery if it was loaded! So we needn't use the <code>$</code> - we can just use <code>angular.element</code>.</li>
+<li>Fourth, closely related to the third, is that jqLite elements needn't be wrapped in <code>$</code> - the <code>element</code> that is passed to the <code>link</code> function would <em>already be</em> a jQuery element! </li>
+<li>And fifth, which we've mentioned in previous sections, why are we mixing template stuff into our logic?</li>
+</ol>
+
+<p>This directive can be rewritten (even for very complicated cases!) much more simply like so:</p>
+
+<pre class="lang-js prettyprint-override"><code>.directive( 'myDirective', function () {
+    return {
+        scope: true,
+        template: '&lt;a class="btn" ng-class="{active: on}" ng-click="toggle()"&gt;Toggle me!&lt;/a&gt;',
+        link: function ( scope, element, attrs ) {
+            scope.on = false;
+
+            scope.toggle = function () {
+                scope.on = !scope.on;
+            };
+        }
+    };
+});
+</code></pre>
+
+<p>Again, the template stuff is in the template, so you (or your users) can easily swap it out for one that meets any style necessary, and the <strong>logic</strong> never had to be touched. Reusability - boom!</p>
+
+<p>And there are still all those other benefits, like testing - it's easy! No matter what's in the template, the directive's internal API is never touched, so refactoring is easy. You can change the template as much as you want without touching the directive. And no matter what you change, your tests still pass.</p>
+
+<p>w00t!</p>
+
+<p>So if directives aren't just collections of jQuery-like functions, what are they? Directives are actually <strong>extensions of HTML</strong>. If HTML doesn't do something you need it to do, you write a directive to do it for you, and then use it just as if it was part of HTML.</p>
+
+<p>Put another way, if AngularJS doesn't do something out of the box, think how the team would accomplish it to fit right in with <code>ngClick</code>, <code>ngClass</code>, et al.</p>
+
+<h1>Summary</h1>
+
+<p>Don't even use jQuery. Don't even include it. It will hold you back. And when you come to a problem that you think you know how to solve in jQuery already, before you reach for the <code>$</code>, try to think about how to do it within the confines the AngularJS. If you don't know, ask! 19 times out of 20, the best way to do it doesn't need jQuery and to try to solve it with jQuery results in more work for you.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="406 votes">406</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/215945/mark-rajcok" rel="noopener">Mark Rajcok</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/14994393" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h2>Imperative → declarative</h2>
+
+<p>In jQuery, <em>selectors</em> are used to find <a href="http://en.wikipedia.org/wiki/Document_Object_Model" rel="nofollow noreferrer">DOM</a> elements and then bind/register event handlers to them. When an event triggers, that (imperative) code executes to update/change the DOM.</p>
+
+<p>In AngularJS, you want to think about <strong>views</strong> rather than DOM elements. Views are (declarative) HTML that contain AngularJS <strong>directives</strong>. Directives set up the event handlers behind the scenes for us and give us dynamic databinding. Selectors are rarely used, so the need for IDs (and some types of classes) is greatly diminished. Views are tied to <strong>models</strong> (via scopes). Views are a projection of the model. Events change models (that is, data, scope properties), and the views that project those models update "automatically."</p>
+
+<p>In AngularJS, think about models, rather than jQuery-selected DOM elements that hold your data. Think about views as projections of those models, rather than registering callbacks to manipulate what the user sees.</p>
+
+<h2>Separation of concerns</h2>
+
+<p>jQuery employs <a href="http://en.wikipedia.org/wiki/Unobtrusive_JavaScript" rel="nofollow noreferrer">unobtrusive JavaScript</a> - behavior (JavaScript) is separated from the structure (HTML).</p>
+
+<p>AngularJS uses <strong>controllers</strong> and directives (each of which can have their own controller, and/or compile and linking functions) to remove behavior from the view/structure (HTML).  Angular also has <strong>services</strong> and <strong>filters</strong> to help separate/organize your application.</p>
+
+<p>See also <a href="https://stackoverflow.com/a/14346528/215945">https://stackoverflow.com/a/14346528/215945</a></p>
+
+<h2>Application design</h2>
+
+<p>One approach to designing an AngularJS application:</p>
+
+<ol>
+<li>Think about your models. Create services or your own JavaScript objects for those models.</li>
+<li>Think about how you want to present your models -- your views. Create HTML templates for each view, using the necessary directives to get dynamic databinding.</li>
+<li>Attach a controller to each view (using ng-view and routing, or ng-controller). Have the controller find/get only whatever model data the view needs to do its job. Make controllers as thin as possible.</li>
+</ol>
+
+<h2>Prototypal inheritance</h2>
+
+<p>You can do a lot with jQuery without knowing about how JavaScript prototypal inheritance works. When developing AngularJS applications, you will avoid some common pitfalls if you have a good understanding of JavaScript inheritance. Recommended reading: <a href="https://stackoverflow.com/questions/14049480/what-are-the-nuances-of-scope-prototypal-prototypical-inheritance-in-angularjs">What are the nuances of scope prototypal / prototypical inheritance in AngularJS?</a></p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="183 votes">183</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/687677/superluminary" rel="noopener">superluminary</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/23606512" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h1>AngularJS vs. jQuery</h1>
+
+<p>AngularJS and jQuery adopt very different ideologies. If you're coming from jQuery you may find some of the differences surprising. Angular may make you angry.</p>
+
+<p>This is normal, you should push through. Angular is worth it.</p>
+
+<h2>The big difference (TLDR)</h2>
+
+<p>jQuery gives you a toolkit for selecting arbitrary bits of the DOM and making ad-hoc changes to them. You can do pretty much anything you like piece by piece.</p>
+
+<p>AngularJS instead gives you a <strong>compiler</strong>.</p>
+
+<p>What this means is that AngularJS reads your entire DOM from top to bottom and treats it as code, literally as instructions to the compiler. As it traverses the DOM, It looks for specific <strong>directives</strong> (compiler directives) that tell the AngularJS compiler how to behave and what to do. Directives are little objects full of JavaScript which can match against attributes, tags, classes or even comments. </p>
+
+<p>When the Angular compiler determines that a piece of the DOM matches a particular directive, it calls the directive function, passing it the DOM element, any attributes, the current $scope (which is a local variable store), and some other useful bits. These attributes may contain expressions which can be interpreted by the Directive, and which tell it how to render, and when it should redraw itself.</p>
+
+<p>Directives can then in turn pull in additional Angular components such as controllers, services, etc. What comes out the bottom of the compiler is a fully formed web application, wired up and ready to go.</p>
+
+<p><strong>This means that Angular is Template Driven</strong>. Your template drives the JavaScript, not the other way around. This is a radical reversal of roles, and the complete opposite of the unobtrusive JavaScript we have been writing for the last 10 years or so. This can take some getting used to.</p>
+
+<p>If this sounds like it might be over-prescriptive and limiting, nothing could be farther from the truth. Because AngularJS treats your HTML as code, you get <strong>HTML level granularity in your web application</strong>. Everything is possible, and most things are surprisingly easy once you make a few conceptual leaps.</p>
+
+<p>Let's get down to the nitty gritty.</p>
+
+<h2>First up, Angular doesn't replace jQuery</h2>
+
+<p>Angular and jQuery do different things. AngularJS gives you a set of tools to produce web applications. jQuery mainly gives you tools for modifying the DOM. If jQuery is present on your page, AngularJS will use it automatically. If it isn't, AngularJS ships with jQuery Lite, which is a cut down, but still perfectly usable version of jQuery.</p>
+
+<p>Misko likes jQuery and doesn't object to you using it. However you will find as you advance that you can get a pretty much all of your work done using a combination of scope, templates and directives, and you should prefer this workflow where possible because your code will be more discrete, more configurable, and more Angular.</p>
+
+<p>If you do use jQuery, you shouldn't be sprinkling it all over the place. The correct place for DOM manipulation in AngularJS is in a directive. More on these later.</p>
+
+<h2>Unobtrusive JavaScript with Selectors vs. Declarative Templates</h2>
+
+<p>jQuery is typically applied unobtrusively. Your JavaScript code is linked in the header (or the footer), and this is the only place it is mentioned. We use selectors to pick out bits of the page and write plugins to modify those parts.</p>
+
+<p>The JavaScript is in control. The HTML has a completely independent existence. Your HTML remains semantic even without JavaScript. Onclick attributes are very bad practice.</p>
+
+<p>One of the first things your will notice about AngularJS is that <strong>custom attributes are everywhere</strong>. Your HTML will be littered with ng attributes, which are essentially onClick attributes on steroids. These are directives (compiler directives), and are one of the main ways in which the template is hooked to the model.</p>
+
+<p>When you first see this you might be tempted to write AngularJS off as old school intrusive JavaScript (like I did at first). In fact, AngularJS does not play by those rules. In AngularJS, your HTML5 is a template. It is compiled by AngularJS to produce your web page.</p>
+
+<p>This is the first big difference. To jQuery, your web page is a DOM to be manipulated. To AngularJS, your HTML is code to be compiled. AngularJS reads in your whole web page and literally compiles it into a new web page using its built in compiler.</p>
+
+<p>Your template should be declarative; its meaning should be clear simply by reading it. We use custom attributes with meaningful names. We make up new HTML elements, again with meaningful names. A designer with minimal HTML knowledge and no coding skill can read your AngularJS template and understand what it is doing. He or she can make modifications. <em>This is the Angular way.</em></p>
+
+<h2>The template is in the driving seat.</h2>
+
+<p>One of the first questions I asked myself when starting AngularJS and running through the tutorials is <strong>"Where is my code?"</strong>. I've written no JavaScript, and yet I have all this behaviour. The answer is obvious. Because AngularJS compiles the DOM, AngularJS is treating your HTML as code. For many simple cases it's often sufficient to just write a template and let AngularJS compile it into an application for you.</p>
+
+<p>Your template drives your application. It's treated as a <a href="http://en.wikipedia.org/wiki/Domain-specific_language" rel="nofollow noreferrer">DSL</a>. You write AngularJS components, and AngularJS will take care of pulling them in and making them available at the right time based on the structure of your template. This is very different to a standard <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller" rel="nofollow noreferrer">MVC</a> pattern, where the template is just for output.</p>
+
+<p>It's more similar to <a href="http://en.wikipedia.org/wiki/XSLT" rel="nofollow noreferrer">XSLT</a> than <a href="http://en.wikipedia.org/wiki/Ruby_on_Rails" rel="nofollow noreferrer">Ruby on Rails</a> for example.</p>
+
+<p>This is a radical inversion of control that takes some getting used to.</p>
+
+<p><strong>Stop trying to drive your application from your JavaScript. Let the template drive the application, and let AngularJS take care of wiring the components together. This also is the Angular way.</strong></p>
+
+<h2>Semantic HTML vs. Semantic Models</h2>
+
+<p>With jQuery your HTML page should contain semantic meaningful content. If the JavaScript is turned off (by a user or search engine) your content remains accessible.</p>
+
+<p>Because AngularJS treats your HTML page as a template. The template is not supposed to be semantic as your content is typically stored in your model which ultimately comes from your API. AngularJS compiles your DOM with the model to produce a semantic web page.</p>
+
+<p><strong>Your HTML source is no longer semantic, instead, your API and compiled DOM are semantic.</strong></p>
+
+<p>In AngularJS, meaning lives in the model, the HTML is just a template, for display only.</p>
+
+<p>At this point you likely have all sorts of questions concerning <a href="http://en.wikipedia.org/wiki/Search_engine_optimization" rel="nofollow noreferrer">SEO</a> and accessibility, and rightly so. There are open issues here. Most screen readers will now parse JavaScript. Search engines can also index <a href="http://en.wikipedia.org/wiki/Ajax_%28programming%29" rel="nofollow noreferrer">AJAXed</a> content. Nevertheless, you will want to make sure you are using pushstate URLs and you have a decent sitemap. See here for a discussion of the issue: <a href="https://stackoverflow.com/a/23245379/687677">https://stackoverflow.com/a/23245379/687677</a></p>
+
+<h2>Separation of concerns (SOC) vs. MVC</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Separation_of_concerns" rel="nofollow noreferrer">Separation of concerns</a> (SOC) is a pattern that grew up over many years of web development for a variety of reasons including SEO, accessibility and browser incompatibility. It looks like this:</p>
+
+<ol>
+<li>HTML - Semantic meaning. The HTML should stand alone.</li>
+<li>CSS - Styling, without the CSS the page is still readable.</li>
+<li>JavaScript - Behaviour, without the script the content remains.</li>
+</ol>
+
+<p>Again, AngularJS does not play by their rules. In a stroke, <strong>AngularJS does away with a decade of received wisdom</strong> and instead implements an MVC pattern in which the template is no longer semantic, not even a little bit.</p>
+
+<p>It looks like this:</p>
+
+<ol>
+<li>Model - your models contains your semantic data. Models are usually <a href="http://en.wikipedia.org/wiki/JSON" rel="nofollow noreferrer">JSON</a> objects. Models exist as attributes of an object called $scope. You can also store handy utility functions on $scope which your templates can then access.</li>
+<li>View - Your views are written in HTML. The view is usually not semantic because your data lives in the model.</li>
+<li>Controller - Your controller is a JavaScript function which hooks the view to the model. Its function is to initialise $scope. Depending on your application, you may or may not need to create a controller. You can have many controllers on a page.</li>
+</ol>
+
+<p>MVC and SOC are not on opposite ends of the same scale, they are on completely different axes. SOC makes no sense in an AngularJS context. You have to forget it and move on.</p>
+
+<p>If, like me, you lived through the browser wars, you might find this idea quite offensive. Get over it, it'll be worth it, I promise.</p>
+
+<h2>Plugins vs. Directives</h2>
+
+<p><strong>Plugins extend jQuery. AngularJS Directives extend the capabilities of your browser.</strong></p>
+
+<p>In jQuery we define plugins by adding functions to the jQuery.prototype. We then hook these into the DOM by selecting elements and calling the plugin on the result. The idea is to extend the capabilities of jQuery.</p>
+
+<p>For example, if you want a carousel on your page, you might define an unordered list of figures, perhaps wrapped in a nav element. You might then write some jQuery to select the list on the page and restyle it as a gallery with timeouts to do the sliding animation.</p>
+
+<p>In AngularJS, we define directives. A directive is a function which returns a JSON object. This object tells AngularJS what DOM elements to look for, and what changes to make to them. Directives are hooked in to the template using either attributes or elements, which you invent. The idea is to extend the capabilities of HTML with new attributes and elements.</p>
+
+<p><em>The AngularJS way is to extend the capabilities of native looking HTML.</em> You should write HTML that looks like HTML, extended with custom attributes and elements.</p>
+
+<p>If you want a carousel, just use a <code>&lt;carousel /&gt;</code> element, then define a directive to pull in a template, and make that sucker work.</p>
+
+<h2>Lots of small directives vs. big plugins with configuration switches</h2>
+
+<p>The tendency with jQuery is to write great big plugins like lightbox which we then configure by passing in numerous values and options.</p>
+
+<p>This is a mistake in AngularJS.</p>
+
+<p>Take the example of a dropdown. When writing a dropdown plugin you might be tempted to code in click handlers, perhaps a function to add in a chevron which is either up or down, perhaps change the class of the unfolded element, show hide the menu, all helpful stuff.</p>
+
+<p>Until you want to make a small change.</p>
+
+<p>Say you have a menu that you want to unfold on hover. Well now we have a problem. Our plugin has wired in our click handler for us, we're going to need to add a configuration option to make it behave differently in this specific case.</p>
+
+<p>In AngularJS we write smaller directives. Our dropdown directive would be ridiculously small. It might maintain the folded state, and provide methods to fold(), unfold() or toggle(). These methods would simply update $scope.menu.visible which is a boolean holding the state.</p>
+
+<p>Now <strong>in our template</strong> we can wire this up:</p>
+
+<pre><code>&lt;a ng-click="toggle()"&gt;Menu&lt;/a&gt;
+&lt;ul ng-show="menu.visible"&gt;
+  ...
+&lt;/ul&gt;
+</code></pre>
+
+<p>Need to update on mouseover?</p>
+
+<pre><code>&lt;a ng-mouseenter="unfold()" ng-mouseleave="fold()"&gt;Menu&lt;/a&gt;
+&lt;ul ng-show="menu.visible"&gt;
+  ...
+&lt;/ul&gt;
+</code></pre>
+
+<p>The template drives the application so we get HTML level granularity. If we want to make case by case exceptions, the template makes this easy.</p>
+
+<h2>Closure vs. $scope</h2>
+
+<p>JQuery plugins are created in a closure. Privacy is maintained within that closure. It's up to you to maintain your scope chain within that closure. You only really have access to the set of DOM nodes passed in to the plugin by jQuery, plus any local variables defined in the closure and any globals you have defined. This means that plugins are quite self contained. This is a good thing, but can get restrictive when creating a whole application. Trying to pass data between sections of a dynamic page becomes a chore.</p>
+
+<p>AngularJS has $scope objects. These are special objects created and maintained by AngularJS in which you store your model. Certain directives will spawn a new $scope, which by default inherits from its wrapping $scope using JavaScript prototypical inheritance. The $scope object is accessible in the controller and the view.</p>
+
+<p>This is the clever part. Because the structure of $scope inheritance roughly follows the structure of the DOM, elements have access to their own scope, and any containing scopes seamlessly, all the way up to the global $scope (which is not the same as the global scope).</p>
+
+<p>This makes it much easier to pass data around, and to store data at an appropriate level. If a dropdown is unfolded, only the dropdown $scope needs to know about it. If the user updates their preferences, you might want to update the global $scope, and any nested scopes listening to the user preferences would automatically be alerted.</p>
+
+<p>This might sound complicated, in fact, once you relax into it, it's like flying. You don't need to create the $scope object, AngularJS instantiates and configures it for you, correctly and appropriately based on your template hierarchy. AngularJS then makes it available to your component using the magic of dependency injection (more on this later).</p>
+
+<h2>Manual DOM changes vs. Data Binding</h2>
+
+<p>In jQuery you make all your DOM changes by hand. You construct new DOM elements programatically. If you have a JSON array and you want to put it to the DOM, you must write a function to generate the HTML and insert it.</p>
+
+<p>In AngularJS you can do this too, but you are encouraged to make use of data binding. Change your model, and because the DOM is bound to it via a template your DOM will automatically update, no intervention required.</p>
+
+<p>Because data binding is done from the template, using either an attribute or the curly brace syntax, it's super easy to do. There's little cognitive overhead associated with it so you'll find yourself doing it all the time.</p>
+
+<pre><code>&lt;input ng-model="user.name" /&gt;
+</code></pre>
+
+<p>Binds the input element to <code>$scope.user.name</code>. Updating the input will update the value in your current scope, and vice-versa.</p>
+
+<p>Likewise:</p>
+
+<pre><code>&lt;p&gt;
+  {{user.name}}
+&lt;/p&gt;
+</code></pre>
+
+<p>will output the user name in a paragraph. It's a live binding, so if the <code>$scope.user.name</code> value is updated, the template will update too.</p>
+
+<h2>Ajax all of the time</h2>
+
+<p>In jQuery making an Ajax call is fairly simple, but it's still something you might think twice about. There's the added complexity to think about, and a fair chunk of script to maintain.</p>
+
+<p>In AngularJS, Ajax is your default go-to solution and it happens all the time, almost without you noticing. You can include templates with ng-include. You can apply a template with the simplest custom directive. You can wrap an Ajax call in a service and create yourself a <a href="http://en.wikipedia.org/wiki/GitHub" rel="nofollow noreferrer">GitHub</a> service, or a <a href="http://en.wikipedia.org/wiki/Flickr" rel="nofollow noreferrer">Flickr</a> service, which you can access with astonishing ease.</p>
+
+<h2>Service Objects vs Helper Functions</h2>
+
+<p>In jQuery, if we want to accomplish a small non-dom related task such as pulling a feed from an API, we might write a little function to do that in our closure. That's a valid solution, but what if we  want to access that feed often? What if we want to reuse that code in another application?</p>
+
+<p>AngularJS gives us service objects.</p>
+
+<p>Services are simple objects that contain functions and data. They are always singletons, meaning there can never be more than one of them. Say we want to access the Stack Overflow API, we might write a <code>StackOverflowService</code> which defines methods for doing so.</p>
+
+<p>Let's say we have a shopping cart. We might define a ShoppingCartService which maintains our cart and contains methods for adding and removing items. Because the service is a singleton, and is shared by all other components, any object that needs to can write to the shopping cart and pull data from it. It's always the same cart.</p>
+
+<p>Service objects are self-contained AngularJS components which we can use and reuse as we see fit. They are simple JSON objects containing functions and Data. They are always singletons, so if you store data on a service in one place, you can get that data out somewhere else just by requesting the same service.</p>
+
+<h2><a href="http://en.wikipedia.org/wiki/Dependency_injection" rel="nofollow noreferrer">Dependency injection</a> (DI) vs. Instatiation - aka de-spaghettification</h2>
+
+<p>AngularJS manages your dependencies for you. If you want an object, simply refer to it and AngularJS will get it for you.</p>
+
+<p>Until you start to use this, it's hard to explain just what a massive time boon this is. Nothing like AngularJS DI exists inside jQuery.</p>
+
+<p>DI means that instead of writing your application and wiring it together, you instead define a library of components, each identified by a string.</p>
+
+<p>Say I have a component called 'FlickrService' which defines methods for pulling JSON feeds from Flickr. Now, if I want to write a controller that can access Flickr, I just need to refer to the 'FlickrService' by name when I declare the controller. AngularJS will take care of instantiating the component and making it available to my controller.</p>
+
+<p>For example, here I define a service:</p>
+
+<pre><code>myApp.service('FlickrService', function() {
+  return {
+    getFeed: function() { // do something here }
+  }
+});
+</code></pre>
+
+<p>Now when I want to use that service I just refer to it by name like this:</p>
+
+<pre><code>myApp.controller('myController', ['FlickrService', function(FlickrService) {
+  FlickrService.getFeed()
+}]);
+</code></pre>
+
+<p>AngularJS will recognise that a FlickrService object is needed to instantiate the controller, and will provide one for us.</p>
+
+<p>This makes wiring things together very easy, and pretty much eliminates any tendency towards spagettification. We have a flat list of components, and AngularJS hands them to us one by one as and when we need them.</p>
+
+<h2>Modular service architecture</h2>
+
+<p>jQuery says very little about how you should organise your code. AngularJS has opinions.</p>
+
+<p>AngularJS gives you modules into which you can place your code. If you're writing a script that talks to Flickr for example, you might want to create a Flickr module to wrap all your Flickr related functions in. Modules can include other modules (DI). Your main application is usually a module, and this should include all the other modules your application will depend on.</p>
+
+<p>You get simple code reuse, if you want to write another application based on Flickr, you can just include the Flickr module and voila, you have access to all your Flickr related functions in your new application.</p>
+
+<p>Modules contain AngularJS components. <strong>When we include a module, all the components in that module become available to us as a simple list identified by their unique strings</strong>. We can then inject those components into each other using AngularJS's dependency injection mechanism.</p>
+
+<h2>To sum up</h2>
+
+<p>AngularJS and jQuery are not enemies. It's possible to use jQuery within AngularJS very nicely. If you're using AngularJS well (templates, data-binding, $scope, directives, etc.) you will find you need a <strong>lot</strong> less jQuery than you might otherwise require.</p>
+
+<p>The main thing to realise is that your template drives your application. Stop trying to write big plugins that do everything. Instead write little directives that do one thing, then write a simple template to wire them together.</p>
+
+<p>Think less about unobtrusive JavaScript, and instead think in terms of HTML extensions.</p>
+
+<h2>My little book</h2>
+
+<p>I got so excited about AngularJS, I wrote a short book on it which you're very welcome to read online <a href="http://nicholasjohnson.com/angular-book/" rel="nofollow noreferrer">http://nicholasjohnson.com/angular-book/</a>. I hope it's helpful.</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaScript check if variable exists (is defined/initialized) · jsdigest</title>
+<meta name="description" content="Which method of checking if a variable has been initialized is better/correct? (Assuming the variable could hold anything (string, int, object, function, etc.)…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>JavaScript check if variable exists (is defined/initialized)</h1>
+    <div class="q-meta big"><span class="score hot" title="2479 votes">2.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/584192/samliew" rel="noopener">samliew</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">function</span><span class="tag">variables</span><span class="tag">initialization</span><span class="tag">undefined</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/5113374/javascript-check-if-variable-exists-is-defined-initialized" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Which method of checking if a variable has been initialized is better/correct?
+(Assuming the variable could hold anything (string, int, object, function, etc.))</p>
+<pre><code>if (elem) { // or !elem
+</code></pre>
+<p>or</p>
+<pre><code>if (typeof elem !== 'undefined') {
+</code></pre>
+<p>or</p>
+<pre><code>if (elem != null) {
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1135 votes">1.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/584192/samliew" rel="noopener">samliew</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/6509422" rel="noopener">原文 ↗</a></div><div class="prose"><p>The <code>typeof</code> operator will check if the variable is really undefined.</p>
+
+<pre><code>if (typeof variable === 'undefined') {
+    // variable is undefined
+}
+</code></pre>
+
+<p>The <code>typeof</code> operator, unlike the other operators, doesn't throw a <em>ReferenceError</em> exception when used with an undeclared variable.</p>
+
+<p>However, do note that <code>typeof null</code> will return <code>"object"</code>. We have to be careful to avoid the mistake of initializing a variable to <code>null</code>. To be safe, this is what we could use instead:</p>
+
+<pre><code>if (typeof variable === 'undefined' || variable === null) {
+    // variable is undefined or null
+}
+</code></pre>
+
+<hr>
+
+<p>For more info on using strict comparison <code>===</code> instead of simple equality <code>==</code>, see:<br><a href="https://stackoverflow.com/q/359494/584192">Which equals operator (== vs ===) should be used in JavaScript comparisons?</a></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="4003 votes">4k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/6010/jim-puls" rel="noopener">Jim Puls</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/519157" rel="noopener">原文 ↗</a></div><div class="prose"><p>You want <a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Operators/Special_Operators/typeof_Operator" rel="noreferrer">the <code>typeof</code> operator</a>. Specifically:</p>
+<pre><code>if (typeof variable !== 'undefined') {
+    // the variable is defined
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="350 votes">350</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/5423108/alireza" rel="noopener">Alireza</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/45994251" rel="noopener">原文 ↗</a></div><div class="prose"><p>In many cases, using:</p>
+
+<pre><code>if (elem) { // or !elem
+</code></pre>
+
+<p>will do the job for you!... this will check these below cases:</p>
+
+<ol>
+<li><strong>undefined</strong>: if the value is not defined and it's <code>undefined</code></li>
+<li><strong>null</strong>: if it's null, for example, if a DOM element not exists...</li>
+<li><strong>empty string</strong>: <code>''</code> </li>
+<li><strong>0</strong>: number zero</li>
+<li><strong>NaN</strong>: not a number</li>
+<li><strong>false</strong></li>
+</ol>
+
+<p>So it will cover off kind of all cases, but there are always weird cases which we'd like to cover as well, for example, a string with spaces, like this <code>'    '</code> one, this will be defined in javascript as it has spaces inside string... for example in this case you add one more check using trim(), like:</p>
+
+<pre><code>if(elem) {
+
+if(typeof elem === 'string' &amp;&amp; elem.trim()) {
+///
+</code></pre>
+
+<p>Also, these checks are for <strong>values</strong> only, as objects and arrays work differently in Javascript, empty array <code>[]</code> and empty object <code>{}</code> are always <strong>true</strong>. </p>
+
+<p>I create the image below to show a quick brief of the answer:</p>
+
+<p><a href="https://i.sstatic.net/UTBcN.png" rel="noreferrer"><img src="https://i.sstatic.net/UTBcN.png" alt="undefined, null, etc"></a></p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

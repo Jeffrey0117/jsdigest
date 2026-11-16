@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to loop through the items of an array in JavaScript? · jsdigest</title>
+<meta name="description" content="In Java, you can use a for loop to traverse objects in an array as follows: String[] myStringArray = {&quot;Hello&quot;, &quot;World&quot;}; for (String s : myStringArray) { // Do…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to loop through the items of an array in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="4097 votes">4.1k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/304725/mark-szymanski" rel="noopener">Mark Szymanski</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">loops</span><span class="tag">for-loop</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/3010840/how-to-loop-through-the-items-of-an-array-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>In Java, you can use a <code>for</code> loop to traverse objects in an array as follows:</p>
+<pre class="lang-java prettyprint-override"><code>String[] myStringArray = {&quot;Hello&quot;, &quot;World&quot;};
+for (String s : myStringArray) {
+    // Do something
+}
+</code></pre>
+<p>Can I do the same in JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5297 votes">5.3k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/5445/christian-c-salvad%c3%b3" rel="noopener">Christian C. Salvad&amp;#243;</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3010848" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Three main options:</p>
+<ol>
+<li><code>for (var i = 0; i &lt; xs.length; i++) { console.log(xs[i]); }</code></li>
+<li><code>xs.forEach((x, i) =&gt; console.log(x));</code></li>
+<li><code>for (const x of xs) { console.log(x); }</code></li>
+</ol>
+<p>Detailed examples are below.</p>
+<hr />
+<h1>1. Sequential <code>for</code> loop:</h1>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var myStringArray = ["Hello","World"];
+var arrayLength = myStringArray.length;
+for (var i = 0; i &lt; arrayLength; i++) {
+    console.log(myStringArray[i]);
+    //Do something
+}</code></pre>
+</div>
+</div>
+</p>
+<p><strong>Pros</strong></p>
+<ul>
+<li>Works on every environment</li>
+<li>You can use <code>break</code> and <code>continue</code> flow control statements</li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul>
+<li>Too verbose</li>
+<li>Imperative</li>
+<li>Easy to have <a href="https://en.wikipedia.org/wiki/Off-by-one_error#Looping_over_arrays" rel="noreferrer">off-by-one errors</a> (sometimes also called a <em>fence post error</em>)</li>
+</ul>
+<h1>2. <code>Array.prototype.forEach</code>:</h1>
+<p>The <a href="https://en.wikipedia.org/wiki/ECMAScript#5th_Edition" rel="noreferrer">ES5</a> specification introduced a lot of beneficial array methods. One of them, the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach" rel="noreferrer"><code>Array.prototype.forEach</code></a>, gave us a concise way to iterate over an array:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const array = ["one", "two", "three"]
+array.forEach(function (item, index) {
+  console.log(item, index);
+});</code></pre>
+</div>
+</div>
+</p>
+<p>Being almost ten years as the time of writing that the ES5 specification was released (Dec. 2009), it has been implemented by nearly all modern engines in the desktop, server, and mobile environments, so it's safe to use them.</p>
+<p>And with the ES6 arrow function syntax, it's even more succinct:</p>
+<pre><code>array.forEach(item =&gt; console.log(item));
+</code></pre>
+<p>Arrow functions are also widely implemented unless you plan to support ancient platforms (e.g., <a href="https://en.wikipedia.org/wiki/Internet_Explorer_11#Internet_Explorer_11" rel="noreferrer">Internet Explorer 11</a>); you are also safe to go.</p>
+<p><strong>Pros</strong></p>
+<ul>
+<li>Very short and succinct.</li>
+<li>Declarative</li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul>
+<li>Cannot use <code>break</code> / <code>continue</code></li>
+</ul>
+<p>Normally, you can replace the need to <code>break</code> out of imperative loops by filtering the array elements before iterating them, for example:</p>
+<pre><code>array.filter(item =&gt; item.condition &lt; 10)
+     .forEach(item =&gt; console.log(item))
+</code></pre>
+<p>Keep in mind if you are iterating an array <em>to build another array from it</em>, you should use <code>map</code>. I've seen this anti-pattern so many times.</p>
+<p><strong>Anti-pattern:</strong></p>
+<pre><code>const numbers = [1,2,3,4,5], doubled = [];
+
+numbers.forEach((n, i) =&gt; { doubled[i] = n * 2 });
+</code></pre>
+<p><strong>Proper use case of <em>map</em>:</strong></p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const numbers = [1,2,3,4,5];
+const doubled = numbers.map(n =&gt; n * 2);
+
+console.log(doubled);</code></pre>
+</div>
+</div>
+</p>
+<p>Also, if you are trying to <em>reduce</em> the array to a value, for example, you want to sum an array of numbers, you should use the <em>reduce</em> method.</p>
+<p><strong>Anti-pattern:</strong></p>
+<pre><code>const numbers = [1,2,3,4,5];
+const sum = 0;
+numbers.forEach(num =&gt; { sum += num });
+</code></pre>
+<p><strong>Proper use of <em>reduce</em>:</strong></p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const numbers = [1,2,3,4,5];
+const sum = numbers.reduce((total, n) =&gt; total + n, 0);
+
+console.log(sum);</code></pre>
+</div>
+</div>
+</p>
+<h1>3. ES6 <code>for-of</code> statement:</h1>
+<p>The <a href="https://en.wikipedia.org/wiki/ECMAScript#6th_Edition_%E2%80%93_ECMAScript_2015" rel="noreferrer">ES6</a> standard introduces the concept of iterable objects and defines a new construct for traversing data, the <code>for...of</code> statement.</p>
+<p>This statement works for any kind of iterable object and also for generators (any object that has a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/iterator" rel="noreferrer"><code>\[Symbol.iterator\]</code></a> property).</p>
+<p>Array objects are by definition built-in iterables in ES6, so you can use this statement on them:</p>
+<pre><code>let colors = ['red', 'green', 'blue'];
+for (const color of colors){
+    console.log(color);
+}
+</code></pre>
+<p><strong>Pros</strong></p>
+<ul>
+<li>It can iterate over a large variety of objects.</li>
+<li>Can use normal flow control statements (<code>break</code> / <code>continue</code>).</li>
+<li>Useful to iterate serially asynchronous values.</li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul>
+<li>If you are targeting older browsers, the transpiled output <a href="https://babeljs.io/repl#?babili=false&amp;browsers=&amp;build=&amp;builtIns=false&amp;spec=false&amp;loose=false&amp;code_lz=GYewTgBAFAxiB2BnALhOAbcETDSTYiAlAN4BQEeS-ApgHSYDms-4RA3GQL5A&amp;debug=false&amp;forceAllTransforms=false&amp;shippedProposals=false&amp;circleciRepo=&amp;evaluate=true&amp;fileSize=false&amp;timeTravel=false&amp;sourceType=module&amp;lineWrap=false&amp;presets=es2015&amp;prettier=false&amp;targets=&amp;version=7.4.4&amp;externalPlugins=" rel="noreferrer">might surprise you</a>.</li>
+</ul>
+<h1>Do not use <code>for...in</code></h1>
+<p>@zipcodeman suggests the use of the <code>for...in</code> statement, but for iterating arrays <code>for-in</code> should be avoided, that statement is meant to <strong>enumerate</strong> object properties.</p>
+<p>It shouldn't be used for array-like objects because:</p>
+<ul>
+<li>The order of iteration is not guaranteed; the array indexes may not be visited in numeric order.</li>
+<li>Inherited properties are also enumerated.</li>
+</ul>
+<p>The second point is that it can give you a lot of problems, for example, if you extend the <code>Array.prototype</code> object to include a method there, that property will also be enumerated.</p>
+<p>For example:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>Array.prototype.foo = "foo!";
+var array = ['a', 'b', 'c'];
+
+for (var i in array) {
+    console.log(array[i]);
+}</code></pre>
+</div>
+</div>
+</p>
+<p>The above code will console log &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, and &quot;foo!&quot;.</p>
+<p>That can be particularly a problem if you use some library that relies heavily on native prototypes augmentation (such as <a href="https://en.wikipedia.org/wiki/MooTools" rel="noreferrer">MooTools</a>).</p>
+<p>The <code>for-in</code> statement, as I said before, is there to <em>enumerate</em> object properties, for example:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var obj = {
+    "a": 1,
+    "b": 2,
+    "c": 3
+};
+
+for (var prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+        // or if (Object.prototype.hasOwnProperty.call(obj,prop)) for safety...
+        console.log("prop: " + prop + " value: " + obj[prop])
+    }
+}</code></pre>
+</div>
+</div>
+</p>
+<p>In the above example, the <code>hasOwnProperty</code> method allows you to enumerate only <em>own properties</em>. That's it, only the properties that the object physically has, no inherited properties.</p>
+<p>I would recommend you to read the following article:</p>
+<ul>
+<li><a href="http://web.archive.org/web/20101213150231/http://dhtmlkitchen.com/?category=/JavaScript/&amp;date=2007/10/21/&amp;entry=Iteration-Enumeration-Primitives-and-Objects" rel="noreferrer">Enumeration VS Iteration</a></li>
+</ul>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1210 votes">1.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/797049/mark-reed" rel="noopener">Mark Reed</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/10167931" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>Yes, assuming your implementation includes the <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-for-in-and-for-of-statements" rel="noreferrer"><code>for</code>...<code>of</code></a> feature introduced in <a href="http://www.ecma-international.org/ecma-262/6.0/" rel="noreferrer">ECMAScript 2015</a> (the &quot;Harmony&quot; release)... which is a pretty safe assumption these days.</p>
+<p>It works like this:</p>
+<pre><code>// REQUIRES ECMASCRIPT 2015+
+var s, myStringArray = [&quot;Hello&quot;, &quot;World&quot;];
+for (s of myStringArray) {
+  // ... do something with s ...
+}
+</code></pre>
+<p>Or better yet, since ECMAScript 2015 also provides block-scoped variables:</p>
+<pre><code>// REQUIRES ECMASCRIPT 2015+
+const myStringArray = [&quot;Hello&quot;, &quot;World&quot;];
+for (const s of myStringArray) {
+  // ... do something with s ...
+}
+// s is no longer defined here
+</code></pre>
+<p>(The variable <code>s</code> is different on each iteration, but can still be declared <code>const</code> inside the loop body as long as it isn't modified there.)</p>
+<p>A note on sparse arrays: an array in JavaScript may not actually store as many items as reported by its <code>length</code>; that number is simply one greater than the highest index at which a value is stored. If the array holds fewer elements than indicated by its length, its said to be <em>sparse</em>. For example, it's perfectly legitimate to have an array with items only at indexes 3, 12, and 247; the <code>length</code> of such an array is 248, though it is only actually storing 3 values.  If you try to access an item at any other index, the array will appear to have the <code>undefined</code> value there, but the array is nonetheless is distinct from one that actually has <code>undefined</code> values stored. You can see this difference in a number of ways, for example in the way the Node REPL displays arrays:</p>
+<pre><code>&gt; a              // array with only one item, at index 12
+[ &lt;12 empty items&gt;, 1 ]
+&gt; a[0]           // appears to have undefined at index 0
+undefined
+&gt; a[0]=undefined // but if we put an actual undefined there
+undefined
+&gt; a              // it now looks like this
+[ undefined, &lt;11 empty items&gt;, 1 ]
+</code></pre>
+<p>So when you want to &quot;loop through&quot; an array, you have a question to answer: do you want to loop over the full range indicated by its length and process <code>undefined</code>s for any missing elements, or do you only want to process the elements actually present? There are plenty of applications for both approaches; it just depends on what you're using the array for.</p>
+<p>If you iterate over an array with <code>for</code>..<code>of</code>, the body of the loop is executed <code>length</code> times, and the loop control variable is set to <code>undefined</code> for any items not actually present in the array. Depending on the details of your &quot;do something with&quot; code, that behavior may be what you want, but if not, you should use a different approach.</p>
+<p>Of course, some developers have no choice but to use a different approach anyway, because for whatever reason they're targeting a version of JavaScript that doesn't yet support <code>for</code>...<code>of</code>.</p>
+<p>As long as your JavaScript implementation is compliant with the <em>previous</em> edition of the ECMAScript specification (which rules out, for example, versions of Internet Explorer before 9), then you can use the <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.foreach" rel="noreferrer"><code>Array#forEach</code></a> iterator method instead of a loop. In that case, you pass a function to be called on each item in the array:</p>
+<pre><code>var myStringArray = [ &quot;Hello&quot;, &quot;World&quot; ];
+myStringArray.forEach( function(s) { 
+     // ... do something with s ...
+} );
+</code></pre>
+<p>You can of course use an arrow function if your implementation supports ES6+:</p>
+<pre><code>myStringArray.forEach( s =&gt; { 
+     // ... do something with s ...
+} );
+</code></pre>
+<p>Unlike <code>for</code>...<code>of</code>, <code>.forEach</code> only calls the function for elements that are actually present in the array. If passed our hypothetical array with three elements and a length of 248, it will only call the function three times, not 248 times. If this is how you want to handle sparse arrays, <code>.forEach</code> may be the way to go even if your interpreter supports <code>for</code>...<code>of</code>.</p>
+<p>The final option, which works in <em>all</em> versions of JavaScript, is <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-for-statement" rel="noreferrer">an explicit counting loop</a>. You simply count from 0 up to one less than the length and use the counter as an index. The basic loop looks like this:</p>
+<pre><code>var i, s, myStringArray = [ &quot;Hello&quot;, &quot;World&quot; ], len = myStringArray.length;
+for (i=0; i&lt;len; ++i) {
+  s = myStringArray[i];
+  // ... do something with s ...
+}
+</code></pre>
+<p>One advantage of this approach is that you can choose how to handle sparse arrays. The above code will run the body of the loop the full <code>length</code> times, with <code>s</code> set to <code>undefined</code> for any missing elements, just like <code>for</code>..<code>of</code>; if you instead want to handle only the actually-present elements of a sparse array, like <code>.forEach</code>, you can add a simple <code>in</code> test on the index:</p>
+<pre><code>var i, s, myStringArray = [ &quot;Hello&quot;, &quot;World&quot; ], len = myStringArray.length;
+for (i=0; i&lt;len; ++i) {
+  if (i in myStringArray) {
+    s = myStringArray[i];
+    // ... do something with s ...
+  }
+}
+</code></pre>
+<p>Depending on your implementation's optimizations, assigning the length value to the local variable (as opposed to including the full <code>myStringArray.length</code> expression in the loop condition) can make a significant difference in performance since it skips a property lookup each time through. You may see the length caching done in the loop initialization clause, like this:</p>
+<pre><code>var i, len, myStringArray = [ &quot;Hello&quot;, &quot;World&quot; ];
+for (len = myStringArray.length, i=0; i&lt;len; ++i) {
+</code></pre>
+<p>The explicit counting loop also means you have access to the index of each value, should you want it. The index is also passed as an extra parameter to the function you pass to <code>forEach</code>, so you can access it that way as well:</p>
+<pre><code>myStringArray.forEach( (s,i) =&gt; {
+   // ... do something with s and i ...
+});
+</code></pre>
+<p><code>for</code>...<code>of</code> doesn't give you the index associated with each object, but as long as the object you're iterating over is actually an instance of <code>Array</code> (and not one of the other iterable types <code>for</code>..<code>of</code> works on), you can use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries" rel="noreferrer">Array#entries</a> method to change it to an array of [index, item] pairs, and then iterate over that:</p>
+<pre><code>for (const [i, s] of myStringArray.entries()) {
+  // ... do something with s and i ...
+}
+</code></pre>
+<p>The <code>for</code>...<code>in</code> syntax mentioned by others is for looping over an object's properties; since an Array in JavaScript is just an object with numeric property names (and an automatically-updated <code>length</code> property), you can theoretically loop over an Array with it.  But the problem is that it doesn't restrict itself to the numeric property values (remember that even methods are actually just properties whose value is a closure), nor is it guaranteed to iterate over those in numeric order. Therefore, the <code>for</code>...<code>in</code> syntax should <em>not</em> be used for looping through Arrays.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="454 votes">454</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/35364/hasen" rel="noopener">hasen</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3010854" rel="noopener">原文 ↗</a></div><div class="prose"><p>You can use <code>map</code>, which is a functional programming technique that's also available in other languages like <a href="http://en.wikipedia.org/wiki/Python_%28programming_language%29" rel="noreferrer">Python</a> and <a href="http://en.wikipedia.org/wiki/Haskell_%28programming_language%29" rel="noreferrer">Haskell</a>.</p>
+
+<pre><code>[1,2,3,4].map( function(item) {
+     alert(item);
+})
+</code></pre>
+
+<p>The general syntax is:</p>
+
+<pre><code>array.map(func)
+</code></pre>
+
+<p>In general <code>func</code> would take one parameter, which is an item of the array. But in the case of JavaScript, it can take a second parameter which is the item's index, and a third parameter which is the array itself.</p>
+
+<p>The return value of <code>array.map</code> is another array, so you can use it like this:</p>
+
+<pre><code>var x = [1,2,3,4].map( function(item) {return item * 10;});
+</code></pre>
+
+<p>And now x is <code>[10,20,30,40]</code>.</p>
+
+<p>You don't have to write the function inline. It could be a separate function.</p>
+
+<pre><code>var item_processor = function(item) {
+      // Do something complicated to an item
+}
+
+new_list = my_list.map(item_processor);
+</code></pre>
+
+<p>which would be sort-of equivalent to:</p>
+
+<pre><code> for (item in my_list) {item_processor(item);}
+</code></pre>
+
+<p>Except you don't get the <code>new_list</code>.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

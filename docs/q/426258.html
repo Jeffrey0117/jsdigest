@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setting &quot;checked&quot; for a checkbox with jQuery · jsdigest</title>
+<meta name="description" content="I&#39;d like to do something like this to tick a checkbox using jQuery : $(&quot;.myCheckBox&quot;).checked(true); or $(&quot;.myCheckBox&quot;).selected(true); Does such a thing exis…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Setting &quot;checked&quot; for a checkbox with jQuery</h1>
+    <div class="q-meta big"><span class="score hot" title="4609 votes">4.6k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/18107/tpower" rel="noopener">tpower</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">checkbox</span><span class="tag">selected</span><span class="tag">checked</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/426258/setting-checked-for-a-checkbox-with-jquery" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'd like to do something like this to tick a <code>checkbox</code> using <strong>jQuery</strong>:</p>
+
+<pre><code>$(".myCheckBox").checked(true);
+</code></pre>
+
+<p>or</p>
+
+<pre><code>$(".myCheckBox").selected(true);
+</code></pre>
+
+<p>Does such a thing exist?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="6460 votes">6.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/4642/xian" rel="noopener">Xian</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/426276" rel="noopener">原文 ↗</a></div><div class="prose"><h2>Modern jQuery</h2>
+
+<p>Use <a href="https://api.jquery.com/prop" rel="noreferrer"><code>.prop()</code></a>:</p>
+
+<pre><code>$('.myCheckbox').prop('checked', true);
+$('.myCheckbox').prop('checked', false);
+</code></pre>
+
+<h2>DOM API</h2>
+
+<p>If you're working with just one element, you can always just access the underlying <a href="https://developer.mozilla.org/en/docs/Web/API/HTMLInputElement" rel="noreferrer"><code>HTMLInputElement</code></a> and modify its <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties_checkbox_radio" rel="noreferrer"><code>.checked</code></a> property:</p>
+
+<pre><code>$('.myCheckbox')[0].checked = true;
+$('.myCheckbox')[0].checked = false;
+</code></pre>
+
+<p>The benefit to using the <code>.prop()</code> and <code>.attr()</code> methods instead of this is that they will operate on all matched elements.</p>
+
+<h2>jQuery 1.5.x and below</h2>
+
+<p>The <code>.prop()</code> method is not available, so you need to use <a href="https://api.jquery.com/attr" rel="noreferrer"><code>.attr()</code></a>.</p>
+
+<pre><code>$('.myCheckbox').attr('checked', true);
+$('.myCheckbox').attr('checked', false);
+</code></pre>
+
+<p>Note that this is <a href="https://github.com/jquery/jquery/blob/1.5.2/test/unit/attributes.js#L157" rel="noreferrer">the approach used by jQuery's unit tests prior to version 1.6</a> and is preferable to using <code>$('.myCheckbox').removeAttr('checked');</code> since the latter will, if the box was initially checked, change the behaviour of a call to <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement.reset" rel="noreferrer"><code>.reset()</code></a> on any form that contains it – a subtle but probably unwelcome behaviour change.</p>
+
+<p>For more context, some incomplete discussion of the changes to the handling of the <code>checked</code> attribute/property in the transition from 1.5.x to 1.6 can be found in the <a href="https://blog.jquery.com/2011/05/03/jquery-16-released/" rel="noreferrer">version 1.6 release notes</a> and the <strong>Attributes vs. Properties</strong> section of the <a href="https://api.jquery.com/prop" rel="noreferrer"><code>.prop()</code> documentation</a>.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="784 votes">784</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/48500/bchhun" rel="noopener">bchhun</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/426277" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use:</p>
+
+<pre><code>$(".myCheckbox").attr('checked', true); // Deprecated
+$(".myCheckbox").prop('checked', true);
+</code></pre>
+
+<p>And if you want to check if a checkbox is checked or not:</p>
+
+<pre><code>$('.myCheckbox').is(':checked');
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="364 votes">364</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/696056/cwharris" rel="noopener">cwharris</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5916151" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>This is the correct way of checking and unchecking checkboxes with jQuery, as it is cross-platform standard, and <em>will</em> allow form reposts.</p>
+<pre><code>$('.myCheckBox').each(function(){ this.checked = true; });
+
+$('.myCheckBox').each(function(){ this.checked = false; });
+</code></pre>
+<p>By doing this, you are using JavaScript standards for checking and unchecking checkboxes, so any browser that properly implements the &quot;checked&quot; property of the checkbox element will run this code flawlessly. This <em>should</em> be all major browsers, but I am unable to test previous to Internet Explorer 9.</p>
+<p><strong>The Problem</strong> (jQuery 1.6):</p>
+<p>Once a user clicks on a checkbox, that checkbox stops responding to the &quot;checked&quot; attribute changes.</p>
+<p>Here is an example of the checkbox attribute failing to do the job after someone has <em>clicked</em> the checkbox (this happens in Chrome).</p>
+<p><strong><a href="http://jsfiddle.net/xixonia/zgcrB/" rel="noreferrer">Fiddle</a></strong></p>
+<p><strong>The Solution:</strong></p>
+<p>By using JavaScript's &quot;checked&quot; property on the <a href="http://en.wikipedia.org/wiki/Document_Object_Model" rel="noreferrer">DOM</a> elements, we are able to solve the problem directly, instead of trying to manipulate the DOM into doing what we <em>want</em> it to do.</p>
+<p><a href="http://jsfiddle.net/xixonia/WnbNC/" rel="noreferrer"><strong>Fiddle</strong></a></p>
+<p>This plugin will alter the checked property of any elements selected by jQuery, and successfully check and uncheck checkboxes under all circumstances. So, while this may seem like an over-bearing solution, it will make your site's user experience better, and help prevent user frustration.</p>
+<pre><code>(function( $ ) {
+    $.fn.checked = function(value) {
+        if(value === true || value === false) {
+            // Set the value of the checkbox
+            $(this).each(function(){ this.checked = value; });
+        } 
+        else if(value === undefined || value === 'toggle') {
+            // Toggle the checkbox
+            $(this).each(function(){ this.checked = !this.checked; });
+        }
+
+        return this;
+    };
+})( jQuery );
+</code></pre>
+<p>Alternatively, if you do not want to use a plugin, you can use the following code snippets:</p>
+<pre><code>// Check
+$(':checkbox').prop('checked', true);
+
+// Un-check
+$(':checkbox').prop('checked', false);
+
+// Toggle
+$(':checkbox').prop('checked', function (i, value) {
+    return !value;
+});
+</code></pre>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

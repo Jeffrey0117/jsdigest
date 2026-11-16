@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>event.preventDefault() vs. return false · jsdigest</title>
+<meta name="description" content="When I want to prevent other event handlers from executing after a certain event is fired, I can use one of two techniques. I&#39;ll use jQuery in the examples, bu…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>event.preventDefault() vs. return false</h1>
+    <div class="q-meta big"><span class="score hot" title="3270 votes">3.3k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/137467/rayell" rel="noopener">RaYell</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">event-handling</span><span class="tag">dom-events</span><span class="tag">event-propagation</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1357118/event-preventdefault-vs-return-false" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>When I want to prevent other event handlers from executing after a certain event is fired, I can use one of two techniques. I'll use jQuery in the examples, but this applies to plain-JS as well:</p>
+
+<h3>1. <code>event.preventDefault()</code></h3>
+
+<pre><code>$('a').click(function (e) {
+    // custom handling here
+    e.preventDefault();
+});
+</code></pre>
+
+<h3>2. <code>return false</code></h3>
+
+<pre><code>$('a').click(function () {
+    // custom handling here
+    return false;
+});
+</code></pre>
+
+<p>Is there any significant difference between those two methods of stopping event propagation?</p>
+
+<p>For me, <code>return false;</code> is simpler, shorter and probably less error prone than executing a method. With the method, you have to remember about correct casing, parenthesis, etc. </p>
+
+<p>Also, I have to define the first parameter in callback to be able to call the method. Perhaps, there are some reasons why I should avoid doing it like this and use <code>preventDefault</code> instead? What's the better way?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2985 votes">3k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/70393/karim79" rel="noopener">karim79</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1357151" rel="noopener">原文 ↗</a></div><div class="prose"><p><code>return false</code> from <em>within a jQuery event handler</em> is effectively the same as calling both  <code>e.preventDefault</code> and <code>e.stopPropagation</code> on the passed <a href="http://api.jquery.com/category/events/event-object/" rel="noreferrer">jQuery.Event object.</a></p>
+
+<p><code>e.preventDefault()</code> will prevent the default event from occuring, <code>e.stopPropagation()</code> will prevent the event from bubbling up and <code>return false</code> will do both. Note that this behaviour differs from <em>normal</em> (non-jQuery) event handlers, in which, notably, <code>return false</code> does <em>not</em> stop the event from bubbling up.</p>
+
+<p>Source: <a href="http://ejohn.org/" rel="noreferrer">John Resig</a></p>
+
+<p><a href="http://www.mail-archive.com/jquery-en@googlegroups.com/msg71371.html" rel="noreferrer"><strong>Any benefit to using event.preventDefault() over "return false" to cancel out an href click?</strong></a></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="456 votes">456</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/490006/jeff-poulton" rel="noopener">Jeff Poulton</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4771084" rel="noopener">原文 ↗</a></div><div class="prose"><p>From my experience, there is at least one clear advantage when using event.preventDefault() over using return false. Suppose you are capturing the click event on an anchor tag, otherwise which it would be a big problem if the user were to be navigated away from the current page. If your click handler uses return false to prevent browser navigation, it opens the possibility that the interpreter will not reach the return statement and the browser will proceed to execute the anchor tag's default behavior.</p>
+
+<pre><code>$('a').click(function (e) {
+  // custom handling here
+
+  // oops...runtime error...where oh where will the href take me?
+
+  return false;
+});
+</code></pre>
+
+<p>The benefit to using event.preventDefault() is that you can add this as the first line in the handler, thereby guaranteeing that the anchor's default behavior will not fire, regardless if the last line of the function is not reached (eg. runtime error).</p>
+
+<pre><code>$('a').click(function (e) {
+  e.preventDefault();
+
+  // custom handling here
+
+  // oops...runtime error, but at least the user isn't navigated away.
+});
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="116 votes">116</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/261439/garrett" rel="noopener">Garrett</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3081018" rel="noopener">原文 ↗</a></div><div class="prose"><p>This is not, as you've titled it, a &quot;JavaScript&quot; question; it is a question regarding the design of jQuery.</p>
+<p>jQuery and the <a href="http://www.mail-archive.com/jquery-en@googlegroups.com/msg71371.html" rel="noreferrer">previously linked citation</a> from <a href="http://ejohn.org" rel="noreferrer">John Resig</a> (in <a href="https://stackoverflow.com/users/70393">karim79's</a> <a href="https://stackoverflow.com/questions/1357118/#1357151">message</a>) seem to be the source misunderstanding of how event handlers in general work.</p>
+<p>Fact: An event handler that returns false prevents the default action for that event. It does not stop the event propagation. Event handlers have always worked this way, since the old days of Netscape Navigator.</p>
+<p>Event handler content attributes and event handler IDL attributes that returns false prevents the default action for that event handler.</p>
+<p>What happens in jQuery is not the same as what happens with event handlers. DOM event listeners and MSIE &quot;attached&quot; events are a different matter altogether.</p>
+<p>For further reading, see the[ [W3C DOM 2 Events documentation]][1].</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

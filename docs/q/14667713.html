@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to convert a string to number in TypeScript? · jsdigest</title>
+<meta name="description" content="Given a string representation of a number, how can I convert it to number type in TypeScript? var numberString: string = &quot;1234&quot;; var numberValue: number = /* w…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to convert a string to number in TypeScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="1708 votes">1.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1627079/paul0515" rel="noopener">Paul0515</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">typescript</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/14667713/how-to-convert-a-string-to-number-in-typescript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Given a string representation of a number, how can I convert it to <code>number</code> type in TypeScript?</p>
+
+<pre><code>var numberString: string = "1234";
+var numberValue: number = /* what should I do with `numberString`? */;
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="2504 votes">2.5k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1704166/ryan-cavanaugh" rel="noopener">Ryan Cavanaugh</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/14668510" rel="noopener">原文 ↗</a></div><div class="prose"><p><a href="https://stackoverflow.com/questions/1133770/convert-a-string-to-an-integer">Exactly like</a> <a href="https://stackoverflow.com/questions/17106681/parseint-vs-unary-plus-when-to-use-which/17106702#17106702">in JavaScript</a>, you can use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt" rel="noreferrer"><code>parseInt</code></a> or <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseFloat" rel="noreferrer"><code>parseFloat</code></a> functions, or simply use the unary <code>+</code> operator:</p>
+
+<pre><code>var x = "32";
+var y: number = +x;
+</code></pre>
+
+<p>All of the mentioned techniques will have correct typing and will correctly parse simple decimal integer strings like <code>"123"</code>, but will behave differently for various other, possibly expected, cases (like <code>"123.45"</code>) and corner cases (like <code>null</code>).</p>
+
+<p><a href="https://i.sstatic.net/QNMfI.png" rel="noreferrer"><img src="https://i.sstatic.net/QNMfI.png" alt="Conversion table"></a>
+Table taken from  <a href="https://stackoverflow.com/a/17106702/1483676">this answer</a></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1670 votes">1.7k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2083492/philip" rel="noopener">Philip</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/36134133" rel="noopener">原文 ↗</a></div><div class="prose"><p>The TypeScript way to do this would be:</p>
+<pre><code>Number('1234') // 1234
+Number('9BX9') // NaN
+</code></pre>
+<p>as answered here: <a href="https://stackoverflow.com/a/23440948/2083492">https://stackoverflow.com/a/23440948/2083492</a></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="156 votes">156</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/3779853/phil294" rel="noopener">phil294</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/42122654" rel="noopener">原文 ↗</a></div><div class="prose"><p>For our fellow Angular users:</p>
+
+<p>Within a <strong>template</strong>, <code>Number(x)</code> and <code>parseInt(x)</code> throws an error, and <code>+x</code> has no effect. Valid casting will be <code>x*1</code> or <code>x/1</code>.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open a URL in a new tab (and not a new window) · jsdigest</title>
+<meta name="description" content="I&#39;m trying to open a URL in a new tab, as opposed to a popup window. I&#39;ve seen related questions where the responses would look something like: window.open(url…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Open a URL in a new tab (and not a new window)</h1>
+    <div class="q-meta big"><span class="score hot" title="2952 votes">3k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/137100/mark" rel="noopener">Mark</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">tabs</span><span class="tag">href</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/4907843/open-a-url-in-a-new-tab-and-not-a-new-window" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm trying to open a <a href="https://en.wikipedia.org/wiki/URL" rel="noreferrer">URL</a> in a new tab, as opposed to a popup window.</p>
+
+<p>I've seen related questions where the responses would look something like:</p>
+
+<pre><code>window.open(url,'_blank');
+window.open(url);
+</code></pre>
+
+<p>But none of them worked for me, the browser still tried to open a popup window.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1145 votes">1.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/19068/quentin" rel="noopener">Quentin</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/4907854" rel="noopener">原文 ↗</a></div><div class="prose"><p>Nothing an author can do can choose to open in a new tab instead of a new window; it is a <em>user preference</em>. (Note that the default user preference in most browsers is for new tabs, so a trivial test on a browser where that preference hasn't been changed will not demonstrate this.)</p>
+<p>CSS3 proposed <a href="https://www.w3.org/TR/2004/WD-css3-hyperlinks-20040224/#target-new" rel="noreferrer">target-new</a>, but <a href="https://www.w3.org/TR/2014/NOTE-css3-hyperlinks-20141014/" rel="noreferrer">the specification was abandoned</a>.</p>
+<p><a href="https://stackoverflow.com/a/64718494/19068">The <strong>reverse</strong> is not true</a>; by specifying certain window features for the window in the third argument of <code>window.open()</code>, you can trigger a new window when the preference is for tabs.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="2684 votes">2.7k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/510754/duke" rel="noopener">Duke</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/11384018" rel="noopener">原文 ↗</a></div><div class="prose"><p>This is a trick,</p>
+<pre class="lang-javascript prettyprint-override"><code>function openInNewTab(url) {
+  window.open(url, '_blank').focus();
+}
+
+// Or just
+window.open(url, '_blank').focus();
+</code></pre>
+<p>In most cases, this should happen directly in the <code>onclick</code> handler for the link to prevent pop-up blockers, and the default &quot;new window&quot; behavior. You could do it this way, or by adding an event listener to your <code>DOM</code> object.</p>
+<pre class="lang-html prettyprint-override"><code>&lt;div To Click On&lt;/div&gt;
+</code></pre>
+<p>Reference: <em><a href="http://www.tutsplanet.com/open-url-new-tab-using-javascript/" rel="noreferrer">Open a URL in a new tab using JavaScript</a></em></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="449 votes">449</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1504589/venkat-kotra" rel="noopener">Venkat Kotra</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/13158856" rel="noopener">原文 ↗</a></div><div class="prose"><p><code>window.open()</code> will not open in a new tab if it is not happening on the actual click event. In the example given the URL is being opened on the actual click event. <strong>This will work provided the user has appropriate settings in the browser</strong>.</p>
+<pre><code>&lt;a class=&quot;link&quot;&gt;Link&lt;/a&gt;
+&lt;script  type=&quot;text/javascript&quot;&gt;
+     $(&quot;a.link&quot;).on(&quot;click&quot;,function(){
+         window.open('www.yourdomain.com','_blank');
+     });
+&lt;/script&gt;
+</code></pre>
+<p>Similarly, if you are trying to do an Ajax call within the click function and want to open a window on success, ensure you are doing the Ajax call with the <code>async : false</code> option set.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

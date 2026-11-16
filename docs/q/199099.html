@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to manage a redirect request after a jQuery Ajax call · jsdigest</title>
+<meta name="description" content="I&#39;m using $.post() to call a servlet using Ajax and then using the resulting HTML fragment to replace a div element in the user&#39;s current page. However, if the…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How to manage a redirect request after a jQuery Ajax call</h1>
+    <div class="q-meta big"><span class="score hot" title="1541 votes">1.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/2024/elliot-vargas" rel="noopener">Elliot Vargas</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">jquery</span><span class="tag">ajax</span><span class="tag">http-redirect</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/199099/how-to-manage-a-redirect-request-after-a-jquery-ajax-call" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I'm using <code>$.post()</code> to call a servlet using Ajax and then using the resulting HTML fragment to replace a <code>div</code> element in the user's current page. However, if the session times out, the server sends a redirect directive to send the user to the login page. In this case, jQuery is replacing the <code>div</code> element with the contents of the login page, forcing the user's eyes to witness a rare scene indeed. </p>
+
+<p>How can I manage a redirect directive from an Ajax call with jQuery 1.2.6?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score" title="106 votes">106</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2024/elliot-vargas" rel="noopener">Elliot Vargas</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/484541" rel="noopener">原文 ↗</a></div><div class="prose"><p>The solution that was eventually implemented was to use a wrapper for the callback function of the Ajax call and in this wrapper check for the existence of a specific element on the returned HTML chunk. If the element was found then the wrapper executed a redirection. If not, the wrapper forwarded the call to the actual callback function. </p>
+
+<p>For example, our wrapper function was something like:</p>
+
+<pre><code>function cbWrapper(data, funct){
+    if($("#myForm", data).length &gt; 0)
+        top.location.href="login.htm";//redirection
+    else
+        funct(data);
+}
+</code></pre>
+
+<p>Then, when making the Ajax call we used something like:</p>
+
+<pre><code>$.post("myAjaxHandler", 
+       {
+        param1: foo,
+        param2: bar
+       },
+       function(data){
+           cbWrapper(data, myActualCB);
+       }, 
+       "html"
+);
+</code></pre>
+
+<p>This worked for us because all Ajax calls always returned HTML inside a DIV element that we use to replace a piece of the page. Also, we only needed to redirect to the login page.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="767 votes">767</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/121872/steg" rel="noopener">Steg</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1534662" rel="noopener">原文 ↗</a></div><div class="prose"><p>I read this question and implemented the approach that has been stated regarding setting the response <em>HTTP status code</em> to 278 in order to avoid the browser transparently handling the redirects. Even though this worked, I was a little dissatisfied as it is a bit of a hack.</p>
+
+<p>After more digging around, I ditched this approach and used <a href="http://en.wikipedia.org/wiki/JSON" rel="noreferrer">JSON</a>. In this case, all responses to AJAX requests have the <em>status code</em> 200 and the body of the response contains a JSON object that is constructed on the server. The JavaScript on the client can then use the JSON object to decide what it needs to do.</p>
+
+<p>I had a similar problem to yours. I perform an AJAX request that has 2 possible responses: one that <em>redirects</em> the browser to a new page and one that <em>replaces</em> an existing HTML form on the current page with a new one. The jQuery code to do this looks something like:</p>
+
+<pre><code>$.ajax({
+    type: "POST",
+    url: reqUrl,
+    data: reqBody,
+    dataType: "json",
+    success: function(data, textStatus) {
+        if (data.redirect) {
+            // data.redirect contains the string URL to redirect to
+            window.location.href = data.redirect;
+        } else {
+            // data.form contains the HTML for the replacement form
+            $("#myform").replaceWith(data.form);
+        }
+    }
+});
+</code></pre>
+
+<p>The JSON object "data" is constructed on the server to have 2 members: <code>data.redirect</code> and <code>data.form</code>. I found this approach to be much better.</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="270 votes">270</span>
+    <span class="a-by">by SuperG</span>
+    <a class="a-src" href="https://stackoverflow.com/a/579895" rel="noopener">原文 ↗</a></div><div class="prose"><p>I solved this issue by:</p>
+
+<ol>
+<li><p>Adding a custom header to the response:</p>
+
+<pre><code>public ActionResult Index(){
+    if (!HttpContext.User.Identity.IsAuthenticated)
+    {
+        HttpContext.Response.AddHeader("REQUIRES_AUTH","1");
+    }
+    return View();
+}
+</code></pre></li>
+<li><p>Binding a JavaScript function to the <a href="http://api.jquery.com/ajaxsuccess/" rel="noreferrer"><code>ajaxSuccess</code></a> event and checking to see if the header exists:</p>
+
+<pre><code>$(document).ajaxSuccess(function(event, request, settings) {
+    if (request.getResponseHeader('REQUIRES_AUTH') === '1') {
+       window.location = '/';
+    }
+});
+</code></pre></li>
+</ol>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generate a string of random characters · jsdigest</title>
+<meta name="description" content="I want a string of fixed length, composed of characters picked randomly from a set of characters e.g. [a-zA-Z0-9] . How can I do this with JavaScript?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Generate a string of random characters</h1>
+    <div class="q-meta big"><span class="score hot" title="2915 votes">2.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/25068/tom-lehman" rel="noopener">Tom Lehman</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">string</span><span class="tag">random</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1349404/generate-a-string-of-random-characters" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I want a string of fixed length, composed of characters picked randomly from a set of characters e.g. <code>[a-zA-Z0-9]</code>.</p>
+<p>How can I do this with JavaScript?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3770 votes">3.8k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/164392/csharptest-net" rel="noopener">csharptest.net</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1349426" rel="noopener">原文 ↗</a></div><div class="prose"><p>I think this will work for you:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false" data-babel-preset-react="false" data-babel-preset-ts="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i &lt; length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+console.log(makeid(5));</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="3234 votes">3.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1040319/doubletap" rel="noopener">doubletap</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/8084248" rel="noopener">原文 ↗</a></div><div class="prose"><p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>//Can change 7 to 2 for longer results.
+let r = (Math.random() + 1).toString(36).substring(7);
+console.log("random", r);</code></pre>
+</div>
+</div>
+</p>
+<p>Note: The above algorithm has the following weaknesses:</p>
+<ul>
+<li>It will generate anywhere between 0 and 6 characters due to the fact that trailing zeros get removed when stringifying floating points.</li>
+<li>It depends deeply on the algorithm used to stringify floating point numbers, which is horrifically complex. (See the paper <a href="https://lists.nongnu.org/archive/html/gcl-devel/2012-10/pdfkieTlklRzN.pdf" rel="noreferrer">&quot;How to Print Floating-Point Numbers Accurately&quot;</a>.)</li>
+<li><code>Math.random()</code> may produce predictable (&quot;random-looking&quot; but not really random) output depending on the implementation. The resulting string is not suitable when you need to guarantee uniqueness or unpredictability.</li>
+<li>Even if it produced 6 uniformly random, unpredictable characters, you can expect to see a duplicate after generating only about 50,000 strings, due to the <a href="https://en.wikipedia.org/wiki/Birthday_problem" rel="noreferrer">birthday paradox</a>. (sqrt(36^6) = 46656)</li>
+</ul>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="996 votes">996</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/633183/1hko" rel="noopener">1hko</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/27747377" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><a href="https://stackoverflow.com/a/14869745/633183"><strong>Math.random</strong> is bad for this kind of thing</a></p>
+<p><strong>server side (node, bun)</strong></p>
+<p>Use node <a href="http://nodejs.org/api/crypto.html" rel="noreferrer">crypto</a> module -</p>
+<p>esm -</p>
+<pre class="lang-js prettyprint-override"><code>import * as crypto from &quot;node:crypto&quot;;
+const id = crypto.randomBytes(20).toString('hex');
+
+console.log(id)
+// &quot;bb5dc8842ca31d4603d6aa11448d1654&quot;
+</code></pre>
+<p>or cjs -</p>
+<pre class="lang-js prettyprint-override"><code>const crypto = require(&quot;crypto&quot;);
+const id = crypto.randomBytes(20).toString('hex');
+
+console.log(id)
+// &quot;bb5dc8842ca31d4603d6aa11448d1654&quot;
+</code></pre>
+<p>The resulting string will be twice as long as the random bytes you generate; each byte encoded to hex is 2 characters. 20 bytes will be 40 characters of hex.</p>
+<hr />
+<p><strong>client side (browser)</strong></p>
+<p>Use the browser's <a href="https://developer.mozilla.org/en-US/docs/Web/API/Crypto" rel="noreferrer">crypto</a> module -</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>const id = window.crypto.randomUUID()
+console.log(id)
+// bd4d099b-3d39-4aad-a59c-c45dfac8eaf0</code></pre>
+</div>
+</div>
+</p>
+<p>Or <a href="https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues" rel="noreferrer">crypto.getRandomValues</a> -</p>
+<blockquote>
+<p>The <code>crypto.getRandomValues()</code> method lets you get cryptographically strong random values. The array given as the parameter is filled with random numbers (random in its cryptographic meaning).</p>
+</blockquote>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>// dec2hex :: Integer -&gt; String
+// i.e. 0-255 -&gt; '00'-'ff'
+function dec2hex (dec) {
+  return dec.toString(16).padStart(2, "0")
+}
+
+// generateId :: Integer -&gt; String
+function generateId (len) {
+  var arr = new Uint8Array((len || 40) / 2)
+  window.crypto.getRandomValues(arr)
+  return Array.from(arr, dec2hex).join('')
+}
+
+console.log(generateId())
+// "82defcf324571e70b0521d79cce2bf3fffccd69"
+
+console.log(generateId(20))
+// "c1a050a4cd1556948d41"</code></pre>
+</div>
+</div>
+</p>
+<p>A step-by-step console example -</p>
+<pre><code>&gt; var arr = new Uint8Array(4) # make array of 4 bytes (values 0-255)
+&gt; arr
+Uint8Array(4) [ 0, 0, 0, 0 ]
+
+&gt; window.crypto
+Crypto { subtle: SubtleCrypto }
+
+&gt; window.crypto.getRandomValues()
+TypeError: Crypto.getRandomValues requires at least 1 argument, but only 0 were passed
+
+&gt; window.crypto.getRandomValues(arr)
+Uint8Array(4) [ 235, 229, 94, 228 ]
+</code></pre>
+<p>For IE11 support you can use -</p>
+<pre><code>(window.crypto || window.msCrypto).getRandomValues(arr)
+</code></pre>
+<p>For browser coverage see <a href="https://caniuse.com/#feat=getrandomvalues" rel="noreferrer">https://caniuse.com/#feat=getrandomvalues</a></p>
+<hr />
+<p><strong>client side (old browsers)</strong></p>
+<p>If you must support old browsers, consider something like <code>uuid</code> -</p>
+<pre class="lang-js prettyprint-override"><code>const uuid = require(&quot;uuid&quot;);
+const id = uuid.v4();
+
+// &quot;110ec58a-a0f2-4ac4-8393-c866d813b8d1&quot;
+</code></pre>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get a random item from a JavaScript array · jsdigest</title>
+<meta name="description" content="var items = Array(523, 3452, 334, 31, ..., 5346); How do I get random item from items ?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>Get a random item from a JavaScript array</h1>
+    <div class="q-meta big"><span class="score hot" title="1537 votes">1.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/398431/james" rel="noopener">James</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">random</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/5915096/get-a-random-item-from-a-javascript-array" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><pre><code>var items = Array(523, 3452, 334, 31, ..., 5346);
+</code></pre>
+<p>How do I get random item from <code>items</code>?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="3163 votes">3.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/585105/kelly" rel="noopener">Kelly</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5915122" rel="noopener">原文 ↗</a></div><div class="prose"><pre><code>var item = items[Math.floor(Math.random()*items.length)];
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="167 votes">167</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/254915/dino-reic" rel="noopener">Dino Reic</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/24137301" rel="noopener">原文 ↗</a></div><div class="prose"><p><strong>1. solution: define Array prototype</strong></p>
+<pre class="lang-js prettyprint-override"><code>Array.prototype.random = function () {
+  return this[Math.floor((Math.random()*this.length))];
+}
+</code></pre>
+<p>that will work on inline arrays</p>
+<pre class="lang-js prettyprint-override"><code>[2,3,5].random()
+</code></pre>
+<p>and of course predefined arrays</p>
+<pre class="lang-js prettyprint-override"><code>var list = [2,3,5]
+list.random()
+</code></pre>
+<p><strong>2. solution: define custom function that accepts list and returns element</strong></p>
+<pre class="lang-js prettyprint-override"><code>function get_random (list) {
+  return list[Math.floor((Math.random()*list.length))];
+}
+
+
+get_random([2,3,5])
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="134 votes">134</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/673282/chim" rel="noopener">chim</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/13526946" rel="noopener">原文 ↗</a></div><div class="prose"><p>Use underscore (or loDash :)):</p>
+
+<pre><code>var randomArray = [
+   '#cc0000','#00cc00', '#0000cc'
+];
+
+// use _.sample
+var randomElement = _.sample(randomArray);
+
+// manually use _.random
+var randomElement = randomArray[_.random(randomArray.length-1)];
+</code></pre>
+
+<p>Or to shuffle an entire array:</p>
+
+<pre><code>// use underscore's shuffle function
+var firstRandomElement = _.shuffle(randomArray)[0];
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

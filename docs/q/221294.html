@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I get a timestamp in JavaScript? · jsdigest</title>
+<meta name="description" content="I want a single number that represents the current date and time, like a Unix timestamp .">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I get a timestamp in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="4937 votes">4.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/6068/pablo-fernandez" rel="noopener">Pablo Fernandez</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">datetime</span><span class="tag">timestamp</span><span class="tag">date-arithmetic</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/221294/how-do-i-get-a-timestamp-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>I want a single number that represents the current date and time, like a <a href="https://en.wikipedia.org/wiki/Unix_time" rel="noreferrer">Unix timestamp</a>.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="6190 votes">6.2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/11858/daveb" rel="noopener">daveb</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/221297" rel="noopener">原文 ↗</a></div><div class="prose"><h3>Timestamp in milliseconds</h3>
+<p>To get the number of milliseconds since <a href="https://en.wikipedia.org/wiki/Unix_time" rel="noreferrer">Unix epoch</a>, call <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now" rel="noreferrer"><code>Date.now</code></a>:</p>
+<pre><code>Date.now()
+</code></pre>
+<p>Alternatively, use the unary operator <code>+</code> to call <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/valueOf" rel="noreferrer"><code>Date.prototype.valueOf</code></a>:</p>
+<pre><code>+ new Date()
+</code></pre>
+<p>Alternatively, call <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/valueOf" rel="noreferrer"><code>valueOf</code></a> directly:</p>
+<pre><code>new Date().valueOf()
+</code></pre>
+<p>To support IE8 and earlier (see <a href="http://kangax.github.io/compat-table/es5/#Date.now" rel="noreferrer">compatibility table</a>), create a <em>shim</em> for <code>Date.now</code>:</p>
+<pre><code>if (!Date.now) {
+    Date.now = function() { return new Date().getTime(); }
+}
+</code></pre>
+<p>Alternatively, call <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime" rel="noreferrer"><code>getTime</code></a> directly:</p>
+<pre><code>new Date().getTime()
+</code></pre>
+<hr />
+<h3>Timestamp in seconds</h3>
+<p>To get the number of seconds since <a href="https://en.wikipedia.org/wiki/Unix_time" rel="noreferrer">Unix epoch</a>, i.e. <em>Unix timestamp</em>:</p>
+<pre><code>Math.floor(Date.now() / 1000)
+</code></pre>
+<p>Alternatively, using bitwise-or to floor is slightly faster, but also less readable and may break in the future (see explanations <a href="https://stackoverflow.com/questions/7487977/using-bitwise-or-0-to-floor-a-number">1</a>, <a href="https://stackoverflow.com/a/11446757/1519836">2</a>):</p>
+<pre><code>Date.now() / 1000 | 0
+</code></pre>
+<hr />
+<h3>Timestamp in milliseconds (higher resolution)</h3>
+<p>Use <a href="https://developer.mozilla.org/en-US/docs/Web/API/Performance/now" rel="noreferrer"><code>performance.now</code></a>:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>var isPerformanceSupported = (
+    window.performance &amp;&amp;
+    window.performance.now &amp;&amp;
+    window.performance.timing &amp;&amp;
+    window.performance.timing.navigationStart
+);
+
+var timeStampInMs = (
+    isPerformanceSupported ?
+    window.performance.now() +
+    window.performance.timing.navigationStart :
+    Date.now()
+);
+
+console.log(timeStampInMs, Date.now());</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="642 votes">642</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/47604/xer0x" rel="noopener">xer0x</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5036460" rel="noopener">原文 ↗</a></div><div class="prose"><p>I like this, because it is small:</p>
+
+<pre><code>+new Date
+</code></pre>
+
+<p>I also like this, because it is just as short and is compatible with modern browsers, and over 500 people voted that it is better: </p>
+
+<pre><code>Date.now()
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="323 votes">323</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/288644/daith%c3%ad" rel="noopener">Daith&amp;#237;</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5971324" rel="noopener">原文 ↗</a></div><div class="prose"><p>JavaScript works with the number of milliseconds since the epoch whereas most other languages work with the seconds. You could work with milliseconds but as soon as you pass a value to say PHP, the PHP native functions will probably fail. So to be sure I always use the seconds, not milliseconds.</p>
+
+<p>This will give you a Unix timestamp (in seconds):</p>
+
+<pre><code>var unix = Math.round(+new Date()/1000);
+</code></pre>
+
+<p>This will give you the milliseconds since the epoch (not Unix timestamp):</p>
+
+<pre><code>var milliseconds = new Date().getTime();
+</code></pre>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

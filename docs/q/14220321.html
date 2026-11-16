@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I return the response from an asynchronous call? · jsdigest</title>
+<meta name="description" content="How do I return the response/result from a function foo that makes an asynchronous request? I am trying to return the value from the callback, as well as assig…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I return the response from an asynchronous call?</h1>
+    <div class="q-meta big"><span class="score hot" title="6744 votes">6.7k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/218196/felix-kling" rel="noopener">Felix Kling</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">ajax</span><span class="tag">asynchronous</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/14220321/how-do-i-return-the-response-from-an-asynchronous-call" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>How do I return the response/result from a function <code>foo</code> that makes an asynchronous request?</p>
+<p>I am trying to return the value from the callback, as well as assigning the result to a local variable inside the function and returning that one, but none of those ways actually return the response — they all return <code>undefined</code> or whatever the initial value of the variable <code>result</code> is.</p>
+<p><strong>Example of an asynchronous function that accepts a callback</strong> (using jQuery's <code>ajax</code> function):</p>
+<pre><code>function foo() {
+    var result;
+
+    $.ajax({
+        url: '...',
+        success: function(response) {
+            result = response;
+            // return response; // &lt;- I tried that one as well
+        }
+    });
+
+    return result; // It always returns `undefined`
+}
+</code></pre>
+<p><strong>Example using Node.js:</strong></p>
+<pre><code>function foo() {
+    var result;
+
+    fs.readFile(&quot;path/to/file&quot;, function(err, data) {
+        result = data;
+        // return data; // &lt;- I tried that one as well
+    });
+
+    return result; // It always returns `undefined`
+}
+</code></pre>
+<p><strong>Example using the <code>then</code> block of a promise:</strong></p>
+<pre><code>function foo() {
+    var result;
+
+    fetch(url).then(function(response) {
+        result = response;
+        // return response; // &lt;- I tried that one as well
+    });
+
+    return result; // It always returns `undefined`
+}
+</code></pre>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="6659 votes">6.7k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/218196/felix-kling" rel="noopener">Felix Kling</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/14220323" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><blockquote>
+<p><em>→ For a more general explanation of asynchronous behaviour with different examples, see</em> <a href="https://stackoverflow.com/q/23667086/218196">Why is my variable unaltered after I modify it inside of a function? - Asynchronous code reference</a></p>
+<p><em>→ If you already understand the problem, skip to the possible solutions below.</em></p>
+</blockquote>
+<h1>The problem</h1>
+<p>The <strong>A</strong> in <a href="https://en.wikipedia.org/wiki/Ajax_(programming)" rel="noreferrer">Ajax</a> stands for <a href="https://www.merriam-webster.com/dictionary/asynchronous" rel="noreferrer"><strong>asynchronous</strong></a>. That means sending the request (or rather receiving the response) is taken out of the normal execution flow. In your example, <code>$.ajax</code> returns immediately and the next statement, <code>return result;</code>, is executed before the function you passed as <code>success</code> callback was even called.</p>
+<p>Here is an analogy which hopefully makes the difference between synchronous and asynchronous flow clearer:</p>
+<h2>Synchronous</h2>
+<p>Imagine you make a phone call to a friend and ask him to look something up for you. Although it might take a while, you wait on the phone and stare into space, until your friend gives you the answer that you needed.</p>
+<p>The same is happening when you make a function call containing &quot;normal&quot; code:</p>
+<pre><code>function findItem() {
+    var item;
+    while(item_not_found) {
+        // search
+    }
+    return item;
+}
+
+var item = findItem();
+
+// Do something with item
+doSomethingElse();
+</code></pre>
+<p>Even though <code>findItem</code> might take a long time to execute, any code coming after <code>var item = findItem();</code> has to <em>wait</em> until the function returns the result.</p>
+<h2>Asynchronous</h2>
+<p>You call your friend again for the same reason. But this time you tell him that you are in a hurry and he should <em>call you back</em> on your mobile phone. You hang up, leave the house, and do whatever you planned to do. Once your friend calls you back, you are dealing with the information he gave to you.</p>
+<p>That's exactly what's happening when you do an Ajax request.</p>
+<pre><code>findItem(function(item) {
+    // Do something with the item
+});
+doSomethingElse();
+</code></pre>
+<p>Instead of waiting for the response, the execution continues immediately and the statement after the Ajax call is executed. To get the response eventually, you provide a function to be called once the response was received, a <em>callback</em> (notice something? <em>call back</em> ?). Any statement coming after that call is executed before the callback is called.</p>
+<hr />
+<h1>Solution(s)</h1>
+<p><strong>Embrace the asynchronous nature of JavaScript!</strong> While certain asynchronous operations provide synchronous counterparts (so does &quot;Ajax&quot;), it's generally discouraged to use them, especially in a browser context.</p>
+<p>Why is it bad do you ask?</p>
+<p>JavaScript runs in the UI thread of the browser and any long-running process will lock the UI, making it unresponsive. Additionally, there is an upper limit on the execution time for JavaScript and the browser will ask the user whether to continue the execution or not.</p>
+<p>All of this results in a really bad user experience. The user won't be able to tell whether everything is working fine or not. Furthermore, the effect will be worse for users with a slow connection.</p>
+<p>In the following we will look at three different solutions that are all building on top of each other:</p>
+<ul>
+<li><strong>Promises with <code>async/await</code></strong> (ES2017+, available in older browsers if you use a transpiler or regenerator)</li>
+<li><strong>Callbacks</strong> (popular in node)</li>
+<li><strong>Promises with <code>then()</code></strong> (ES2015+, available in older browsers if you use one of the many promise libraries)</li>
+</ul>
+<p><strong>All three are available in current browsers, and node 7+.</strong></p>
+<hr />
+<h2>ES2017+: Promises with <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function" rel="noreferrer"><code>async/await</code></a></h2>
+<p>The ECMAScript version released in 2017 introduced <em>syntax-level support</em> for asynchronous functions. With the help of <code>async</code> and <code>await</code>, you can write asynchronous in a &quot;synchronous style&quot;. The code is still asynchronous, but it's easier to read/understand.</p>
+<p><code>async/await</code> builds on top of promises: an <code>async</code> function always returns a promise. <code>await</code> &quot;unwraps&quot; a promise and either result in the value the promise was resolved with or throws an error if the promise was rejected.</p>
+<p><strong>Important:</strong> You can only use <code>await</code> inside an <code>async</code> function or in a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules" rel="noreferrer">JavaScript module</a>. Top-level <code>await</code> is not supported outside of modules, so you might have to make an async IIFE (<a href="https://en.wikipedia.org/wiki/Immediately_invoked_function_expression" rel="noreferrer">Immediately Invoked Function Expression</a>) to start an <code>async</code> context if not using a module.</p>
+<p>You can read more about <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function" rel="noreferrer"><code>async</code></a> and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await" rel="noreferrer"><code>await</code></a> on MDN.</p>
+<p>Here is an example that elaborates the <em>delay</em> function <code>findItem()</code> above:</p>
+<pre><code>// Using 'superagent' which will return a promise.
+var superagent = require('superagent')
+
+// This is isn't declared as `async` because it already returns a promise
+function delay() {
+  // `delay` returns a promise
+  return new Promise(function(resolve, reject) {
+    // Only `delay` is able to resolve or reject the promise
+    setTimeout(function() {
+      resolve(42); // After 3 seconds, resolve the promise with value 42
+    }, 3000);
+  });
+}
+
+async function getAllBooks() {
+  try {
+    // GET a list of book IDs of the current user
+    var bookIDs = await superagent.get('/user/books');
+    // wait for 3 seconds (just for the sake of this example)
+    await delay();
+    // GET information about each book
+    return superagent.get('/books/ids='+JSON.stringify(bookIDs));
+  } catch(error) {
+    // If any of the awaited promises was rejected, this catch block
+    // would catch the rejection reason
+    return null;
+  }
+}
+
+// Start an IIFE to use `await` at the top level
+(async function(){
+  let books = await getAllBooks();
+  console.log(books);
+})();
+</code></pre>
+<p>Current <a href="https://kangax.github.io/compat-table/es2016plus/#test-async_functions" rel="noreferrer">browser</a> and <a href="http://node.green/#ES2017-features-async-functions" rel="noreferrer">node</a> versions support <code>async/await</code>. You can also support older environments by transforming your code to ES5 with the help of <a href="https://github.com/facebook/regenerator" rel="noreferrer">regenerator</a> (or tools that use regenerator, such as <a href="https://babeljs.io/" rel="noreferrer">Babel</a>).</p>
+<hr />
+<h2>Let functions accept <em>callbacks</em></h2>
+<p>A callback is when function 1 is passed to function 2. Function 2 can call function 1 whenever it is ready. In the context of an asynchronous process, the callback will be called whenever the asynchronous process is done. Usually, the result is passed to the callback.</p>
+<p>In the example of the question, you can make <code>foo</code> accept a callback and use it as <code>success</code> callback. So this</p>
+<pre><code>var result = foo();
+// Code that depends on 'result'
+</code></pre>
+<p>becomes</p>
+<pre><code>foo(function(result) {
+    // Code that depends on 'result'
+});
+</code></pre>
+<p>Here we defined the function &quot;inline&quot; but you can pass any function reference:</p>
+<pre><code>function myCallback(result) {
+    // Code that depends on 'result'
+}
+
+foo(myCallback);
+</code></pre>
+<p><code>foo</code> itself is defined as follows:</p>
+<pre><code>function foo(callback) {
+    $.ajax({
+        // ...
+        success: callback
+    });
+}
+</code></pre>
+<p><code>callback</code> will refer to the function we pass to <code>foo</code> when we call it and we pass it on to <code>success</code>. I.e. once the Ajax request is successful, <code>$.ajax</code> will call <code>callback</code> and pass the response to the callback (which can be referred to with <code>result</code>, since this is how we defined the callback).</p>
+<p>You can also process the response before passing it to the callback:</p>
+<pre><code>function foo(callback) {
+    $.ajax({
+        // ...
+        success: function(response) {
+            // For example, filter the response
+            callback(filtered_response);
+        }
+    });
+}
+</code></pre>
+<p>It's easier to write code using callbacks than it may seem. After all, JavaScript in the browser is heavily event-driven (DOM events). Receiving the Ajax response is nothing else but an event.
+Difficulties could arise when you have to work with third-party code, but most problems can be solved by just thinking through the application flow.</p>
+<hr />
+<h2>ES2015+: Promises with <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" rel="noreferrer">then()</a></h2>
+<p>The <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" rel="noreferrer">Promise API</a> is a new feature of ECMAScript 6 (ES2015), but it has good <a href="http://caniuse.com/#feat=promises" rel="noreferrer" title="caniuse">browser support</a> already. There are also many libraries which implement the standard Promises API and provide additional methods to ease the use and composition of asynchronous functions (e.g., <a href="https://github.com/petkaantonov/bluebird" rel="noreferrer">bluebird</a>).</p>
+<p>Promises are containers for <em>future</em> values. When the promise receives the value (it is <em>resolved</em>) or when it is canceled (<em>rejected</em>), it notifies all of its &quot;listeners&quot; who want to access this value.</p>
+<p>The advantage over plain callbacks is that they allow you to decouple your code and they are easier to compose.</p>
+<p>Here is an example of using a promise:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function delay() {
+  // `delay` returns a promise
+  return new Promise(function(resolve, reject) {
+    // Only `delay` is able to resolve or reject the promise
+    setTimeout(function() {
+      resolve(42); // After 3 seconds, resolve the promise with value 42
+    }, 3000);
+  });
+}
+
+delay()
+  .then(function(v) { // `delay` returns a promise
+    console.log(v); // Log the value once it is resolved
+  })
+  .catch(function(v) {
+    // Or do something else if it is rejected
+    // (it would not happen in this example, since `reject` is not called).
+  });</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.as-console-wrapper { max-height: 100% !important; top: 0; }</code></pre>
+</div>
+</div>
+</p>
+<p>Applied to our Ajax call we could use promises like this:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function ajax(url) {
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+      resolve(this.responseText);
+    };
+    xhr.onerror = reject;
+    xhr.open('GET', url);
+    xhr.send();
+  });
+}
+
+ajax("https://jsonplaceholder.typicode.com/todos/1")
+  .then(function(result) {
+    console.log(result); // Code depending on result
+  })
+  .catch(function() {
+    // An error occurred
+  });</code></pre>
+<pre class="snippet-code-css lang-css prettyprint-override"><code>.as-console-wrapper { max-height: 100% !important; top: 0; }</code></pre>
+</div>
+</div>
+</p>
+<p>Describing all the advantages that promise offer is beyond the scope of this answer, but if you write new code, you should seriously consider them. They provide a great abstraction and separation of your code.</p>
+<p>More information about promises: <a href="http://www.html5rocks.com/en/tutorials/es6/promises/" rel="noreferrer">HTML5 rocks - JavaScript Promises</a>.</p>
+<h3>Side note: jQuery's deferred objects</h3>
+<p><a href="https://stackoverflow.com/questions/4866721/what-are-deferred-objects">Deferred objects</a> are jQuery's custom implementation of promises (before the Promise API was standardized). They behave almost like promises but expose a slightly different API.</p>
+<p>Every Ajax method of jQuery already returns a &quot;deferred object&quot; (actually a promise of a deferred object) which you can just return from your function:</p>
+<pre><code>function ajax() {
+    return $.ajax(...);
+}
+
+ajax().done(function(result) {
+    // Code depending on result
+}).fail(function() {
+    // An error occurred
+});
+</code></pre>
+<h3>Side note: Promise gotchas</h3>
+<p>Keep in mind that promises and deferred objects are just <em>containers</em> for a future value, they are not the value itself. For example, suppose you had the following:</p>
+<pre><code>function checkPassword() {
+    return $.ajax({
+        url: '/password',
+        data: {
+            username: $('#username').val(),
+            password: $('#password').val()
+        },
+        type: 'POST',
+        dataType: 'json'
+    });
+}
+
+if (checkPassword()) {
+    // Tell the user they're logged in
+}
+</code></pre>
+<p>This code misunderstands the above asynchronous issues. Specifically, <code>$.ajax()</code> doesn't freeze the code while it checks the '/password' page on your server - it sends a request to the server and while it waits, it immediately returns a jQuery Ajax Deferred object, not the response from the server. That means the <code>if</code> statement is going to always get this Deferred object, treat it as <code>true</code>, and proceed as though the user is logged in. Not good.</p>
+<p>But the fix is easy:</p>
+<pre><code>checkPassword()
+.done(function(r) {
+    if (r) {
+        // Tell the user they're logged in
+    } else {
+        // Tell the user their password was bad
+    }
+})
+.fail(function(x) {
+    // Tell the user something bad happened
+});
+</code></pre>
+<hr />
+<h2>Not recommended: Synchronous &quot;Ajax&quot; calls</h2>
+<p>As I mentioned, some(!) asynchronous operations have synchronous counterparts. I don't advocate their use, but for completeness' sake, here is how you would perform a synchronous call:</p>
+<h3>Without jQuery</h3>
+<p>If you directly use a <a href="https://xhr.spec.whatwg.org/" rel="noreferrer"><code>XMLHttpRequest</code></a> object, pass <code>false</code> as third argument to <a href="https://xhr.spec.whatwg.org/#the-open()-method" rel="noreferrer"><code>.open</code></a>.</p>
+<h3>jQuery</h3>
+<p>If you use <a href="http://api.jquery.com/jQuery.ajax/" rel="noreferrer">jQuery</a>, you can set the <code>async</code> option to <code>false</code>. Note that this option is <em>deprecated</em> since jQuery 1.8.
+You can then either still use a <code>success</code> callback or access the <code>responseText</code> property of the <a href="http://api.jquery.com/jQuery.ajax/#jqXHR" rel="noreferrer">jqXHR object</a>:</p>
+<pre><code>function foo() {
+    var jqXHR = $.ajax({
+        //...
+        async: false
+    });
+    return jqXHR.responseText;
+}
+</code></pre>
+<p>If you use any other jQuery Ajax method, such as <code>$.get</code>, <code>$.getJSON</code>, etc., you have to change it to <code>$.ajax</code> (since you can only pass configuration parameters to <code>$.ajax</code>).</p>
+<p><strong>Heads up!</strong> It is not possible to make a synchronous <a href="https://stackoverflow.com/questions/2067472/please-explain-jsonp">JSONP</a> request. JSONP by its very nature is always asynchronous (one more reason to not even consider this option).</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score hot" title="1232 votes">1.2k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/1348195/benjamin-gruenbaum" rel="noopener">Benjamin Gruenbaum</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/16825593" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><h1>If you're <em>not</em> using jQuery in your code, this answer is for you</h1>
+<p>Your code should be something along the lines of this:</p>
+<pre><code>function foo() {
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.open('GET', &quot;/echo/json&quot;);
+    httpRequest.send();
+    return httpRequest.responseText;
+}
+
+var result = foo(); // Always ends up being 'undefined'
+</code></pre>
+<p><a href="https://stackoverflow.com/questions/14220321/how-do-i-return-the-response-from-an-asynchronous-call/14220323#14220323">Felix Kling did a fine job</a> writing an answer for people using jQuery for AJAX, but I've decided to provide an alternative for people who aren't.</p>
+<p>(<a href="https://stackoverflow.com/a/30180679/1348195">Note, for those using the new <code>fetch</code> API, Angular or promises I've added another answer below</a>)</p>
+<hr />
+<h1>What you're facing</h1>
+<p>This is a short summary of &quot;Explanation of the problem&quot; from the other answer, if you're not sure after reading this, read that.</p>
+<p>The <strong>A</strong> in AJAX stands for <strong>asynchronous</strong>. That means sending the request (or rather receiving the response) is taken out of the normal execution flow. In your example, <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#send%28%29" rel="noreferrer"><code>.send</code></a> returns immediately and the next statement, <code>return result;</code>, is executed before the function you passed as <code>success</code> callback was even called.</p>
+<p>This means when you're returning, the listener you've defined did not execute yet, which means the value you're returning has not been defined.</p>
+<p>Here is a simple analogy:</p>
+<pre><code>function getFive(){
+    var a;
+    setTimeout(function(){
+         a=5;
+    },10);
+    return a;
+}
+</code></pre>
+<p><a href="http://jsfiddle.net/7RK3k/" rel="noreferrer">(Fiddle)</a></p>
+<p>The value of <code>a</code> returned is <code>undefined</code> since the <code>a=5</code> part has not executed yet. AJAX acts like this, you're returning the value before the server got the chance to tell your browser what that value is.</p>
+<p>One possible solution to this problem is to code <em>re-actively</em> , telling your program what to do when the calculation completed.</p>
+<pre><code>function onComplete(a){ // When the code completes, do this
+    alert(a);
+}
+
+function getFive(whenDone){
+    var a;
+    setTimeout(function(){
+         a=5;
+         whenDone(a);
+    },10);
+}
+</code></pre>
+<p>This is called <a href="http://en.wikipedia.org/wiki/Continuation-passing_style" rel="noreferrer">CPS</a>. Basically, we're passing <code>getFive</code> an action to perform when it completes, we're telling our code how to react when an event completes (like our AJAX call, or in this case the timeout).</p>
+<p>Usage would be:</p>
+<pre><code>getFive(onComplete);
+</code></pre>
+<p>Which should alert &quot;5&quot; to the screen. <a href="http://jsfiddle.net/PAjZR/" rel="noreferrer">(Fiddle)</a>.</p>
+<h1>Possible solutions</h1>
+<p>There are basically two ways how to solve this:</p>
+<ol>
+<li>Make the AJAX call synchronous (let’s call it SJAX).</li>
+<li>Restructure your code to work properly with callbacks.</li>
+</ol>
+<h2>1. Synchronous AJAX - Don't do it!!</h2>
+<p>As for synchronous AJAX, <strong>don't do it!</strong> Felix's answer raises some compelling arguments about why it's a bad idea. To sum it up, it'll freeze the user's browser until the server returns the response and create a very bad user experience. Here is another short summary taken from MDN on why:</p>
+<blockquote>
+<p>XMLHttpRequest supports both synchronous and asynchronous communications. In general, however, asynchronous requests should be preferred to synchronous requests for performance reasons.</p>
+<p>In short, synchronous requests block the execution of code... ...this can cause serious issues...</p>
+</blockquote>
+<p>If you <em>have</em> to do it, you can pass a flag. <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests#Synchronous_request" rel="noreferrer">Here is how</a>:</p>
+<pre><code>var request = new XMLHttpRequest();
+request.open('GET', 'yourURL', false);  // `false` makes the request synchronous
+request.send(null);
+
+if (request.status === 200) {// That's HTTP for 'ok'
+  console.log(request.responseText);
+}
+</code></pre>
+<h2>2. Restructure code</h2>
+<p>Let your function accept a callback. In the example code <code>foo</code> can be made to accept a callback. We'll be telling our code how to <em>react</em> when <code>foo</code> completes.</p>
+<p>So:</p>
+<pre><code>var result = foo();
+// Code that depends on `result` goes here
+</code></pre>
+<p>Becomes:</p>
+<pre><code>foo(function(result) {
+    // Code that depends on `result`
+});
+</code></pre>
+<p>Here we passed an anonymous function, but we could just as easily pass a reference to an existing function, making it look like:</p>
+<pre><code>function myHandler(result) {
+    // Code that depends on `result`
+}
+foo(myHandler);
+</code></pre>
+<p>For more details on how this sort of callback design is done, check Felix's answer.</p>
+<p>Now, let's define foo itself to act accordingly</p>
+<pre><code>function foo(callback) {
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onload = function(){ // When the request is loaded
+       callback(httpRequest.responseText);// We're calling our method
+    };
+    httpRequest.open('GET', &quot;/echo/json&quot;);
+    httpRequest.send();
+}
+</code></pre>
+<p><a href="http://jsfiddle.net/DAcWT/" rel="noreferrer">(fiddle)</a></p>
+<p>We have now made our <em>foo</em> function accept an action to run when the AJAX completes successfully. We can extend this further by checking if the response status is not 200 and acting accordingly (create a fail handler and such). Effectively it is solving our issue.</p>
+<p>If you're still having a hard time understanding this, <a href="https://developer.mozilla.org/en-US/docs/AJAX/Getting_Started" rel="noreferrer">read the AJAX getting started guide</a> at MDN.</p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="456 votes">456</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2450730/cocco" rel="noopener">cocco</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/18309057" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong><a href="http://en.wikipedia.org/wiki/XMLHttpRequest" rel="nofollow noreferrer">XMLHttpRequest</a> 2</strong> (first of all, read the answers from <a href="https://stackoverflow.com/a/16825593/19068">Benjamin Gruenbaum</a> and <a href="https://stackoverflow.com/a/14220323/19068">Felix Kling</a>)</p>
+<p>If you don't use jQuery and want a nice short XMLHttpRequest 2 which works in modern browsers and also in mobile browsers, I suggest using it this way:</p>
+<pre><code>function ajax(a, b, c){ // URL, callback, just a placeholder
+  c = new XMLHttpRequest;
+  c.open('GET', a);
+  c.onload = b;
+  c.send()
+}
+</code></pre>
+<p>As you can see:</p>
+<ol>
+<li>It's shorter than all other functions Listed.</li>
+<li>The callback is set directly (so no extra unnecessary closures).</li>
+<li>It uses the new onload (so you don't have to check for readystate &amp;&amp; status)</li>
+<li>There are some other situations, which I don't remember, that make the XMLHttpRequest 1 annoying.</li>
+</ol>
+<p>There are two ways to get the response of this Ajax call (three using the XMLHttpRequest var name):</p>
+<p>The simplest:</p>
+<pre><code>this.response
+</code></pre>
+<p>Or if for some reason you <code>bind()</code> the callback to a class:</p>
+<pre><code>e.target.response
+</code></pre>
+<p>Example:</p>
+<pre><code>function callback(e){
+  console.log(this.response);
+}
+ajax('URL', callback);
+</code></pre>
+<p>Or (the above one is better anonymous functions are always a problem):</p>
+<pre><code>ajax('URL', function(e){console.log(this.response)});
+</code></pre>
+<p>Nothing easier.</p>
+<p>Now some people will probably say that it's better to use onreadystatechange or even the XMLHttpRequest variable name. That's wrong.</p>
+<p>Check out <a href="http://caniuse.com/xhr2" rel="nofollow noreferrer">XMLHttpRequest advanced features</a>.</p>
+<p>It supported all *modern browsers. And I can confirm as I have been using this approach since XMLHttpRequest 2 was created. I never had any type of problem in any browsers I used.</p>
+<p>onreadystatechange is only useful if you want to get the headers on state 2.</p>
+<p>Using the <code>XMLHttpRequest</code> variable name is another big error as you need to execute the callback inside the onload/oreadystatechange closures, or else you lost it.</p>
+<hr />
+<p>Now if you want something more complex using <a href="https://en.wikipedia.org/wiki/POST_%28HTTP%29" rel="nofollow noreferrer">POST</a> and FormData you can easily extend this function:</p>
+<pre><code>function x(a, b, e, d, c){ // URL, callback, method, formdata or {key:val},placeholder
+  c = new XMLHttpRequest;
+  c.open(e||'get', a);
+  c.onload = b;
+  c.send(d||null)
+}
+</code></pre>
+<p>Again ... it's a very short function, but it does <a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods" rel="nofollow noreferrer">GET</a> and POST.</p>
+<p>Examples of usage:</p>
+<pre><code>x(url, callback); // By default it's GET so no need to set
+x(url, callback, 'post', {'key': 'val'}); // No need to set POST data
+</code></pre>
+<p>Or pass a full form element (<code>document.getElementsByTagName('form')[0]</code>):</p>
+<pre><code>var fd = new FormData(form);
+x(url, callback, 'post', fd);
+</code></pre>
+<p>Or set some custom values:</p>
+<pre><code>var fd = new FormData();
+fd.append('key', 'val')
+x(url, callback, 'post', fd);
+</code></pre>
+<p>As you can see, I didn't implement sync... it's a bad thing.</p>
+<p>Having said that ... why don't we do it the easy way?</p>
+<hr />
+<p>As mentioned in the comment, the use of error &amp;&amp; synchronous does completely break the point of the answer. Which is a nice short way to use Ajax properly?</p>
+<p><em>Error handler</em></p>
+<pre><code>function x(a, b, e, d, c){ // URL, callback, method, formdata or {key:val}, placeholder
+  c = new XMLHttpRequest;
+  c.open(e||'get', a);
+  c.onload = b;
+  c.onerror = error;
+  c.send(d||null)
+}
+
+function error(e){
+  console.log('--Error--', this.type);
+  console.log('this: ', this);
+  console.log('Event: ', e)
+}
+function displayAjax(e){
+  console.log(e, this);
+}
+x('WRONGURL', displayAjax);
+</code></pre>
+<p>In the above script, you have an error handler which is statically defined, so it does not compromise the function. The error handler can be used for other functions too.</p>
+<p>But to get out an error, the <strong>only</strong> way is to write a wrong URL in which case every browser throws an error.</p>
+<p>Error handlers may maybe useful if you set custom headers, set the responseType to blob array buffer, or whatever...</p>
+<p>Even if you pass 'POSTAPAPAP' as the method it won't throw an error.</p>
+<p>Even if you pass 'fdggdgilfdghfldj' as formdata it won't throw an error.</p>
+<p>In the first case, the error is inside the <code>displayAjax()</code> under <code>this.statusText</code> as <code>Method not Allowed</code>.</p>
+<p>In the second case, it simply works. You have to check on the server side if you passed the right post data.</p>
+<p>Cross-domain not allowed throws an error automatically.</p>
+<p>In the error response, there aren't any error codes.</p>
+<p>There is only the <code>this.type</code> which is set to <em>error</em>.</p>
+<p>Why add an error handler if you don't have any control over errors?
+Most of the errors are returned inside this in the callback function <code>displayAjax()</code>.</p>
+<p>So: There isn't any need for error checks if you're able to copy and paste the URL properly. ;)</p>
+<p><em>PS: As the first test I wrote x('x', displayAjax)..., and it totally got a response...??? So I checked the folder where the HTML is located, and there was a file called 'x.xml'. So even if you forget the extension of your file XMLHttpRequest 2 WILL FIND IT</em>. I LOL'd</p>
+<hr />
+<p><em>Read a file synchronous</em></p>
+<p><strong>Don't do that.</strong></p>
+<p>If you want to block the browser for a while load a nice big <code>.txt</code> file synchronous.</p>
+<pre><code>function omg(a, c){ // URL
+  c = new XMLHttpRequest;
+  c.open('GET', a, true);
+  c.send();
+  return c; // Or c.response
+}
+</code></pre>
+<p>Now you can do</p>
+<pre><code> var res = omg('thisIsGonnaBlockThePage.txt');
+</code></pre>
+<p>There is no other way to do this in a non-asynchronous way. (Yeah, with setTimeout loop... but seriously?)</p>
+<p>Another point is... if you work with APIs or just your own list's files or whatever you always use different functions for each request...</p>
+<p>Only if you have a page where you load always the same XML/JSON or whatever you need only one function. In that case, modify a little the Ajax function and replace b with your special function.</p>
+<hr />
+<p>The functions above are for basic use.</p>
+<p>If you want to <em>extend</em> the function...</p>
+<p>Yes, you can.</p>
+<p>I'm using a lot of APIs and one of the first functions I integrate into every HTML page is the first Ajax function in this answer, with GET only...</p>
+<p>But you can do a lot of stuff with XMLHttpRequest 2:</p>
+<p>I made a download manager (using ranges on both sides with resume, filereader, and filesystem), various image resizers converters using canvas, populate web SQL databases with base64images and much more...</p>
+<p>But in these cases you should create a function only for that purpose... sometimes you need a blob, or array buffers, you can set headers, override mimetype and there is a lot more...</p>
+<p>But the question here is how to return an Ajax response... (I added an easy way.)</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

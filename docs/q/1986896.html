@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is the difference between call and apply? · jsdigest</title>
+<meta name="description" content="What is the difference between using Function.prototype.apply() and Function.prototype.call() to invoke a function? const func = function() { alert(&quot;Hello worl…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What is the difference between call and apply?</h1>
+    <div class="q-meta big"><span class="score hot" title="3507 votes">3.5k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/3041/john-duff" rel="noopener">John Duff</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">function</span><span class="tag">performance</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/1986896/what-is-the-difference-between-call-and-apply" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What is the difference between using <code>Function.prototype.apply()</code> and <code>Function.prototype.call()</code> to invoke a function?</p>
+<pre class="lang-js prettyprint-override"><code>const func = function() {
+    alert(&quot;Hello world!&quot;);
+};
+</code></pre>
+<p><code>func.apply()</code> vs. <code>func.call()</code></p>
+<p>Are there performance differences between the two aforementioned methods? When is it best to use <code>call</code> over <code>apply</code> and vice versa?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="4047 votes">4k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/20846/flatline" rel="noopener">flatline</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1986909" rel="noopener">原文 ↗</a></div><div class="prose"><p>The difference is that <code>apply</code> lets you invoke the function with <code>arguments</code> as an array; <code>call</code> requires the parameters be listed explicitly. A useful mnemonic is <em>&quot;<strong>A</strong> for <strong>a</strong>rray and <strong>C</strong> for <strong>c</strong>omma.&quot;</em></p>
+<p>See MDN's documentation on <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply" rel="noreferrer">apply</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/call" rel="noreferrer">call</a>.</p>
+<p>Pseudo syntax:</p>
+<p><code>theFunction.apply(valueForThis, arrayOfArgs)</code></p>
+<p><code>theFunction.call(valueForThis, arg1, arg2, ...)</code></p>
+<p>There is also, as of ES6, the possibility to <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Operators/Spread_operator" rel="noreferrer"><code>spread</code></a> the array for use with the <code>call</code> function, you can see the compatibilities <a href="http://kangax.github.io/compat-table/es6/" rel="noreferrer">here</a>.</p>
+<p>Sample code:</p>
+<p><div class="snippet" data-lang="js" data-hide="false" data-console="true" data-babel="false">
+<div class="snippet-code">
+<pre class="snippet-code-js lang-js prettyprint-override"><code>function theFunction(name, profession) {
+    console.log("My name is " + name + " and I am a " + profession +".");
+}
+theFunction("John", "fireman");
+theFunction.apply(undefined, ["Susan", "school teacher"]);
+theFunction.call(undefined, "Claude", "mathematician");
+theFunction.call(undefined, ...["Matthew", "physicist"]); // used with the spread operator</code></pre>
+</div>
+</div>
+</p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="259 votes">259</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/125844/notnoop" rel="noopener">notnoop</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1986906" rel="noopener">原文 ↗</a></div><div class="prose"><p>K. Scott Allen has <a href="http://odetocode.com/blogs/scott/archive/2007/07/04/function-apply-and-function-call-in-javascript.aspx" rel="noreferrer">a nice writeup</a> on the matter.</p>
+
+<p>Basically, they differ on how they handle function arguments.  </p>
+
+<blockquote>
+  <p>The apply() method is identical to call(), except apply() requires an array as the second parameter. The array represents the arguments for the target method."</p>
+</blockquote>
+
+<p>So:</p>
+
+<pre><code>// assuming you have f
+function f(message) { ... }
+f.call(receiver, "test");
+f.apply(receiver, ["test"]);
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="172 votes">172</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2214/matthew-crumley" rel="noopener">Matthew Crumley</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/1987244" rel="noopener">原文 ↗</a></div><div class="prose"><p>To answer the part about when to use each function, use <code>apply</code> if you don't know the number of arguments you will be passing, or if they are already in an array or array-like object (like the <code>arguments</code> object to forward your own arguments. Use <code>call</code> otherwise, since there's no need to wrap the arguments in an array.</p>
+
+<pre><code>f.call(thisObject, a, b, c); // Fixed number of arguments
+
+f.apply(thisObject, arguments); // Forward this function's arguments
+
+var args = [];
+while (...) {
+    args.push(some_value());
+}
+f.apply(thisObject, args); // Unknown number of arguments
+</code></pre>
+
+<p>When I'm not passing any arguments (like your example), I prefer <code>call</code> since I'm <em>calling</em> the function. <code>apply</code> would imply you are <em>applying</em> the function to the (non-existent) arguments.</p>
+
+<p>There shouldn't be any performance differences, except maybe if you use <code>apply</code> and wrap the arguments in an array (e.g. <code>f.apply(thisObject, [a, b, c])</code> instead of <code>f.call(thisObject, a, b, c)</code>). I haven't tested it, so there could be differences, but it would be very browser specific. It's likely that <code>call</code> is faster if you don't already have the arguments in an array and <code>apply</code> is faster if you do.</p>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

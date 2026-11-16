@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is the difference between Bower and npm? · jsdigest</title>
+<meta name="description" content="What is the fundamental difference between bower and npm ? Just want something plain and simple. I&#39;ve seen some of my colleagues use bower and npm interchangea…">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>What is the difference between Bower and npm?</h1>
+    <div class="q-meta big"><span class="score hot" title="1909 votes">1.9k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/1624921/nafiul-islam" rel="noopener">Nafiul Islam</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">npm</span><span class="tag">bower</span><span class="tag">dependency-management</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/18641899/what-is-the-difference-between-bower-and-npm" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>What is the fundamental difference between <code>bower</code> and <code>npm</code>? Just want something plain and simple. I've seen some of my colleagues use <code>bower</code> and <code>npm</code> interchangeably in their projects.</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="1986 votes">2k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/64949/sindre-sorhus" rel="noopener">Sindre Sorhus</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/18652918" rel="noopener">原文 ↗</a></div><div class="prose"><p>All package managers have many downsides. You just have to pick which you can live with.</p>
+<h2>History</h2>
+<p><a href="https://www.npmjs.org" rel="noreferrer">npm</a> started out managing node.js modules (that's why packages go into <code>node_modules</code> by default), but it works for the front-end too when combined with <a href="http://browserify.org/" rel="noreferrer">Browserify</a> or <a href="https://webpack.js.org/" rel="noreferrer">webpack</a>.</p>
+<p><a href="http://bower.io" rel="noreferrer">Bower</a> is created solely for the front-end and is optimized with that in mind.</p>
+<h2>Size of repo</h2>
+<p>npm is much, much larger than bower, including general purpose JavaScript (like <code>country-data</code> for country information or <code>sorts</code> for sorting functions that is usable on the front end or the back end).</p>
+<p>Bower has a much smaller amount of packages.</p>
+<h2>Handling of styles etc</h2>
+<p>Bower includes styles etc.</p>
+<p>npm is focused on JavaScript. Styles are either downloaded separately or required by something like <code>npm-sass</code> or <code>sass-npm</code>.</p>
+<h2>Dependency handling</h2>
+<p>The biggest difference is that npm does nested dependencies (but is flat by default) while Bower requires a flat dependency tree <em>(puts the burden of dependency resolution on the user)</em>.</p>
+<p>A nested dependency tree means that your dependencies can have their own dependencies which can have their own, and so on. This allows for two modules to require different versions of the same dependency and still work. Note since npm v3, the dependency tree will be flat by default (saving space) and only nest where needed, e.g., if two dependencies need their own version of Underscore.</p>
+<p>Some projects use both: they use Bower for front-end packages and npm for developer tools like Yeoman, Grunt, Gulp, JSHint, CoffeeScript, etc.</p>
+<hr />
+<h2>Resources</h2>
+<ul>
+<li><a href="http://maxogden.com/nested-dependencies.html" rel="noreferrer">Nested Dependencies</a> - Insight into why node_modules works the way it does</li>
+</ul>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="377 votes">377</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/334243/justus-romijn" rel="noopener">Justus Romijn</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/27105655" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p>This answer is an addition to the answer of Sindre Sorhus. The major difference between npm and Bower is the way they treat recursive dependencies. Note that they can be used together in a single project.</p>
+
+<p><strong>On the <a href="https://web.archive.org/web/20150906022540/https://docs.npmjs.com/misc/faq#why-can-t-npm-just-put-everything-in-one-place-like-other-package-managers" rel="noreferrer">npm FAQ</a>:</strong> (archive.org link from 6 Sep 2015) </p>
+
+<blockquote>
+  <p>It is much harder to avoid dependency conflicts without nesting
+  dependencies. This is fundamental to the way that npm works, and has
+  proven to be an extremely successful approach.</p>
+</blockquote>
+
+<p><strong>On <a href="http://bower.io/" rel="noreferrer">Bower</a> homepage:</strong></p>
+
+<blockquote>
+  <p>Bower is optimized for the front-end. Bower uses a flat dependency
+  tree, requiring only one version for each package, reducing page load
+  to a minimum.</p>
+</blockquote>
+
+<p>In short, npm aims for stability. Bower aims for minimal resource load. If you draw out the dependency structure, you will see this:</p>
+
+<p>npm:</p>
+
+<pre><code>project root
+[node_modules] // default directory for dependencies
+ -&gt; dependency A
+ -&gt; dependency B
+    [node_modules]
+    -&gt; dependency A
+
+ -&gt; dependency C
+    [node_modules]
+    -&gt; dependency B
+      [node_modules]
+       -&gt; dependency A 
+    -&gt; dependency D
+</code></pre>
+
+<p>As you can see it installs some dependencies recursively. Dependency A has three installed instances!</p>
+
+<p>Bower:</p>
+
+<pre><code>project root
+[bower_components] // default directory for dependencies
+ -&gt; dependency A
+ -&gt; dependency B // needs A
+ -&gt; dependency C // needs B and D
+ -&gt; dependency D
+</code></pre>
+
+<p>Here you see that all unique dependencies are on the same level. </p>
+
+<p><strong>So, why bother using npm?</strong></p>
+
+<p>Maybe dependency B requires a different version of dependency A than dependency C. npm installs both versions of this dependency so it will work anyway, but Bower will give you a <em>conflict</em> because it does not like duplication (because loading the same resource on a webpage is very inefficient and costly, also it can give some serious errors). You will have to manually pick which version you want to install. This can have the effect that one of the dependencies will break, but that is something that you will need to fix anyway.</p>
+
+<p>So, the common usage is Bower for the packages that you want to publish on your webpages (e.g. <em>runtime</em>, where you avoid duplication), and use npm for other stuff, like testing, building, optimizing, checking, etc. (e.g. <em>development time</em>, where duplication is of less concern).</p>
+
+<p><strong>Update for npm 3:</strong></p>
+
+<p>npm 3 still does things differently compared to Bower. It will install the dependencies globally, but only for the first version it encounters.  The other versions are installed in the tree (the parent module, then node_modules).</p>
+
+<ul>
+<li>[node_modules]
+
+<ul>
+<li>dep A v1.0</li>
+<li>dep B v1.0
+
+<ul>
+<li><del>dep A v1.0</del> (uses root version)</li>
+</ul></li>
+<li>dep C v1.0
+
+<ul>
+<li>dep A v2.0 (this version is different from the root version, so it will be an nested installation)</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<p>For more information, I suggest reading the <a href="https://docs.npmjs.com/how-npm-works/npm3-dupe" rel="noreferrer">docs of npm 3</a></p>
+</div></details>
+  </article>
+<article class="a"><div class="a-head"><span class="score" title="291 votes">291</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/800457/xml" rel="noopener">XML</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/31633281" rel="noopener">原文 ↗</a></div>
+    <details><summary>展開這則答案</summary><div class="prose"><p><strong>TL;DR: The biggest difference in everyday use isn't nested dependencies... it's the difference between modules and globals.</strong></p>
+<p>I think the previous posters have covered well some of the basic distinctions. (npm's use of nested dependencies is indeed very helpful in managing large, complex applications, though I don't think it's the most important distinction.)</p>
+<p>I'm surprised, however, that nobody has explicitly explained one of the most fundamental distinctions between Bower and npm. If you read the answers above, you'll see the word 'modules' used often in the context of npm. But it's mentioned casually, as if it might even just be a syntax difference.</p>
+<p>But this distinction of <strong>modules vs. globals</strong> (or modules vs. 'scripts') is possibly the most important difference between Bower and npm. <em>The npm approach of putting everything in modules requires you to change the way you write Javascript for the browser, almost certainly for the better.</em></p>
+<h3>The Bower Approach: Global Resources, Like <code>&lt;script&gt;</code> Tags</h3>
+<p>At root, Bower is about loading plain-old script files. Whatever those script files contain, Bower will load them. Which basically means that Bower is just like including all your scripts in plain-old <code>&lt;script&gt;</code>'s in the <code>&lt;head&gt;</code> of your HTML.</p>
+<p>So, same basic approach you're used to, but you get some nice automation conveniences:</p>
+<ul>
+<li>You used to need to include JS dependencies in your project repo (while developing), or get them via CDN. Now, you can skip that extra download weight in the repo, and somebody can do a quick <code>bower install</code> and instantly have what they need, locally.</li>
+<li>If a Bower dependency then specifies its own dependencies in its <code>bower.json</code>, those'll be downloaded for you as well.</li>
+</ul>
+<p>But beyond that, <em>Bower doesn't change how we write javascript</em>. Nothing about what goes inside the files loaded by Bower needs to change at all. In particular, this means that the resources provided in scripts loaded by Bower will (usually, but not always) still be defined as <em>global variables</em>, available from anywhere in the browser execution context.</p>
+<h3>The npm Approach: Common JS Modules, Explicit Dependency Injection</h3>
+<p>All code in Node land (and thus all code loaded via npm) is structured as modules (specifically, as an implementation of the <a href="http://wiki.commonjs.org/wiki/Modules" rel="noreferrer">CommonJS module format</a>, or now, as an ES6 module). So, if you use NPM to handle browser-side dependencies (via Browserify or something else that does the same job), you'll structure your code the same way Node does.</p>
+<p>Smarter people than I have tackled the question of 'Why modules?', but here's a capsule summary:</p>
+<ul>
+<li>Anything inside a module is effectively <em>namespaced</em>, meaning it's not a global variable any more, and you can't accidentally reference it without intending to.</li>
+<li>Anything inside a module must be intentionally injected into a particular context (usually another module) in order to make use of it</li>
+<li>This means you can have multiple versions of the same external dependency (lodash, let's say) in various parts of your application, and they won't collide/conflict. (This happens surprisingly often, because your own code wants to use one version of a dependency, but one of your external dependencies specifies another that conflicts. Or you've got two external dependencies that each want a different version.)</li>
+<li>Because all dependencies are manually injected into a particular module, it's very easy to reason about them. You know for a fact: <em>&quot;The only code I need to consider when working on this is what I have intentionally chosen to inject here&quot;</em>.</li>
+<li>Because even the content of injected modules is <em>encapsulated</em> behind the variable you assign it to, and all code executes inside a limited scope, surprises and collisions become very improbable. It's much, much less likely that something from one of your dependencies will accidentally redefine a global variable without you realizing it, or that you will do so. (It <em>can</em> happen, but you usually have to go out of your way to do it, with something like <code>window.variable</code>. The one accident that still tends to occur is assigning <code>this.variable</code>, not realizing that <code>this</code> is actually <code>window</code> in the current context.)</li>
+<li>When you want to test an individual module, you're able to very easily know: exactly what else (dependencies) is affecting the code that runs inside the module? And, because you're explicitly injecting everything, you can easily mock those dependencies.</li>
+</ul>
+<p>To me, the use of modules for front-end code boils down to: working in a much narrower context that's easier to reason about and test, and having greater certainty about what's going on.</p>
+<hr />
+<p>It only takes about 30 seconds to learn how to use the CommonJS/Node module syntax. Inside a given JS file, which is going to be a module, you first declare any outside dependencies you want to use, like this:</p>
+<p><code>var React = require('react');</code></p>
+<p>Inside the file/module, you do whatever you normally would, and create some object or function that you'll want to expose to outside users, calling it perhaps <code>myModule</code>.</p>
+<p>At the end of a file, you export whatever you want to share with the world, like this:</p>
+<p><code>module.exports = myModule;</code></p>
+<p>Then, to use a CommonJS-based workflow in the browser, you'll use tools like Browserify to grab all those individual module files, encapsulate their contents at runtime, and inject them into each other as needed.</p>
+<p>AND, since ES6 modules (which you'll likely transpile to ES5 with Babel or similar) are gaining wide acceptance, and work both in the browser or in Node 4.0, we should mention a <a href="https://24ways.org/2014/javascript-modules-the-es6-way/" rel="noreferrer">good overview</a> of those as well.</p>
+<p>More about patterns for working with modules in <a href="http://darrenderidder.github.io/talks/ModulePatterns/" rel="noreferrer">this deck</a>.</p>
+<hr />
+<p>EDIT (Feb 2017): Facebook's <a href="http://yarnpkg.com" rel="noreferrer">Yarn</a> is a very important potential replacement/supplement for npm these days: fast, deterministic, offline package-management that builds on what npm gives you. It's worth a look for any JS project, particularly since it's so easy to swap it in/out.</p>
+<hr />
+<p>EDIT (May 2019)
+&quot;Bower has finally been <a href="https://bower.io/blog/2017/how-to-migrate-away-from-bower/" rel="noreferrer">deprecated</a>. End of story.&quot; (h/t: @DanDascalescu, below, for pithy summary.)</p>
+<p>And, while Yarn <a href="https://github.com/yarnpkg/yarn/issues/6953" rel="noreferrer">is still active</a>, a lot of the momentum for it shifted back to npm once it adopted some of Yarn's key features.</p>
+</div></details>
+  </article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>

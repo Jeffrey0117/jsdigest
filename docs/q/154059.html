@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How do I check for an empty/undefined/null string in JavaScript? · jsdigest</title>
+<meta name="description" content="Is there a string.Empty in JavaScript, or is it just a case of checking for &quot;&quot; ?">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../index.html">← jsdigest</a>
+  </div>
+</header>
+<main class="wrap detail">
+  <article class="question">
+    <h1>How do I check for an empty/undefined/null string in JavaScript?</h1>
+    <div class="q-meta big"><span class="score hot" title="4168 votes">4.2k</span><span class="q-by">asked by <a href="https://stackoverflow.com/users/5619/casademora" rel="noopener">casademora</a></span>
+      <span class="dot">·</span><span class="tag">javascript</span><span class="tag">null</span><span class="tag">is-empty</span>
+      <a class="a-src" href="https://stackoverflow.com/questions/154059/how-do-i-check-for-an-empty-undefined-null-string-in-javascript" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
+    <div class="prose"><p>Is there a <code>string.Empty</code> in JavaScript, or is it just a case of checking for <code>&quot;&quot;</code>?</p>
+</div>
+  </article>
+  <section class="answers">
+    <h2>重點答案</h2>
+<article class="a"><div class="a-head"><span class="score hot" title="5121 votes">5.1k</span><span class="accepted">採納</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/2688/brian-dukes" rel="noopener">Brian Dukes</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/154068" rel="noopener">原文 ↗</a></div><div class="prose"><h3>Empty string, undefined, null, ...</h3>
+<p>To check for a <a href="https://developer.mozilla.org/en-US/docs/Glossary/Truthy" rel="noreferrer">truthy value</a>:</p>
+<pre><code>if (strValue) {
+    // strValue was non-empty string, true, 42, Infinity, [], ...
+}
+</code></pre>
+<p>To check for a <a href="https://developer.mozilla.org/en-US/docs/Glossary/Falsy" rel="noreferrer">falsy value</a>:</p>
+<pre><code>if (!strValue) {
+    // strValue was empty string, false, 0, null, undefined, ...
+}
+</code></pre>
+<hr />
+<h3>Empty string (only!)</h3>
+<p>To check for exactly an empty string, compare for strict equality against <code>&quot;&quot;</code> using the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Strict_equality" rel="noreferrer"><code>===</code> operator</a>:</p>
+<pre><code>if (strValue === &quot;&quot;) {
+    // strValue was empty string
+}
+</code></pre>
+<p>To check for not an empty string strictly, use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Strict_inequality" rel="noreferrer"><code>!==</code> operator</a>:</p>
+<pre><code>if (strValue !== &quot;&quot;) {
+    // strValue was not an empty string
+}
+</code></pre>
+</div></article>
+<article class="a"><div class="a-head"><span class="score hot" title="1449 votes">1.4k</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/389026/jano-gonz%c3%a1lez" rel="noopener">Jano Gonz&amp;#225;lez</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/3261380" rel="noopener">原文 ↗</a></div><div class="prose"><p>For checking if a variable is <a href="https://developer.mozilla.org/en-US/docs/Glossary/Falsy" rel="noreferrer">falsey</a> or if it has length attribute equal to zero (which for a string, means it is empty), I use:</p>
+<pre><code>function isEmpty(str) {
+    return (!str || str.length === 0 );
+}
+</code></pre>
+<p><sub>(Note that strings aren't the only variables with a <code>length</code> attribute, arrays have them as well, for example.)</sub></p>
+<p>Alternativaly, you can use the (not so) newly optional chaining and arrow functions to simplify:</p>
+<pre><code>const isEmpty = (str) =&gt; (!str?.length);
+</code></pre>
+<p>It will check the length, returning <code>undefined</code> in case of a nullish value, without throwing an error. In the case of an empty value, zero is falsy and the result is still valid.</p>
+<p>For checking if a variable is falsey or if the string only contains whitespace or is empty, I use:</p>
+<pre><code>function isBlank(str) {
+    return (!str || /^\s*$/.test(str));
+}
+</code></pre>
+<p>If you want, you can <a href="https://www.audero.it/blog/2016/12/05/monkey-patching-javascript/" rel="noreferrer">monkey-patch</a> the <code>String</code> prototype like this:</p>
+<pre><code>String.prototype.isEmpty = function() {
+    // This doesn't work the same way as the isEmpty function used 
+    // in the first example, it will return true for strings containing only whitespace
+    return (this.length === 0 || !this.trim());
+};
+console.log(&quot;example&quot;.isEmpty());
+</code></pre>
+<p><sub>Note that monkey-patching built-in types are controversial, as it can break code that depends on the existing structure of built-in types, for whatever reason.</sub></p>
+</div></article>
+<article class="a"><div class="a-head"><span class="score" title="569 votes">569</span>
+    <span class="a-by">by <a href="https://stackoverflow.com/users/683996/karthick-sk" rel="noopener">karthick.sk</a></span>
+    <a class="a-src" href="https://stackoverflow.com/a/5487027" rel="noopener">原文 ↗</a></div><div class="prose"><p>All the previous answers are good, but this will be even better. Use dual NOT operators (<code>!!</code>):</p>
+<pre class="lang-js prettyprint-override"><code>if (!!str) {
+    // Some code here
+}
+</code></pre>
+<p>Or use type casting:</p>
+<pre class="lang-js prettyprint-override"><code>if (Boolean(str)) {
+    // Code here
+}
+</code></pre>
+<p>Both do the same function. Typecast the variable to Boolean, where <code>str</code> is a variable.</p>
+<ul>
+<li><p>It returns <code>false</code> for <code>null</code>, <code>undefined</code>, <code>0</code>, <code>000</code>, <code>&quot;&quot;</code>, <code>false</code>.</p>
+</li>
+<li><p>It returns <code>true</code> for all string values other than the empty string (including strings like <code>&quot;0&quot;</code> and <code>&quot; &quot;</code>)</p>
+</li>
+</ul>
+</div></article>
+  </section>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+</body>
+</html>
