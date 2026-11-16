@@ -41,6 +41,11 @@ function tagList(tags, { link } = {}) {
     : `<span class="tag">${escapeHtml(t)}</span>`).join('');
 }
 
+function year(epochSeconds) {
+  if (!epochSeconds) return '';
+  return new Date(epochSeconds * 1000).getUTCFullYear();
+}
+
 function siteFooter() {
   return `<footer class="site-footer">
   <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
@@ -69,7 +74,7 @@ function renderIndex(data) {
     <div class="q-main">
       <h2 class="q-title"><a href="q/${q.id}.html">${titleHtml(q)}</a></h2>
       <p class="q-snippet">${escapeHtml(snippet)}</p>
-      <div class="q-meta">${tagList(q.tags)}<span class="dot">·</span>${q.answers.length} 重點答案<span class="dot">·</span>${formatScore(q.viewCount || 0)} 次瀏覽</div>
+      <div class="q-meta"><span class="year">${year(q.creationDate)}</span>${tagList(q.tags)}<span class="dot">·</span>${q.answers.length} 重點答案<span class="dot">·</span>${formatScore(q.viewCount || 0)} 次瀏覽</div>
     </div>
   </article>`;
   }).join('\n');
@@ -127,7 +132,7 @@ function renderDetail(q, data) {
 <main class="wrap detail">
   <article class="question">
     <h1>${titleHtml(q)}</h1>
-    <div class="q-meta big">${scoreBadge(q.score)}<span class="q-by">asked by ${ownerHtml}</span>
+    <div class="q-meta big">${scoreBadge(q.score)}<span class="q-by">${year(q.creationDate)} 年提問 · ${ownerHtml}</span>
       <span class="dot">·</span>${tagList(q.tags)}
       <a class="a-src" href="${escapeHtml(q.link)}" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
     <div class="prose">${sanitizeBody(q.bodyHtml)}</div>

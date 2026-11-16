@@ -85,6 +85,7 @@ button.tag.on { background: var(--link); color: #fff; }
 .q-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; color: var(--faint); font-size: 12.5px; }
 .q-meta.big { font-size: 13.5px; margin: 10px 0 20px; }
 .dot { color: var(--faint); }
+.year { font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .score {
   display: inline-block; min-width: 46px; text-align: center; padding: 4px 8px;
