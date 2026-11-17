@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>物件、JSON 與拷貝 · jsdigest</title>
+<meta name="description" content="深淺拷貝、合併、遍歷、比較與 JSON。">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../topics.html">← 所有主題</a>
+  </div>
+</header>
+<main class="wrap">
+  <div class="topic-head">
+    <h1>物件、JSON 與拷貝</h1>
+    <p class="tagline">深淺拷貝、合併、遍歷、比較與 JSON。</p>
+    <input id="search" class="search" type="search" placeholder="在這個主題裡搜尋…" autocomplete="off" aria-label="搜尋">
+    <div id="prac" class="prac-filter" hidden>
+      <button type="button" class="prac-btn on" data-prac="all">全部</button>
+      <button type="button" class="prac-btn" data-prac="todo">未練</button>
+      <button type="button" class="prac-btn" data-prac="done">練過 <span id="done-count">0</span></button>
+    </div>
+    <p class="count"><span id="shown">20</span> / 20 題 · 依票數排序</p>
+  </div>
+  <div id="list" class="list">
+<article class="q" data-id="208105" data-tags="javascript object properties" data-search="how do i remove a property from a javascript object? javascript object properties">
+    <div class="q-score"><span class="score hot" title="7585 votes">7.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/208105.html">How do I remove a property from a JavaScript object?</a></h2>
+      <p class="q-snippet">Given an object: let myObject = { &quot;ircEvent&quot;: &quot;PRIVMSG&quot;, &quot;method&quot;: &quot;newURI&quot;, &quot;regex&quot;: &quot;^http://.*&quot; }; How do I remove the property regex to end up with the following myObject ? le…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">object</span><span class="tag">properties</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.4M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="122102" data-tags="javascript object clone" data-search="what is the most efficient way to deep clone an object in javascript? javascript object clone">
+    <div class="q-score"><span class="score hot" title="5156 votes">5.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/122102.html">What is the most efficient way to deep clone an object in JavaScript?</a></h2>
+      <p class="q-snippet">What is the most efficient way to clone a JavaScript object? I&#39;ve seen obj = eval(uneval(o)); being used, but that&#39;s non-standard and only supported by Firefox . I&#39;ve done things…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">object</span><span class="tag">clone</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.1M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="2669690" data-tags="javascript json ajax security" data-search="why does google prepend while(1); to their json responses? javascript json ajax security">
+    <div class="q-score"><span class="score hot" title="4510 votes">4.5k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/2669690.html">Why does Google prepend while(1); to their JSON responses?</a></h2>
+      <p class="q-snippet">Why does Google prepend while(1); to their (private) JSON responses? For example, here&#39;s a response while turning a calendar on and off in Google Calendar : while (1); [ [&#39;u&#39;, [ […</p>
+      <div class="q-meta"><span class="year">2010</span><span class="tag">javascript</span><span class="tag">json</span><span class="tag">ajax</span><span class="tag">security</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>612k 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="679915" data-tags="javascript javascript-objects" data-search="how do i test for an empty javascript object? javascript javascript-objects">
+    <div class="q-score"><span class="score hot" title="3888 votes">3.9k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/679915.html">How do I test for an empty JavaScript object?</a></h2>
+      <p class="q-snippet">After an AJAX request, sometimes my application may return an empty object, like: var a = {}; How can I check whether that&#39;s the case?</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">javascript-objects</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>4.5M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="728360" data-tags="javascript clone javascript-objects" data-search="how do i correctly clone a javascript object? javascript clone javascript-objects">
+    <div class="q-score"><span class="score hot" title="3830 votes">3.8k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/728360.html">How do I correctly clone a JavaScript object?</a></h2>
+      <p class="q-snippet">I have an object x . I&#39;d like to copy it as object y , such that changes to y do not modify x . I realized that copying objects derived from built-in JavaScript objects will resul…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">clone</span><span class="tag">javascript-objects</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.6M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="4810841" data-tags="javascript json pretty-print" data-search="pretty-print json using javascript javascript json pretty-print">
+    <div class="q-score"><span class="score hot" title="3557 votes">3.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/4810841.html">pretty-print JSON using JavaScript</a></h2>
+      <p class="q-snippet">How can I display JSON in an easy-to-read (for human readers) format? I&#39;m looking primarily for indentation and whitespace, with perhaps even colors / font-styles / etc.</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">json</span><span class="tag">pretty-print</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="171251" data-tags="javascript javascript-objects" data-search="how can i merge properties of two javascript objects? javascript javascript-objects">
+    <div class="q-score"><span class="score hot" title="3376 votes">3.4k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/171251.html">How can I merge properties of two JavaScript objects?</a></h2>
+      <p class="q-snippet">I need to be able to merge two (very simple) JavaScript objects at runtime. For example I&#39;d like to: var obj1 = { food: &#39;pizza&#39;, car: &#39;ford&#39; } var obj2 = { animal: &#39;dog&#39; } obj1.me…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">javascript-objects</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.1M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="27509" data-tags="javascript object undefined object-property" data-search="detecting an undefined object property javascript object undefined object-property">
+    <div class="q-score"><span class="score hot" title="3247 votes">3.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/27509.html">Detecting an undefined object property</a></h2>
+      <p class="q-snippet">How do I check if an object property in JavaScript is undefined?</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">object</span><span class="tag">undefined</span><span class="tag">object-property</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.5M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="5223" data-tags="javascript object javascript-objects" data-search="length of a javascript object javascript object javascript-objects">
+    <div class="q-score"><span class="score hot" title="3083 votes">3.1k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/5223.html">Length of a JavaScript object</a></h2>
+      <p class="q-snippet">I have a JavaScript object. Is there a built-in or accepted best practice way to get the length of this object? const myObject = new Object(); myObject[&quot;firstname&quot;] = &quot;Gareth&quot;; my…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">object</span><span class="tag">javascript-objects</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.1M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="2067472" data-tags="javascript json jsonp terminology" data-search="what is jsonp, and why was it created? javascript json jsonp terminology">
+    <div class="q-score"><span class="score hot" title="2494 votes">2.5k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/2067472.html">What is JSONP, and why was it created?</a></h2>
+      <p class="q-snippet">I understand JSON, but not JSONP. Wikipedia&#39;s document on JSON is (was) the top search result for JSONP. It says this: JSONP or &quot;JSON with padding&quot; is a JSON extension wherein a p…</p>
+      <div class="q-meta"><span class="year">2010</span><span class="tag">javascript</span><span class="tag">json</span><span class="tag">jsonp</span><span class="tag">terminology</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>632k 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="957537" data-tags="javascript serialization javascript-objects" data-search="how can i display a javascript object? javascript serialization javascript-objects">
+    <div class="q-score"><span class="score hot" title="2152 votes">2.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/957537.html">How can I display a JavaScript object?</a></h2>
+      <p class="q-snippet">How do I display the content of a JavaScript object in a string format like when we alert a variable? The same formatted way I want to display an object.</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">serialization</span><span class="tag">javascript-objects</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.6M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="126100" data-tags="javascript performance properties count key" data-search="how to efficiently count the number of keys/properties of an object in javascript javascript performance properties count key">
+    <div class="q-score"><span class="score hot" title="2046 votes">2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/126100.html">How to efficiently count the number of keys/properties of an object in JavaScript</a></h2>
+      <p class="q-snippet">What’s the fastest way to count the number of keys/properties of an object? Is it possible to do this without iterating over the object, i.e., without doing: var count = 0; for (k…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">performance</span><span class="tag">properties</span><span class="tag">count</span><span class="tag">key</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.1M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="455338" data-tags="javascript object" data-search="how do i check if an object has a key in javascript? javascript object">
+    <div class="q-score"><span class="score hot" title="2031 votes">2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/455338.html">How do I check if an object has a key in JavaScript?</a></h2>
+      <p class="q-snippet">Which is the right thing to do? if (myObj[&#39;key&#39;] == undefined) or if (myObj[&#39;key&#39;] == null) or if (myObj[&#39;key&#39;])</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">object</span><span class="dot">·</span>2 重點答案<span class="dot">·</span>2.3M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="1168807" data-tags="javascript object-literal" data-search="how can i add a key/value pair to a javascript object? javascript object-literal">
+    <div class="q-score"><span class="score hot" title="1999 votes">2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/1168807.html">How can I add a key/value pair to a JavaScript object?</a></h2>
+      <p class="q-snippet">Here is my object literal: var obj = {key1: value1, key2: value2}; How can I add field key3 with value3 to the object?</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">object-literal</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>4.3M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="19590865" data-tags="javascript javascript-objects" data-search="from an array of objects, extract value of a property as array javascript javascript-objects">
+    <div class="q-score"><span class="score hot" title="1975 votes">2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/19590865.html">From an array of objects, extract value of a property as array</a></h2>
+      <p class="q-snippet">I have JavaScript object array with the following structure: objArray = [ { foo: 1, bar: 2}, { foo: 3, bar: 4}, { foo: 5, bar: 6} ]; I want to extract a field from each object, an…</p>
+      <div class="q-meta"><span class="year">2013</span><span class="tag">javascript</span><span class="tag">javascript-objects</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="518000" data-tags="javascript pass-by-reference pass-by-value" data-search="is javascript a pass-by-reference or pass-by-value language? javascript pass-by-reference pass-by-value">
+    <div class="q-score"><span class="score hot" title="1812 votes">1.8k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/518000.html">Is JavaScript a pass-by-reference or pass-by-value language?</a></h2>
+      <p class="q-snippet">The primitive types (number, string, etc.) are passed by value. Still, objects are unknown because they can be both passed by value (in which case we consider that a variable hold…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">pass-by-reference</span><span class="tag">pass-by-value</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>598k 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="4935632" data-tags="javascript json parsing" data-search="parse json in javascript? javascript json parsing">
+    <div class="q-score"><span class="score hot" title="1763 votes">1.8k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/4935632.html">Parse JSON in JavaScript?</a></h2>
+      <p class="q-snippet">I want to parse a JSON string in JavaScript. The response is something like var response = &#39;{&quot;result&quot;:true,&quot;count&quot;:1}&#39;; How can I get the values result and count from this?</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">json</span><span class="tag">parsing</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="10286204" data-tags="javascript json" data-search="what is the &quot;right&quot; json date format? javascript json">
+    <div class="q-score"><span class="score hot" title="1583 votes">1.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/10286204.html">What is the &quot;right&quot; JSON date format?</a></h2>
+      <p class="q-snippet">I&#39;ve seen so many different standards for the JSON date format: &quot;\&quot;\\/Date(1335205592410)\\/\&quot;&quot; .NET JavaScriptSerializer &quot;\&quot;\\/Date(1335205592410-0500)\\/\&quot;&quot; .NET DataContractJso…</p>
+      <div class="q-meta"><span class="year">2012</span><span class="tag">javascript</span><span class="tag">json</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.1M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="1068834" data-tags="javascript object comparison object-comparison" data-search="object comparison in javascript javascript object comparison object-comparison">
+    <div class="q-score"><span class="score hot" title="1514 votes">1.5k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/1068834.html">Object comparison in JavaScript</a></h2>
+      <p class="q-snippet">What is the best way to compare objects in JavaScript? Example: var user1 = {name : &quot;nerd&quot;, org: &quot;dev&quot;}; var user2 = {name : &quot;nerd&quot;, org: &quot;dev&quot;}; var eq = user1 == user2; alert(eq…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">object</span><span class="tag">comparison</span><span class="tag">object-comparison</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.6M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="45015" data-tags="javascript json parsing" data-search="safely turning a json string into an object javascript json parsing">
+    <div class="q-score"><span class="score hot" title="1510 votes">1.5k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/45015.html">Safely turning a JSON string into an object</a></h2>
+      <p class="q-snippet">Given a string of JSON data, how can I safely turn that string into a JavaScript object? Obviously I can do this unsafely with something like: var obj = eval(&quot;(&quot; + json + &#39;)&#39;); bu…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">json</span><span class="tag">parsing</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.5M 次瀏覽</div>
+    </div>
+  </article>
+  </div>
+  <p id="empty" class="empty" hidden>沒有符合的題目。</p>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+<script src="../assets/app.js"></script>
+</body>
+</html>

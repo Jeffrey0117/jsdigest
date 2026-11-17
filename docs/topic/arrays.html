@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>陣列與迴圈 · jsdigest</title>
+<meta name="description" content="增刪、排序、去重、map/filter/reduce 與遍歷。">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../topics.html">← 所有主題</a>
+  </div>
+</header>
+<main class="wrap">
+  <div class="topic-head">
+    <h1>陣列與迴圈</h1>
+    <p class="tagline">增刪、排序、去重、map/filter/reduce 與遍歷。</p>
+    <input id="search" class="search" type="search" placeholder="在這個主題裡搜尋…" autocomplete="off" aria-label="搜尋">
+    <div id="prac" class="prac-filter" hidden>
+      <button type="button" class="prac-btn on" data-prac="all">全部</button>
+      <button type="button" class="prac-btn" data-prac="todo">未練</button>
+      <button type="button" class="prac-btn" data-prac="done">練過 <span id="done-count">0</span></button>
+    </div>
+    <p class="count"><span id="shown">33</span> / 33 題 · 依票數排序</p>
+  </div>
+  <div id="list" class="list">
+<article class="q" data-id="5767325" data-tags="javascript arrays" data-search="how can i remove a specific item from an array in javascript? javascript arrays">
+    <div class="q-score"><span class="score hot" title="12260 votes">12k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/5767325.html">How can I remove a specific item from an array in JavaScript?</a></h2>
+      <p class="q-snippet">How do I remove a specific value from an array? Something like: array.remove(value); Constraints: I have to use core JavaScript. Frameworks are not allowed.</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>13.6M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="9329446" data-tags="javascript arrays loops foreach iteration" data-search="loop (for each) over an array in javascript javascript arrays loops foreach iteration">
+    <div class="q-score"><span class="score hot" title="5814 votes">5.8k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/9329446.html">Loop (for each) over an array in JavaScript</a></h2>
+      <p class="q-snippet">How can I loop through all the entries in an array using JavaScript?</p>
+      <div class="q-meta"><span class="year">2012</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">loops</span><span class="tag">foreach</span><span class="tag">iteration</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>5.6M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="237104" data-tags="javascript arrays algorithm time-complexity javascript-objects" data-search="how do i check if an array includes a value in javascript? javascript arrays algorithm time-complexity javascript-objects">
+    <div class="q-score"><span class="score hot" title="5010 votes">5k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/237104.html">How do I check if an array includes a value in JavaScript?</a></h2>
+      <p class="q-snippet">What is the most concise and efficient way to find out if a JavaScript array contains a value? This is the only way I know to do it: function contains(a, obj) { for (var i = 0; i…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">algorithm</span><span class="tag">time-complexity</span><span class="tag">javascript-objects</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.7M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="586182" data-tags="javascript arrays" data-search="how can i insert an item into an array at a specific index? javascript arrays">
+    <div class="q-score"><span class="score hot" title="4355 votes">4.4k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/586182.html">How can I insert an item into an array at a specific index?</a></h2>
+      <p class="q-snippet">I am looking for a JavaScript array insert method, in the style of: arr.insert(index, item) It should preferably be in jQuery, but any JavaScript implementation will do at this po…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.7M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="1129216" data-tags="javascript arrays sorting comparison array-of-dict" data-search="sort array of objects by string property value javascript arrays sorting comparison array-of-dict">
+    <div class="q-score"><span class="score hot" title="4231 votes">4.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/1129216.html">Sort array of objects by string property value</a></h2>
+      <p class="q-snippet">I have an array of JavaScript objects: var objs = [ { first_nom: &#39;Laszlo&#39;, last_nom: &#39;Jamf&#39; }, { first_nom: &#39;Pig&#39;, last_nom: &#39;Bodine&#39; }, { first_nom: &#39;Pirate&#39;, last_nom: &#39;Prentice…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">sorting</span><span class="tag">comparison</span><span class="tag">array-of-dict</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.5M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="1098040" data-tags="javascript arrays object" data-search="checking if a key exists in a javascript object? javascript arrays object">
+    <div class="q-score"><span class="score hot" title="4141 votes">4.1k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/1098040.html">Checking if a key exists in a JavaScript object?</a></h2>
+      <p class="q-snippet">How do I check if a particular key exists in a JavaScript object or array? If a key doesn&#39;t exist, and I try to access it, will it return false? Or throw an error?</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">object</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.9M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="3010840" data-tags="javascript arrays loops for-loop" data-search="how to loop through the items of an array in javascript? javascript arrays loops for-loop">
+    <div class="q-score"><span class="score hot" title="4097 votes">4.1k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/3010840.html">How to loop through the items of an array in JavaScript?</a></h2>
+      <p class="q-snippet">In Java, you can use a for loop to traverse objects in an array as follows: String[] myStringArray = {&quot;Hello&quot;, &quot;World&quot;}; for (String s : myStringArray) { // Do something } Can I d…</p>
+      <div class="q-meta"><span class="year">2010</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">loops</span><span class="tag">for-loop</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>5.6M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="684672" data-tags="javascript loops for-loop each" data-search="how do i loop through or enumerate a javascript object? javascript loops for-loop each">
+    <div class="q-score"><span class="score hot" title="3627 votes">3.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/684672.html">How do I loop through or enumerate a JavaScript object?</a></h2>
+      <p class="q-snippet">I have a JavaScript object like the following: var p = { &quot;p1&quot;: &quot;value1&quot;, &quot;p2&quot;: &quot;value2&quot;, &quot;p3&quot;: &quot;value3&quot; }; How do I loop through all of p &#39;s elements ( p1 , p2 , p3 ...) and get t…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">loops</span><span class="tag">for-loop</span><span class="tag">each</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.9M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="4775722" data-tags="javascript arrays javascript-objects" data-search="how can i check if an object is an array? javascript arrays javascript-objects">
+    <div class="q-score"><span class="score hot" title="3361 votes">3.4k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/4775722.html">How can I check if an object is an array?</a></h2>
+      <p class="q-snippet">I&#39;m trying to write a function that either accepts a list of strings, or a single string. If it&#39;s a string, then I want to convert it to an array with just the one item so I can l…</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">javascript-objects</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.1M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="750486" data-tags="javascript loops closures" data-search="how to ensure closures created in a loop capture the value of the loop variable from their particular iteration? javascript loops closures">
+    <div class="q-score"><span class="score hot" title="3264 votes">3.3k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/750486.html">How to ensure closures created in a loop capture the value of the loop variable from their particular iteration?</a></h2>
+      <p class="q-snippet">var funcs = []; // let&#39;s create 3 functions for (var i = 0; i &lt; 3; i++) { // and store them in funcs funcs[i] = function() { // each should log its value. console.log(&quot;My value:&quot;,…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">loops</span><span class="tag">closures</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>500k 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="1960473" data-tags="javascript unique arrays" data-search="get all unique values in a javascript array (remove duplicates) javascript unique arrays">
+    <div class="q-score"><span class="score hot" title="2926 votes">2.9k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/1960473.html">Get all unique values in a JavaScript array (remove duplicates)</a></h2>
+      <p class="q-snippet">I have an array of numbers that I need to make sure are unique. I found the code snippet below on the Internet, and it works great until the array has a zero in it. I found this o…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">unique</span><span class="tag">arrays</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.8M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="351409" data-tags="javascript arrays append" data-search="how to append something to an array? javascript arrays append">
+    <div class="q-score"><span class="score hot" title="2889 votes">2.9k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/351409.html">How to append something to an array?</a></h2>
+      <p class="q-snippet">How do I append an object (such as a string or number) to an array in JavaScript?</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">append</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>5.5M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="952924" data-tags="javascript slice trim" data-search="how do i chop/slice/trim off last character in string using javascript? javascript slice trim">
+    <div class="q-score"><span class="score hot" title="2624 votes">2.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/952924.html">How do I chop/slice/trim off last character in string using Javascript?</a></h2>
+      <p class="q-snippet">I have a string, 12345.00 , and I would like it to return 12345.0 . I have looked at trim , but it looks like it is only trimming whitespace and slice which I don&#39;t see how this w…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">slice</span><span class="tag">trim</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.7M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="3746725" data-tags="javascript arrays range" data-search="how to create an array containing 1...n javascript arrays range">
+    <div class="q-score"><span class="score hot" title="2484 votes">2.5k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/3746725.html">How to create an array containing 1...N</a></h2>
+      <p class="q-snippet">I&#39;m looking for any alternatives to the below for creating a JavaScript array containing 1 through to N where N is only known at runtime. var foo = []; for (var i = 1; i &lt;= N; i++…</p>
+      <div class="q-meta"><span class="year">2010</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">range</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.9M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="8073673" data-tags="javascript arrays" data-search="how can i add new array elements at the beginning of an array in javascript? javascript arrays">
+    <div class="q-score"><span class="score hot" title="2439 votes">2.4k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/8073673.html">How can I add new array elements at the beginning of an array in JavaScript?</a></h2>
+      <p class="q-snippet">I have a need to add or prepend elements at the beginning of an array. For example, if my array looks like below: [23, 45, 12, 67] And the response from my AJAX call is 34 , I wan…</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.8M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="8312459" data-tags="javascript loops object" data-search="iterate through object properties javascript loops object">
+    <div class="q-score"><span class="score hot" title="2400 votes">2.4k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/8312459.html">Iterate through object properties</a></h2>
+      <p class="q-snippet">var obj = { name: &quot;Simon&quot;, age: &quot;20&quot;, clothing: { style: &quot;simple&quot;, hipster: false } } for(var propt in obj){ console.log(propt + &#39;: &#39; + obj[propt]); } How does the variable propt…</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">loops</span><span class="tag">object</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.7M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="2641347" data-tags="javascript arrays foreach" data-search="short circuit array.foreach like calling break javascript arrays foreach">
+    <div class="q-score"><span class="score hot" title="2249 votes">2.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/2641347.html">Short circuit Array.forEach like calling break</a></h2>
+      <p class="q-snippet">[1,2,3].forEach(function(el) { if(el === 1) break; }); How can I do this using the new forEach method in JavaScript? I&#39;ve tried return; , return false; and break . break crashes a…</p>
+      <div class="q-meta"><span class="year">2010</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">foreach</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.9M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="1232040" data-tags="javascript arrays" data-search="how do i empty an array in javascript? javascript arrays">
+    <div class="q-score"><span class="score hot" title="2192 votes">2.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/1232040.html">How do I empty an array in JavaScript?</a></h2>
+      <p class="q-snippet">Is there a way to empty an array and if so possibly with .remove() ? For instance, A = [1,2,3,4]; How can I empty that?</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>4.4M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="3216013" data-tags="javascript arrays" data-search="get the last item in an array javascript arrays">
+    <div class="q-score"><span class="score hot" title="2186 votes">2.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/3216013.html">Get the last item in an array</a></h2>
+      <p class="q-snippet">Here is my JavaScript code so far: var linkElement = document.getElementById(&quot;BackButton&quot;); var loc_array = document.location.href.split(&#39;/&#39;); var newT = document.createTextNode(u…</p>
+      <div class="q-meta"><span class="year">2010</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.7M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="767486" data-tags="javascript arrays list variables" data-search="how do i check if a variable is an array in javascript? javascript arrays list variables">
+    <div class="q-score"><span class="score hot" title="2185 votes">2.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/767486.html">How do I check if a variable is an array in JavaScript?</a></h2>
+      <p class="q-snippet">How do I check if a variable is an array in JavaScript? if (variable.constructor == Array)</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">list</span><span class="tag">variables</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.4M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="7486085" data-tags="javascript arrays deep-copy pass-by-value" data-search="how to create a copy of a javascript array instead of a reference? javascript arrays deep-copy pass-by-value">
+    <div class="q-score"><span class="score hot" title="2165 votes">2.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/7486085.html">How to create a copy of a JavaScript array instead of a reference?</a></h2>
+      <p class="q-snippet">When copying an array in JavaScript to another array: var arr1 = [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;]; var arr2 = arr1; arr2.push(&#39;d&#39;); console.log(arr1); //= [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;] I realized that arr2 refe…</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">deep-copy</span><span class="tag">pass-by-value</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.3M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="7364150" data-tags="javascript arrays javascript-objects" data-search="search an array of javascript objects for an object with a matching value javascript arrays javascript-objects">
+    <div class="q-score"><span class="score hot" title="2161 votes">2.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/7364150.html">Search an array of JavaScript objects for an object with a matching value</a></h2>
+      <p class="q-snippet">I&#39;ve got an array: myArray = [{&#39;id&#39;:&#39;73&#39;,&#39;foo&#39;:&#39;bar&#39;},{&#39;id&#39;:&#39;45&#39;,&#39;foo&#39;:&#39;bar&#39;}, etc.] I&#39;m unable to change the structure of the array. I&#39;m being passed an id of 45 , and I want to…</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">javascript-objects</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.5M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="500504" data-tags="javascript arrays loops for-loop iteration" data-search="why is using &quot;for...in&quot; for array iteration a bad idea? javascript arrays loops for-loop iteration">
+    <div class="q-score"><span class="score hot" title="2102 votes">2.1k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/500504.html">Why is using &quot;for...in&quot; for array iteration a bad idea?</a></h2>
+      <p class="q-snippet">I&#39;ve been told not to use for...in with arrays in JavaScript. Why not?</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">loops</span><span class="tag">for-loop</span><span class="tag">iteration</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.1M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="2450954" data-tags="javascript arrays random shuffle" data-search="how to randomize (shuffle) a javascript array? javascript arrays random shuffle">
+    <div class="q-score"><span class="score hot" title="2068 votes">2.1k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/2450954.html">How to randomize (shuffle) a JavaScript array?</a></h2>
+      <p class="q-snippet">I have an array like this: var arr1 = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]; How can I randomize / shuffle it?</p>
+      <div class="q-meta"><span class="year">2010</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">random</span><span class="tag">shuffle</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.8M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="1584370" data-tags="javascript arrays merge" data-search="how to merge two arrays in javascript and de-duplicate items javascript arrays merge">
+    <div class="q-score"><span class="score hot" title="2033 votes">2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/1584370.html">How to merge two arrays in JavaScript and de-duplicate items</a></h2>
+      <p class="q-snippet">I have two JavaScript arrays: var array1 = [&quot;Vijendra&quot;,&quot;Singh&quot;]; var array2 = [&quot;Singh&quot;, &quot;Shakya&quot;]; I want the output to be: var array3 = [&quot;Vijendra&quot;,&quot;Singh&quot;,&quot;Shakya&quot;]; The output…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">merge</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.3M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="921789" data-tags="javascript loops" data-search="how to loop through a plain javascript object with the objects as members javascript loops">
+    <div class="q-score"><span class="score hot" title="1840 votes">1.8k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/921789.html">How to loop through a plain JavaScript object with the objects as members</a></h2>
+      <p class="q-snippet">How can I loop through all members in a JavaScript object, including values that are objects? For example, how could I loop through this (accessing the &quot;your_name&quot; and &quot;your_messa…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">loops</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.1M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="3895478" data-tags="javascript arrays functional-programming" data-search="does javascript have a method like &quot;range()&quot; to generate a range within the supplied bounds? javascript arrays functional-programming">
+    <div class="q-score"><span class="score hot" title="1759 votes">1.8k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/3895478.html">Does JavaScript have a method like &quot;range()&quot; to generate a range within the supplied bounds?</a></h2>
+      <p class="q-snippet">In PHP, you can do... range(1, 3); // Array(1, 2, 3) range(&quot;A&quot;, &quot;C&quot;); // Array(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;) That is, there is a function that lets you get a range of numbers or characters by pa…</p>
+      <div class="q-meta"><span class="year">2010</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">functional-programming</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.7M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="979256" data-tags="javascript arrays sorting" data-search="sorting an array of objects by property values javascript arrays sorting">
+    <div class="q-score"><span class="score hot" title="1728 votes">1.7k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/979256.html">Sorting an array of objects by property values</a></h2>
+      <p class="q-snippet">I&#39;ve got the following objects using AJAX and stored them in an array: var homes = [ { &quot;h_id&quot;: &quot;3&quot;, &quot;city&quot;: &quot;Dallas&quot;, &quot;state&quot;: &quot;TX&quot;, &quot;zip&quot;: &quot;75201&quot;, &quot;price&quot;: &quot;162500&quot; }, { &quot;h_id&quot;:…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">sorting</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.6M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="281264" data-tags="javascript arrays" data-search="remove empty elements from an array in javascript javascript arrays">
+    <div class="q-score"><span class="score hot" title="1665 votes">1.7k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/281264.html">Remove empty elements from an array in Javascript</a></h2>
+      <p class="q-snippet">How do I remove empty elements from an array in JavaScript? Is there a straightforward way, or do I need to loop through it and remove them manually?</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.9M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="10865025" data-tags="javascript arrays multidimensional-array merge flatten" data-search="merge/flatten an array of arrays javascript arrays multidimensional-array merge flatten">
+    <div class="q-score"><span class="score hot" title="1583 votes">1.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/10865025.html">Merge/flatten an array of arrays</a></h2>
+      <p class="q-snippet">I have a JavaScript array like: [[&quot;$6&quot;], [&quot;$12&quot;], [&quot;$25&quot;], [&quot;$25&quot;], [&quot;$18&quot;], [&quot;$22&quot;], [&quot;$10&quot;]] How would I go about merging the separate inner arrays into one like: [&quot;$6&quot;, &quot;$12&quot;,…</p>
+      <div class="q-meta"><span class="year">2012</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">multidimensional-array</span><span class="tag">merge</span><span class="tag">flatten</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.3M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="7837456" data-tags="javascript arrays json" data-search="how to compare arrays in javascript? javascript arrays json">
+    <div class="q-score"><span class="score hot" title="1580 votes">1.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/7837456.html">How to compare arrays in JavaScript?</a></h2>
+      <p class="q-snippet">I&#39;d like to compare two arrays... ideally, efficiently. Nothing fancy, just true if they are identical, and false if not. Not surprisingly, the comparison operator doesn&#39;t seem to…</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">json</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.9M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="5915096" data-tags="javascript arrays random" data-search="get a random item from a javascript array javascript arrays random">
+    <div class="q-score"><span class="score hot" title="1537 votes">1.5k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/5915096.html">Get a random item from a JavaScript array</a></h2>
+      <p class="q-snippet">var items = Array(523, 3452, 334, 31, ..., 5346); How do I get random item from items ?</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">random</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.6M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="1374126" data-tags="javascript arrays concatenation" data-search="how to extend an existing javascript array with another array, without creating a new array javascript arrays concatenation">
+    <div class="q-score"><span class="score hot" title="1524 votes">1.5k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/1374126.html">How to extend an existing JavaScript array with another array, without creating a new array</a></h2>
+      <p class="q-snippet">There doesn&#39;t seem to be a way to extend an existing JavaScript array with another array, i.e. to emulate Python&#39;s extend method. I want to achieve the following: &gt;&gt;&gt; a = [1, 2] […</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">arrays</span><span class="tag">concatenation</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.1M 次瀏覽</div>
+    </div>
+  </article>
+  </div>
+  <p id="empty" class="empty" hidden>沒有符合的題目。</p>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+<script src="../assets/app.js"></script>
+</body>
+</html>

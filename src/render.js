@@ -54,11 +54,26 @@ function siteFooter() {
 </footer>`;
 }
 
+function questionRow(q, hrefPrefix) {
+  const snippet = truncate(toText(q.bodyHtml), 180);
+  const tagsAttr = q.tags.join(' ').toLowerCase();
+  const searchAttr = `${titleText(q)} ${tagsAttr}`.toLowerCase();
+  return `<article class="q" data-id="${q.id}" data-tags="${escapeHtml(tagsAttr)}" data-search="${escapeHtml(searchAttr)}">
+    <div class="q-score">${scoreBadge(q.score)}</div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="${hrefPrefix}q/${q.id}.html">${titleHtml(q)}</a></h2>
+      <p class="q-snippet">${escapeHtml(snippet)}</p>
+      <div class="q-meta"><span class="year">${year(q.creationDate)}</span>${tagList(q.tags)}<span class="dot">·</span>${q.answers.length} 重點答案<span class="dot">·</span>${formatScore(q.viewCount || 0)} 次瀏覽</div>
+    </div>
+  </article>`;
+}
+
 function renderIndex(data) {
   const header = `<header class="site-header">
   <div class="wrap">
     <h1 class="brand"><a href="index.html">${escapeHtml(data.siteTitle)}</a></h1>
     <p class="tagline">${escapeHtml(data.siteTagline)}</p>
+    <nav class="topnav"><a href="topics.html">按學習主題逛 →</a></nav>
     <input id="search" class="search" type="search" placeholder="搜尋題目或標籤…" autocomplete="off" aria-label="搜尋">
     <div id="tags" class="tag-filter">${tagList(data.topTags, { link: true })}</div>
     <div id="prac" class="prac-filter" hidden>
@@ -70,19 +85,7 @@ function renderIndex(data) {
   </div>
 </header>`;
 
-  const rows = data.questions.map((q) => {
-    const snippet = truncate(toText(q.bodyHtml), 180);
-    const tagsAttr = q.tags.join(' ').toLowerCase();
-    const searchAttr = `${titleText(q)} ${tagsAttr}`.toLowerCase();
-    return `<article class="q" data-id="${q.id}" data-tags="${escapeHtml(tagsAttr)}" data-search="${escapeHtml(searchAttr)}">
-    <div class="q-score">${scoreBadge(q.score)}</div>
-    <div class="q-main">
-      <h2 class="q-title"><a href="q/${q.id}.html">${titleHtml(q)}</a></h2>
-      <p class="q-snippet">${escapeHtml(snippet)}</p>
-      <div class="q-meta"><span class="year">${year(q.creationDate)}</span>${tagList(q.tags)}<span class="dot">·</span>${q.answers.length} 重點答案<span class="dot">·</span>${formatScore(q.viewCount || 0)} 次瀏覽</div>
-    </div>
-  </article>`;
-  }).join('\n');
+  const rows = data.questions.map((q) => questionRow(q, '')).join('\n');
 
   const body = `${header}
 <main class="wrap">
@@ -139,6 +142,7 @@ function renderDetail(q, data) {
     <h1>${titleHtml(q)}</h1>
     <div class="q-meta big">${scoreBadge(q.score)}<span class="q-by">${year(q.creationDate)} 年提問 · ${ownerHtml}</span>
       <span class="dot">·</span>${tagList(q.tags)}
+      ${q.topicSlug ? `<a class="topic-chip" href="../topic/${q.topicSlug}.html">主題：${escapeHtml(q.topicLabel)} →</a>` : ''}
       <a class="a-src" href="${escapeHtml(q.link)}" rel="noopener">在 Stack Overflow 看原文 ↗</a></div>
     <div class="prose">${sanitizeBody(q.bodyHtml)}</div>
   </article>
@@ -170,4 +174,74 @@ ${siteFooter()}
   });
 }
 
-module.exports = { renderIndex, renderDetail, formatScore };
+function renderTopicsIndex(data) {
+  const cards = data.topics.map((t) => {
+    const ids = t.questions.map((q) => q.id).join(',');
+    return `<a class="topic-card" href="topic/${t.slug}.html" data-ids="${ids}">
+    <div class="topic-row">
+      <h2 class="topic-name">${escapeHtml(t.label)}</h2>
+      <span class="topic-count">${t.questions.length} 題 · 練過 <span class="topic-done">0</span></span>
+    </div>
+    <p class="topic-blurb">${escapeHtml(t.blurb)}</p>
+  </a>`;
+  }).join('\n');
+
+  const body = `<header class="site-header">
+  <div class="wrap">
+    <h1 class="brand"><a href="index.html">${escapeHtml(data.siteTitle)}</a></h1>
+    <p class="tagline">學習主題 · 把題目照概念分組</p>
+    <nav class="topnav"><a href="index.html">← 回全部題目</a></nav>
+  </div>
+</header>
+<main class="wrap">
+  <div class="topics">
+${cards}
+  </div>
+</main>
+${siteFooter()}
+<script src="assets/app.js"></script>`;
+
+  return layout({
+    title: `學習主題 · ${data.siteTitle}`,
+    description: `把 ${data.siteTitle} 的 JavaScript 題目照學習主題分組，一塊一塊逛。`,
+    body,
+    depth: 0,
+  });
+}
+
+function renderTopicPage(topic, data) {
+  const rows = topic.questions.map((q) => questionRow(q, '../')).join('\n');
+  const body = `<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../topics.html">← 所有主題</a>
+  </div>
+</header>
+<main class="wrap">
+  <div class="topic-head">
+    <h1>${escapeHtml(topic.label)}</h1>
+    <p class="tagline">${escapeHtml(topic.blurb)}</p>
+    <input id="search" class="search" type="search" placeholder="在這個主題裡搜尋…" autocomplete="off" aria-label="搜尋">
+    <div id="prac" class="prac-filter" hidden>
+      <button type="button" class="prac-btn on" data-prac="all">全部</button>
+      <button type="button" class="prac-btn" data-prac="todo">未練</button>
+      <button type="button" class="prac-btn" data-prac="done">練過 <span id="done-count">0</span></button>
+    </div>
+    <p class="count"><span id="shown">${topic.questions.length}</span> / ${topic.questions.length} 題 · 依票數排序</p>
+  </div>
+  <div id="list" class="list">
+${rows}
+  </div>
+  <p id="empty" class="empty" hidden>沒有符合的題目。</p>
+</main>
+${siteFooter()}
+<script src="../assets/app.js"></script>`;
+
+  return layout({
+    title: `${topic.label} · ${data.siteTitle}`,
+    description: topic.blurb,
+    body,
+    depth: 1,
+  });
+}
+
+module.exports = { renderIndex, renderDetail, renderTopicsIndex, renderTopicPage, formatScore };

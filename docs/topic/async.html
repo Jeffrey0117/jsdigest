@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>非同步 · jsdigest</title>
+<meta name="description" content="callback、Promise、async/await 與事件迴圈。">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../topics.html">← 所有主題</a>
+  </div>
+</header>
+<main class="wrap">
+  <div class="topic-head">
+    <h1>非同步</h1>
+    <p class="tagline">callback、Promise、async/await 與事件迴圈。</p>
+    <input id="search" class="search" type="search" placeholder="在這個主題裡搜尋…" autocomplete="off" aria-label="搜尋">
+    <div id="prac" class="prac-filter" hidden>
+      <button type="button" class="prac-btn on" data-prac="all">全部</button>
+      <button type="button" class="prac-btn" data-prac="todo">未練</button>
+      <button type="button" class="prac-btn" data-prac="done">練過 <span id="done-count">0</span></button>
+    </div>
+    <p class="count"><span id="shown">2</span> / 2 題 · 依票數排序</p>
+  </div>
+  <div id="list" class="list">
+<article class="q" data-id="951021" data-tags="javascript sleep" data-search="what is the javascript version of sleep()? javascript sleep">
+    <div class="q-score"><span class="score hot" title="3982 votes">4k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/951021.html">What is the JavaScript version of sleep()?</a></h2>
+      <p class="q-snippet">Is there a better way to engineer a sleep in JavaScript than the following pausecomp function ? function pausecomp(millis) { var date = new Date(); var curDate = null; do { curDat…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">sleep</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>5.4M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="20279484" data-tags="javascript callback this" data-search="how to access the correct `this` inside a callback javascript callback this">
+    <div class="q-score"><span class="score hot" title="1924 votes">1.9k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/20279484.html">How to access the correct `this` inside a callback</a></h2>
+      <p class="q-snippet">I have a constructor function which registers an event handler: function MyConstructor(data, transport) { this.data = data; transport.on(&#39;data&#39;, function () { alert(this.data); })…</p>
+      <div class="q-meta"><span class="year">2013</span><span class="tag">javascript</span><span class="tag">callback</span><span class="tag">this</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>660k 次瀏覽</div>
+    </div>
+  </article>
+  </div>
+  <p id="empty" class="empty" hidden>沒有符合的題目。</p>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+<script src="../assets/app.js"></script>
+</body>
+</html>

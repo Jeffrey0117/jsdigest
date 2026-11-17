@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>型別、比較與數字 · jsdigest</title>
+<meta name="description" content="== vs ===、型別轉換、null/undefined 與數字格式。">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header slim">
+  <div class="wrap">
+    <a class="back" href="../topics.html">← 所有主題</a>
+  </div>
+</header>
+<main class="wrap">
+  <div class="topic-head">
+    <h1>型別、比較與數字</h1>
+    <p class="tagline">== vs ===、型別轉換、null/undefined 與數字格式。</p>
+    <input id="search" class="search" type="search" placeholder="在這個主題裡搜尋…" autocomplete="off" aria-label="搜尋">
+    <div id="prac" class="prac-filter" hidden>
+      <button type="button" class="prac-btn on" data-prac="all">全部</button>
+      <button type="button" class="prac-btn" data-prac="todo">未練</button>
+      <button type="button" class="prac-btn" data-prac="done">練過 <span id="done-count">0</span></button>
+    </div>
+    <p class="count"><span id="shown">22</span> / 22 題 · 依票數排序</p>
+  </div>
+  <div id="list" class="list">
+<article class="q" data-id="1335851" data-tags="javascript syntax jslint use-strict" data-search="what does &quot;use strict&quot; do in javascript, and what is the reasoning behind it? javascript syntax jslint use-strict">
+    <div class="q-score"><span class="score hot" title="8548 votes">8.5k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/1335851.html">What does &quot;use strict&quot; do in JavaScript, and what is the reasoning behind it?</a></h2>
+      <p class="q-snippet">Recently, I ran some of my JavaScript code through Crockford&#39;s JSLint , and it gave the following error: Problem at line 1 character 1: Missing &quot;use strict&quot; statement. Doing some…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">syntax</span><span class="tag">jslint</span><span class="tag">use-strict</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.2M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="359494" data-tags="javascript operators equality equality-operator identity-operator" data-search="which equals operator (== vs ===) should be used in javascript comparisons? javascript operators equality equality-operator identity-operator">
+    <div class="q-score"><span class="score hot" title="5642 votes">5.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/359494.html">Which equals operator (== vs ===) should be used in JavaScript comparisons?</a></h2>
+      <p class="q-snippet">I&#39;m using JSLint to go through JavaScript, and it&#39;s returning many suggestions to replace == (two equals signs) with === (three equals signs) when doing things like comparing idSe…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">operators</span><span class="tag">equality</span><span class="tag">equality-operator</span><span class="tag">identity-operator</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.2M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="11832914" data-tags="javascript rounding decimal-point" data-search="how to round to at most 2 decimal places, if necessary javascript rounding decimal-point">
+    <div class="q-score"><span class="score hot" title="4338 votes">4.3k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/11832914.html">How to round to at most 2 decimal places, if necessary</a></h2>
+      <p class="q-snippet">I&#39;d like to round at most two decimal places, but only if necessary . Input: 10 1.7777777 9.1 Output: 10 1.78 9.1 How can I do this in JavaScript?</p>
+      <div class="q-meta"><span class="year">2012</span><span class="tag">javascript</span><span class="tag">rounding</span><span class="tag">decimal-point</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>5M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="784929" data-tags="javascript operators" data-search="what does the !! (double exclamation mark) operator do in javascript? javascript operators">
+    <div class="q-score"><span class="score hot" title="4218 votes">4.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/784929.html">What does the !! (double exclamation mark) operator do in JavaScript?</a></h2>
+      <p class="q-snippet">I saw this code: this.vertical = vertical !== undefined ? !!vertical : this.vertical; It seems to be using !! as an operator, which I don&#39;t recognize. What does it do?</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">operators</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>990k 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="154059" data-tags="javascript null is-empty" data-search="how do i check for an empty/undefined/null string in javascript? javascript null is-empty">
+    <div class="q-score"><span class="score hot" title="4168 votes">4.2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/154059.html">How do I check for an empty/undefined/null string in JavaScript?</a></h2>
+      <p class="q-snippet">Is there a string.Empty in JavaScript, or is it just a case of checking for &quot;&quot; ?</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">null</span><span class="tag">is-empty</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>5.9M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="263965" data-tags="javascript boolean-expression boolean-operations string-conversion" data-search="how can i convert a string to boolean in javascript? javascript boolean-expression boolean-operations string-conversion">
+    <div class="q-score"><span class="score hot" title="3624 votes">3.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/263965.html">How can I convert a string to boolean in JavaScript?</a></h2>
+      <p class="q-snippet">Can I convert a string representing a boolean value (e.g., &#39;true&#39;, &#39;false&#39;) into an intrinsic type in JavaScript? I have a hidden form in HTML that is updated based on a user&#39;s se…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">boolean-expression</span><span class="tag">boolean-operations</span><span class="tag">string-conversion</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.7M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="5515310" data-tags="javascript null comparison undefined" data-search="is there a standard function to check for null, undefined, or blank variables in javascript? javascript null comparison undefined">
+    <div class="q-score"><span class="score hot" title="3150 votes">3.1k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/5515310.html">Is there a standard function to check for null, undefined, or blank variables in JavaScript?</a></h2>
+      <p class="q-snippet">Is there a universal JavaScript function that checks that a variable has a value and ensures that it&#39;s not undefined or null ? I&#39;ve got this code, but I&#39;m not sure if it covers al…</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">null</span><span class="tag">comparison</span><span class="tag">undefined</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.2M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="3390396" data-tags="javascript undefined" data-search="how can i check for &quot;undefined&quot; in javascript? javascript undefined">
+    <div class="q-score"><span class="score hot" title="3108 votes">3.1k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/3390396.html">How can I check for &quot;undefined&quot; in JavaScript?</a></h2>
+      <p class="q-snippet">What is the most appropriate way to test if a variable is undefined in JavaScript? I&#39;ve seen several possible ways: if (window.myVariable) Or if (typeof(myVariable) != &quot;undefined&quot;…</p>
+      <div class="q-meta"><span class="year">2010</span><span class="tag">javascript</span><span class="tag">undefined</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3.8M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="2901102" data-tags="javascript formatting numbers" data-search="how can i format a number with commas as thousands separators? javascript formatting numbers">
+    <div class="q-score"><span class="score hot" title="2782 votes">2.8k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/2901102.html">How can I format a number with commas as thousands separators?</a></h2>
+      <p class="q-snippet">I am trying to print an integer in JavaScript with commas as thousands separators. For example, I want to show the number 1234567 as &quot;1,234,567&quot;. How would I go about doing this?…</p>
+      <div class="q-meta"><span class="year">2010</span><span class="tag">javascript</span><span class="tag">formatting</span><span class="tag">numbers</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.3M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="4959975" data-tags="javascript random" data-search="generate random number between two numbers in javascript javascript random">
+    <div class="q-score"><span class="score hot" title="2619 votes">2.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/4959975.html">Generate random number between two numbers in JavaScript</a></h2>
+      <p class="q-snippet">Is there a way to generate a random number in a specified range with JavaScript ? For example : a specified range from 1 to 6 were the random number could be either 1, 2, 3, 4, 5,…</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">random</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.7M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="18082" data-tags="javascript validation numbers" data-search="validate decimal numbers in javascript - isnumeric() javascript validation numbers">
+    <div class="q-score"><span class="score hot" title="2575 votes">2.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/18082.html">Validate decimal numbers in JavaScript - IsNumeric()</a></h2>
+      <p class="q-snippet">What&#39;s the cleanest, most effective way to validate decimal numbers in JavaScript? Bonus points for: Clarity. Solution should be clean and simple. Cross-platform. Test cases: 01.…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">validation</span><span class="tag">numbers</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.6M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="1527803" data-tags="javascript random integer" data-search="generating random whole numbers in javascript in a specific range javascript random integer">
+    <div class="q-score"><span class="score hot" title="2573 votes">2.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/1527803.html">Generating random whole numbers in JavaScript in a specific range</a></h2>
+      <p class="q-snippet">How can I generate random whole numbers between two specified variables in JavaScript, e.g. x = 4 and y = 8 would output any of 4, 5, 6, 7, 8 ?</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">random</span><span class="tag">integer</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.1M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="149055" data-tags="javascript formatting currency number-formatting" data-search="how to format numbers as currency strings? javascript formatting currency number-formatting">
+    <div class="q-score"><span class="score hot" title="2528 votes">2.5k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/149055.html">How to format numbers as currency strings?</a></h2>
+      <p class="q-snippet">I would like to format a price in JavaScript. I&#39;d like a function which takes a float as an argument and returns a string formatted like this: $ 2,500.00 How can I do this?</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">formatting</span><span class="tag">currency</span><span class="tag">number-formatting</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>3M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="287903" data-tags="javascript syntax enums" data-search="what is the preferred syntax for defining enums in javascript? javascript syntax enums">
+    <div class="q-score"><span class="score hot" title="2396 votes">2.4k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/287903.html">What is the preferred syntax for defining enums in JavaScript?</a></h2>
+      <p class="q-snippet">What is the preferred syntax for defining enums in JavaScript? Something like: my.namespace.ColorEnum = { RED : 0, GREEN : 1, BLUE : 2 } // later on if(currentColor == my.namespac…</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">syntax</span><span class="tag">enums</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.3M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="8511281" data-tags="javascript types javascript-objects" data-search="check if a value is an object in javascript javascript types javascript-objects">
+    <div class="q-score"><span class="score hot" title="2340 votes">2.3k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/8511281.html">Check if a value is an object in JavaScript</a></h2>
+      <p class="q-snippet">How do you check if a value is an object in JavaScript?</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">types</span><span class="tag">javascript-objects</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2.5M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="175739" data-tags="javascript validation numeric" data-search="how can i check if a string is a valid number? javascript validation numeric">
+    <div class="q-score"><span class="score hot" title="2053 votes">2.1k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/175739.html">How can I check if a string is a valid number?</a></h2>
+      <p class="q-snippet">I&#39;m hoping there&#39;s something in the same conceptual space as the old VB6 IsNumeric() function?</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">validation</span><span class="tag">numeric</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>2M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="57803" data-tags="javascript hex number-formatting radix" data-search="how to convert decimal to hexadecimal in javascript javascript hex number-formatting radix">
+    <div class="q-score"><span class="score hot" title="1973 votes">2k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/57803.html">How to convert decimal to hexadecimal in JavaScript</a></h2>
+      <p class="q-snippet">How do you convert decimal values to their hexadecimal equivalent in JavaScript?</p>
+      <div class="q-meta"><span class="year">2008</span><span class="tag">javascript</span><span class="tag">hex</span><span class="tag">number-formatting</span><span class="tag">radix</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.6M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="7202157" data-tags="javascript syntax jsfuck" data-search="why does ++[[]][+[]]+[+[]] return the string &quot;10&quot;? javascript syntax jsfuck">
+    <div class="q-score"><span class="score hot" title="1896 votes">1.9k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/7202157.html">Why does ++[[]][+[]]+[+[]] return the string &quot;10&quot;?</a></h2>
+      <p class="q-snippet">This is valid and returns the string &quot;10&quot; in JavaScript ( more examples here ): console.log(++[[]][+[]]+[+[]]) Why? What is happening here?</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">syntax</span><span class="tag">jsfuck</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>238k 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="5076944" data-tags="javascript null undefined" data-search="what is the difference between null and undefined in javascript? javascript null undefined">
+    <div class="q-score"><span class="score hot" title="1752 votes">1.8k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/5076944.html">What is the difference between null and undefined in JavaScript?</a></h2>
+      <p class="q-snippet">What is the difference between null and undefined in JavaScript?</p>
+      <div class="q-meta"><span class="year">2011</span><span class="tag">javascript</span><span class="tag">null</span><span class="tag">undefined</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>769k 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="523643" data-tags="javascript comparison-operators equality-operator identity-operator" data-search="difference between == and === in javascript javascript comparison-operators equality-operator identity-operator">
+    <div class="q-score"><span class="score hot" title="1711 votes">1.7k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/523643.html">Difference between == and === in JavaScript</a></h2>
+      <p class="q-snippet">What is the difference between == and === in JavaScript? I have also seen != and !== operators. Are there more such operators?</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">comparison-operators</span><span class="tag">equality-operator</span><span class="tag">identity-operator</span><span class="dot">·</span>2 重點答案<span class="dot">·</span>1.1M 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="476436" data-tags="javascript operators null-coalescing-operator null-coalescing" data-search="is there a &quot;null coalescing&quot; operator in javascript? javascript operators null-coalescing-operator null-coalescing">
+    <div class="q-score"><span class="score hot" title="1575 votes">1.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/476436.html">Is there a &quot;null coalescing&quot; operator in JavaScript?</a></h2>
+      <p class="q-snippet">Is there a null coalescing operator in Javascript? For example, in C#, I can do this: String someString = null; var whatIWant = someString ?? &quot;Cookies!&quot;; The best approximation I…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">operators</span><span class="tag">null-coalescing-operator</span><span class="tag">null-coalescing</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>487k 次瀏覽</div>
+    </div>
+  </article>
+<article class="q" data-id="596467" data-tags="javascript syntax" data-search="how do i convert a float number to a whole number in javascript? javascript syntax">
+    <div class="q-score"><span class="score hot" title="1573 votes">1.6k</span></div>
+    <div class="q-main">
+      <h2 class="q-title"><a href="../q/596467.html">How do I convert a float number to a whole number in JavaScript?</a></h2>
+      <p class="q-snippet">I&#39;d like to convert a float to a whole number in JavaScript. Actually, I&#39;d like to know how to do BOTH of the standard conversions: by truncating and by rounding. And efficiently,…</p>
+      <div class="q-meta"><span class="year">2009</span><span class="tag">javascript</span><span class="tag">syntax</span><span class="dot">·</span>3 重點答案<span class="dot">·</span>1.8M 次瀏覽</div>
+    </div>
+  </article>
+  </div>
+  <p id="empty" class="empty" hidden>沒有符合的題目。</p>
+</main>
+<footer class="site-footer">
+  <p>題目與答案來自 <a href="https://stackoverflow.com" rel="noopener">Stack Overflow</a>，依
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license noopener">CC BY-SA 4.0</a> 使用，各題皆附原文與作者連結。
+  本站為個人學習用的濃縮閱讀站，非 Stack Overflow 官方。</p>
+</footer>
+<script src="../assets/app.js"></script>
+</body>
+</html>

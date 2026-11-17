@@ -130,8 +130,24 @@
     });
   }
 
+  // ---------- topics overview page ----------
+  function initTopics(box) {
+    var store = readStore();
+    var cards = box.querySelectorAll('.topic-card');
+    for (var i = 0; i < cards.length; i++) {
+      var ids = (cards[i].getAttribute('data-ids') || '').split(',');
+      var done = 0;
+      for (var j = 0; j < ids.length; j++) if (ids[j] && isDone(store, ids[j])) done++;
+      var slot = cards[i].querySelector('.topic-done');
+      if (slot) slot.textContent = String(done);
+      if (done > 0 && done === ids.filter(Boolean).length) cards[i].classList.add('topic-complete');
+    }
+  }
+
   var list = document.getElementById('list');
   if (list) initIndex(list);
   var panel = document.querySelector('.practice');
   if (panel) initDetail(panel);
+  var topics = document.querySelector('.topics');
+  if (topics) initTopics(topics);
 })();

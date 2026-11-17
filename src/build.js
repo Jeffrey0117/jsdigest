@@ -2,7 +2,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { config } = require('./config');
-const { renderIndex, renderDetail } = require('./render');
+const { renderIndex, renderDetail, renderTopicsIndex, renderTopicPage } = require('./render');
+const { assignTopics } = require('./topics');
 
 function loadData() {
   let raw;
@@ -36,26 +37,35 @@ function copyAssets() {
 
 function main() {
   const data = loadData();
+  const { topics, questions } = assignTopics(data.questions);
   const view = {
     ...data,
+    questions,
+    topics,
     siteTitle: config.siteTitle,
     siteTagline: config.siteTagline,
-    topTags: topTags(data.questions, 12),
+    topTags: topTags(questions, 12),
   };
 
-  fs.mkdirSync(config.outDir, { recursive: true });
   const qDir = path.join(config.outDir, 'q');
+  const topicDir = path.join(config.outDir, 'topic');
   fs.mkdirSync(qDir, { recursive: true });
+  fs.mkdirSync(topicDir, { recursive: true });
   cleanDir(config.outDir);
   cleanDir(qDir);
+  cleanDir(topicDir);
 
   fs.writeFileSync(path.join(config.outDir, 'index.html'), renderIndex(view));
-  for (const q of data.questions) {
+  fs.writeFileSync(path.join(config.outDir, 'topics.html'), renderTopicsIndex(view));
+  for (const q of questions) {
     fs.writeFileSync(path.join(qDir, `${q.id}.html`), renderDetail(q, view));
+  }
+  for (const topic of topics) {
+    fs.writeFileSync(path.join(topicDir, `${topic.slug}.html`), renderTopicPage(topic, view));
   }
   copyAssets();
 
-  console.log(`Built ${data.questions.length} pages → ${config.outDir}`);
+  console.log(`Built ${questions.length} questions + ${topics.length} topics → ${config.outDir}`);
 }
 
 main();
