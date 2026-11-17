@@ -16,6 +16,8 @@ function layout({ title, description, body, depth }) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <meta name="description" content="${escapeHtml(description || '')}">
+<link rel="icon" type="image/svg+xml" href="${up}assets/favicon.svg">
+<meta name="theme-color" content="#1f1b16">
 <link rel="stylesheet" href="${up}assets/style.css">
 </head>
 <body>
